@@ -26,7 +26,7 @@ class _EscanerPageState extends State<EscanerPage> {
   List<ProductoEscaneado> productos = [];
   bool isScanning = false;
   bool _isManualInput = false;
-  bool _isProcessingBarcode = false; 
+  bool _isProcessingBarcode = false;
 
   @override
   void initState() {
@@ -84,11 +84,11 @@ class _EscanerPageState extends State<EscanerPage> {
       setState(() {
         _isProcessingBarcode = true;
       });
-      
+
       final String qrCode = barcode.rawValue!;
       _stopScanner();
       BlocProvider.of<EscanerBloc>(context).add(QrCodeScannedEvent(qrCode));
-      
+
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() {
@@ -114,9 +114,7 @@ class _EscanerPageState extends State<EscanerPage> {
       appBar: AppBar(
         title: const Text(
           'Escáner de productos',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
@@ -125,7 +123,8 @@ class _EscanerPageState extends State<EscanerPage> {
           IconButton(
             icon: Icon(_isManualInput ? Icons.qr_code_scanner : Icons.keyboard),
             onPressed: _toggleManualInput,
-            tooltip: _isManualInput ? 'Usar escáner' : 'Ingresar código manualmente',
+            tooltip:
+                _isManualInput ? 'Usar escáner' : 'Ingresar código manualmente',
           ),
         ],
       ),
@@ -142,7 +141,9 @@ class _EscanerPageState extends State<EscanerPage> {
             } else if (state is ProductoEscaneadoExistenteState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('El producto ${state.producto.serie} ya existe'),
+                  content: Text(
+                    'El producto ${state.producto.serie} ya existe',
+                  ),
                   backgroundColor: Colors.orange,
                 ),
               );
@@ -179,9 +180,10 @@ class _EscanerPageState extends State<EscanerPage> {
                     children: [
                       // Selector de hospital
                       BlocBuilder<EscanerBloc, EscanerState>(
-                        buildWhen: (previous, current) => 
-                          current is HospitalesCargados || 
-                          previous is EscanerInitial,
+                        buildWhen:
+                            (previous, current) =>
+                                current is HospitalesCargados ||
+                                previous is EscanerInitial,
                         builder: (context, state) {
                           List<Hospital> hospitales = [];
                           if (state is HospitalesCargados) {
@@ -205,7 +207,8 @@ class _EscanerPageState extends State<EscanerPage> {
                       if (isScanning)
                         ScannerView(
                           controller: _scannerController!,
-                          onBarcodeDetected: (barcode) => _onBarcodeDetected(barcode, context),
+                          onBarcodeDetected:
+                              (barcode) => _onBarcodeDetected(barcode, context),
                           onClose: () {
                             setState(() {
                               isScanning = false;
@@ -215,7 +218,8 @@ class _EscanerPageState extends State<EscanerPage> {
                         )
                       else if (_isManualInput)
                         ManualCodeInput(
-                          onCodeSubmitted: (code) => _onManualCodeSubmitted(code, context),
+                          onCodeSubmitted:
+                              (code) => _onManualCodeSubmitted(code, context),
                         )
                       else
                         Row(
@@ -227,15 +231,19 @@ class _EscanerPageState extends State<EscanerPage> {
                                   setState(() {
                                     isScanning = true;
                                   });
-                                  BlocProvider.of<EscanerBloc>(context)
-                                      .add(ElegirHospitalEvent(selectedHospital!));
-                                  BlocProvider.of<EscanerBloc>(context)
-                                      .add(EscanearCodigoEvent());
+                                  BlocProvider.of<EscanerBloc>(
+                                    context,
+                                  ).add(ElegirHospitalEvent(selectedHospital!));
+                                  BlocProvider.of<EscanerBloc>(
+                                    context,
+                                  ).add(EscanearCodigoEvent());
                                   _startScanner();
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Debe seleccionar un hospital'),
+                                      content: Text(
+                                        'Debe seleccionar un hospital',
+                                      ),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
@@ -247,7 +255,10 @@ class _EscanerPageState extends State<EscanerPage> {
                               icon: const Icon(Icons.keyboard),
                               label: const Text('Ingresar código'),
                               style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
                               ),
                             ),
                           ],
@@ -275,33 +286,39 @@ class _EscanerPageState extends State<EscanerPage> {
                       // Listado de productos o mensaje de vacío
                       SizedBox(
                         height: 300,
-                        child: productos.isNotEmpty
-                            ? ProductosList(
-                                productos: productos,
-                                onRemove: (producto) {
-                                  setState(() {
-                                    productos.removeWhere((p) =>
-                                        p.id == producto.id && p.serie == producto.serie);
-                                  });
-                                },
-                                onUndoRemove: (producto, index) {
-                                  setState(() {
-                                    if (index < productos.length) {
-                                      productos.insert(index, producto);
-                                    } else {
-                                      productos.add(producto);
-                                    }
-                                  });
-                                },
-                              )
-                            : const EmptyProductsView(),
+                        child:
+                            productos.isNotEmpty
+                                ? ProductosList(
+                                  productos: productos,
+                                  onRemove: (producto) {
+                                    setState(() {
+                                      productos.removeWhere(
+                                        (p) =>
+                                            p.id == producto.id &&
+                                            p.serie == producto.serie,
+                                      );
+                                    });
+                                  },
+                                  onUndoRemove: (producto, index) {
+                                    setState(() {
+                                      if (index < productos.length) {
+                                        productos.insert(index, producto);
+                                      } else {
+                                        productos.add(producto);
+                                      }
+                                    });
+                                  },
+                                )
+                                : const EmptyProductsView(),
                       ),
 
                       // Botón de guardar
                       if (productos.isNotEmpty)
                         SaveButton(
                           onPressed: () {
-                            BlocProvider.of<EscanerBloc>(context).add(GuardarProductosEvent(productos));
+                            BlocProvider.of<EscanerBloc>(
+                              context,
+                            ).add(GuardarProductosEvent(productos));
                           },
                         ),
                     ],

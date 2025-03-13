@@ -7,16 +7,6 @@ class ProductoEscaneado {
     this.serie,
   );
 
-  ProductoEscaneado copyWith({
-    int? id,
-    int? serie,
-  }) {
-    return ProductoEscaneado(
-      id ?? this.id,
-      serie ?? this.serie
-    );
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,

@@ -11,7 +11,7 @@ final class EscanerSuccess extends EscanerState {}
 
 final class EscanerError extends EscanerState {
   final String message;
-  
+
   EscanerError(this.message);
 }
 
@@ -25,19 +25,19 @@ final class EscanearCodigosState extends EscanerState {}
 
 final class ProductoEscaneadoExistenteState extends EscanerState {
   final ProductoEscaneado producto;
-  
+
   ProductoEscaneadoExistenteState(this.producto);
 }
 
 final class ProductoEscaneadoGuardadoState extends EscanerState {
   final ProductoEscaneado producto;
-  
+
   ProductoEscaneadoGuardadoState(this.producto);
 }
 
 final class ProductosListadosState extends EscanerState {
   final List<ProductoEscaneado> productos;
-  
+
   ProductosListadosState(this.productos);
 }
 

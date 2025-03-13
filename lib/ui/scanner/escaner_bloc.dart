@@ -39,7 +39,10 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanearCodigosState());
   }
 
-  void _procesarCodigoDeBarras(QrCodeScannedEvent event, Emitter<EscanerState> emit) {
+  void _procesarCodigoDeBarras(
+    QrCodeScannedEvent event,
+    Emitter<EscanerState> emit,
+  ) {
     try {
       if (hospitalSeleccionado == null) {
         emit(EscanerError("Debe seleccionar un hospital primero"));
@@ -47,24 +50,26 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       }
 
       final String barcode = event.qrCode.trim();
-      
+
       if (!RegExp(r'^\d+$').hasMatch(barcode)) {
-        emit(EscanerError("Código de barras inválido: Debe contener solo números"));
+        emit(
+          EscanerError("Código de barras inválido: Debe contener solo números"),
+        );
         return;
       }
-      
+
       final int barcodeNumber = int.parse(barcode);
       final int timestamp = DateTime.now().millisecondsSinceEpoch;
-      
+
       final ProductoEscaneado nuevoProducto = ProductoEscaneado(
         timestamp,
         barcodeNumber,
       );
-      
+
       final productoExistente = productosEscaneados.any(
-        (p) => p.serie == nuevoProducto.serie
+        (p) => p.serie == nuevoProducto.serie,
       );
-      
+
       if (productoExistente) {
         emit(ProductoEscaneadoExistenteState(nuevoProducto));
       } else {
@@ -73,11 +78,16 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         emit(ProductosListadosState(productosEscaneados));
       }
     } catch (e) {
-      emit(EscanerError("Error al procesar el código de barras: ${e.toString()}"));
+      emit(
+        EscanerError("Error al procesar el código de barras: ${e.toString()}"),
+      );
     }
   }
 
-  listarProductos(VerListadoProductosEscaneadosEvent event, Emitter<EscanerState> emit) {
+  listarProductos(
+    VerListadoProductosEscaneadosEvent event,
+    Emitter<EscanerState> emit,
+  ) {
     emit(ProductosListadosState(productosEscaneados));
   }
 

@@ -22,6 +22,38 @@ class Producto {
     this.descripcion1,
     this.codigoalmacen1,
     this.serie,
-    this.fechacaducidad
+    this.fechacaducidad,
   );
+
+  Map<String, dynamic> toMap() {
+    return {
+      'numproducto': numproducto,
+      'descripcion': descripcion,
+      'codigoalmacen': codigoalmacen,
+      'ubicacion': ubicacion,
+      'numerolote': numerolote,
+      'descripcionlote': descripcionlote,
+      'numerodeproducto': numerodeproducto,
+      'descripcion1': descripcion1,
+      'codigoalmacen1': codigoalmacen1,
+      'serie': serie,
+      'fechacaducidad': fechacaducidad.toIso8601String(),
+    };
+  }
+
+  factory Producto.fromMap(Map<String, dynamic> map) {
+    return Producto(
+      map['numproducto'] ?? 0,
+      map['descripcion'],
+      map['codigoalmacen'] ?? 0,
+      map['ubicacion'],
+      map['numerolote'] ?? 0,
+      map['descripcionlote'],
+      map['numerodeproducto'] ?? 0,
+      map['descripcion1'] ?? 'Sin descripción',
+      map['codigoalmacen1'] ?? 0,
+      map['serie'] ?? 0,
+      DateTime.parse(map['fechacaducidad']),
+    );
+  }
 }
