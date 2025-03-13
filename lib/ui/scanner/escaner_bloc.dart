@@ -1,13 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import '../../domain/producto_scaneado.dart';
+import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
 
 part 'escaner_event.dart';
 part 'escaner_state.dart';
 
 class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
-  // Lista temporal para simular una base de datos
   List<ProductoScaneado> productosEscaneados = [];
   Hospital? hospitalSeleccionado;
 
@@ -16,7 +15,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     on<EscanerarCodigoEvent>(escanearCodigo);
     on<VerListadoProductosEscaneadosEvent>(listarProductos);
     on<ElegirHospitalEvent>(elegirHospitales);
-    on<QrCodeScannedEvent>(_processQrCode);
+    on<QrCodeScannedEvent>(_procesarCodigoDeBarras);
   }
 
   cargarHospitales(LoadHospitales event, Emitter<EscanerState> emit) {
@@ -40,7 +39,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanearCodigosState());
   }
 
-  void _processQrCode(QrCodeScannedEvent event, Emitter<EscanerState> emit) {
+  void _procesarCodigoDeBarras(QrCodeScannedEvent event, Emitter<EscanerState> emit) {
     try {
       if (hospitalSeleccionado == null) {
         emit(EscanerError("Debe seleccionar un hospital primero"));

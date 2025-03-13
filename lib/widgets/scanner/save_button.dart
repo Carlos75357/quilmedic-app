@@ -4,9 +4,9 @@ class SaveButton extends StatelessWidget {
   final VoidCallback onPressed;
   
   const SaveButton({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

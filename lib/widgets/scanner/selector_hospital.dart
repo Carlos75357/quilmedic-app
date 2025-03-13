@@ -9,11 +9,11 @@ class SelectorHospital extends StatefulWidget {
   final Function(Hospital) onHospitalSelected;
 
   const SelectorHospital({
-    Key? key,
+    super.key,
     required this.hospitales,
     this.selectedHospital,
     required this.onHospitalSelected,
-  }) : super(key: key);
+  });
 
   @override
   State<SelectorHospital> createState() => _SelectorHospitalState();

@@ -7,11 +7,11 @@ class ScannerView extends StatelessWidget {
   final VoidCallback onClose;
   
   const ScannerView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onBarcodeDetected,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

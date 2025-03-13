@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/ui/scanner/escaner_bloc.dart';
 import 'package:quilmedic/ui/scanner/escaner_page.dart';
+import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 
 void main() {
   runApp(const MainApp());
@@ -14,9 +15,8 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => EscanerBloc(),
-        ),
+        BlocProvider(create: (context) => EscanerBloc()),
+        BlocProvider(create: (context) => ListaProductosBloc()),
       ],
       child: MaterialApp(
         // debugShowCheckedModeBanner: false,

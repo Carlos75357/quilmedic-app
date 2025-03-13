@@ -5,9 +5,9 @@ class ManualCodeInput extends StatefulWidget {
   final Function(String) onCodeSubmitted;
   
   const ManualCodeInput({
-    Key? key,
+    super.key,
     required this.onCodeSubmitted,
-  }) : super(key: key);
+  });
 
   @override
   State<ManualCodeInput> createState() => _ManualCodeInputState();
