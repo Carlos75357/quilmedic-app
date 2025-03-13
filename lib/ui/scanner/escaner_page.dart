@@ -26,7 +26,7 @@ class _EscanerPageState extends State<EscanerPage> {
   List<ProductoEscaneado> productos = [];
   bool isScanning = false;
   bool _isManualInput = false;
-  bool _isProcessingBarcode = false; // Bandera para evitar procesamiento múltiple
+  bool _isProcessingBarcode = false; 
 
   @override
   void initState() {
@@ -56,6 +56,8 @@ class _EscanerPageState extends State<EscanerPage> {
         BarcodeFormat.upcA,
         BarcodeFormat.upcE,
         BarcodeFormat.codabar,
+        BarcodeFormat.dataMatrix,
+        BarcodeFormat.qrCode,
       ],
     );
     _scannerController!.start();
@@ -80,14 +82,13 @@ class _EscanerPageState extends State<EscanerPage> {
   void _onBarcodeDetected(Barcode barcode, BuildContext context) {
     if (barcode.rawValue != null && !_isProcessingBarcode) {
       setState(() {
-        _isProcessingBarcode = true; // Activar bandera para evitar procesamiento múltiple
+        _isProcessingBarcode = true;
       });
       
       final String qrCode = barcode.rawValue!;
       _stopScanner();
       BlocProvider.of<EscanerBloc>(context).add(QrCodeScannedEvent(qrCode));
       
-      // Reiniciar la bandera después de un breve retraso
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           setState(() {
@@ -200,7 +201,7 @@ class _EscanerPageState extends State<EscanerPage> {
 
                       const SizedBox(height: 16),
 
-                      // Área de escaneo o botón de escaneo
+                      // Botón de escaneo
                       if (isScanning)
                         ScannerView(
                           controller: _scannerController!,
@@ -267,21 +268,13 @@ class _EscanerPageState extends State<EscanerPage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.refresh),
-                                onPressed: () {
-                                  BlocProvider.of<EscanerBloc>(context)
-                                      .add(VerListadoProductosEscaneadosEvent());
-                                },
-                                tooltip: 'Actualizar lista',
-                              ),
                             ],
                           ),
                         ),
 
                       // Listado de productos o mensaje de vacío
-                      Container(
-                        height: 300, // Fixed height instead of Expanded
+                      SizedBox(
+                        height: 300,
                         child: productos.isNotEmpty
                             ? ProductosList(
                                 productos: productos,

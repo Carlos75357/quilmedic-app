@@ -20,4 +20,3 @@ final class ProductosCargadosState extends ListaProductosState {
 
   ProductosCargadosState(this.productos);
 }
-

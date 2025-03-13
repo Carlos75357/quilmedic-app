@@ -70,7 +70,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       } else {
         productosEscaneados.add(nuevoProducto);
         emit(ProductoEscaneadoGuardadoState(nuevoProducto));
-        // Emitimos el estado con la lista actualizada solo si se añadió un producto nuevo
         emit(ProductosListadosState(productosEscaneados));
       }
     } catch (e) {
@@ -85,7 +84,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   elegirHospitales(ElegirHospitalEvent event, Emitter<EscanerState> emit) {
     hospitalSeleccionado = event.hospital;
     emit(EscanerSuccess());
-    // Emitir la lista de productos actualizada después de seleccionar hospital
     emit(ProductosListadosState(productosEscaneados));
   }
 

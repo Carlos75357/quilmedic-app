@@ -41,6 +41,14 @@ class ScannerView extends StatelessWidget {
                     }
                   }
                 },
+                scanWindow: Rect.fromCenter(
+                  center: Offset(
+                    screenSize.width / 2,
+                    screenSize.height * 0.3 / 2,
+                  ),
+                  width: screenSize.width * 0.7,
+                  height: 80,
+                ),
               ),
             ),
           ),
@@ -55,7 +63,6 @@ class ScannerView extends StatelessWidget {
               child: const Icon(Icons.close),
             ),
           ),
-          // Guía visual para el escaneo de códigos de barras
           Container(
             decoration: BoxDecoration(
               border: Border.all(
@@ -65,7 +72,7 @@ class ScannerView extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             width: screenSize.width * 0.7,
-            height: 100,
+            height: 80,
             child: const Center(
               child: Text(
                 'Coloque el código de barras aquí',

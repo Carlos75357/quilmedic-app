@@ -5,7 +5,7 @@ sealed class EscanerEvent {}
 
 class EscanearCodigoEvent extends EscanerEvent {}
 
-class VerListadoProductosEscaneadosEvent extends EscanerEvent {} // guardar
+class VerListadoProductosEscaneadosEvent extends EscanerEvent {} 
 
 class ElegirHospitalEvent extends EscanerEvent {
   final Hospital hospital;
