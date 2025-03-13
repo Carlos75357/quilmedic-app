@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import '../../domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
-import 'dart:convert';
 
 part 'escaner_event.dart';
 part 'escaner_state.dart';
@@ -48,45 +47,35 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         return;
       }
 
-      // Intentar decodificar el QR como JSON
-      // Formato esperado: {"id": 123, "nombre": "Producto X", "serie": 456}
-      final Map<String, dynamic>? qrData;
-      try {
-        qrData = jsonDecode(event.qrCode);
-      } catch (_) {
-        emit(EscanerError("QR inválido: No es un JSON válido"));
+      final String barcode = event.qrCode.trim();
+      
+      if (!RegExp(r'^\d+$').hasMatch(barcode)) {
+        emit(EscanerError("Código de barras inválido: Debe contener solo números"));
         return;
       }
-
-      // Verificar si el QR contiene los datos necesarios
-      if (!qrData!.containsKey('id') || !qrData.containsKey('nombre') || !qrData.containsKey('serie')) {
-        emit(EscanerError("QR inválido: No contiene la información necesaria de un producto"));
-        return;
-      }
+      
+      final int barcodeNumber = int.parse(barcode);
+      final int timestamp = DateTime.now().millisecondsSinceEpoch;
       
       final ProductoScaneado nuevoProducto = ProductoScaneado(
-        qrData['id'],
-        qrData['nombre'],
-        qrData['serie'],
+        timestamp,
+        barcodeNumber,
       );
       
-      // Verificar si el producto ya existe en la lista
       final productoExistente = productosEscaneados.any(
-        (p) => p.id == nuevoProducto.id && p.serie == nuevoProducto.serie
+        (p) => p.serie == nuevoProducto.serie
       );
       
       if (productoExistente) {
         emit(ProductoScaneadoExistenteState(nuevoProducto));
       } else {
-        // Guardar el producto en la lista (simulando base de datos)
         productosEscaneados.add(nuevoProducto);
         emit(ProductoScaneadoGuardadoState(nuevoProducto));
+        // Emitimos el estado con la lista actualizada solo si se añadió un producto nuevo
+        emit(ProductosListadosState(productosEscaneados));
       }
-      
-      // Emitir estado con la lista actualizada de productos
-      emit(ProductosListadosState(productosEscaneados));
     } catch (e) {
-      emit(EscanerError("Error al procesar el QR: ${e.toString()}"));
+      emit(EscanerError("Error al procesar el código de barras: ${e.toString()}"));
     }
   }
 
@@ -97,6 +86,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   elegirHospitales(ElegirHospitalEvent event, Emitter<EscanerState> emit) {
     hospitalSeleccionado = event.hospital;
     emit(EscanerSuccess());
+    // Emitir la lista de productos actualizada después de seleccionar hospital
+    emit(ProductosListadosState(productosEscaneados));
   }
 
   guardarProductos(GuardarProductosEvent event, Emitter<EscanerState> emit) {
