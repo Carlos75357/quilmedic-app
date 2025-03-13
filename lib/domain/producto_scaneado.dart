@@ -1,6 +1,6 @@
-class ProductoScaneado {
+class ProductoEscaneado {
   int id;
   int serie;
 
-  ProductoScaneado(this.id, this.serie);
+  ProductoEscaneado(this.id, this.serie);
 }

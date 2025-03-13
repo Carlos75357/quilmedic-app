@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 
 class ProductosList extends StatelessWidget {
-  final List<ProductoScaneado> productos;
-  final Function(ProductoScaneado) onRemove;
-  final Function(ProductoScaneado, int) onUndoRemove;
+  final List<ProductoEscaneado> productos;
+  final Function(ProductoEscaneado) onRemove;
+  final Function(ProductoEscaneado, int) onUndoRemove;
   
   const ProductosList({
     super.key,

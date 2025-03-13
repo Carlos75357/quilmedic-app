@@ -23,7 +23,7 @@ class _EscanerPageState extends State<EscanerPage> {
   final TextEditingController _hospitalesController = TextEditingController();
   MobileScannerController? _scannerController;
   Hospital? selectedHospital;
-  List<ProductoScaneado> productos = [];
+  List<ProductoEscaneado> productos = [];
   bool isScanning = false;
   bool _isManualInput = false;
   bool _isProcessingBarcode = false; // Bandera para evitar procesamiento múltiple
@@ -138,14 +138,14 @@ class _EscanerPageState extends State<EscanerPage> {
                   backgroundColor: Colors.red,
                 ),
               );
-            } else if (state is ProductoScaneadoExistenteState) {
+            } else if (state is ProductoEscaneadoExistenteState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('El producto ${state.producto.serie} ya existe'),
                   backgroundColor: Colors.orange,
                 ),
               );
-            } else if (state is ProductoScaneadoGuardadoState) {
+            } else if (state is ProductoEscaneadoGuardadoState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Producto ${state.producto.serie} guardado'),
@@ -229,7 +229,7 @@ class _EscanerPageState extends State<EscanerPage> {
                                   BlocProvider.of<EscanerBloc>(context)
                                       .add(ElegirHospitalEvent(selectedHospital!));
                                   BlocProvider.of<EscanerBloc>(context)
-                                      .add(EscanerarCodigoEvent());
+                                      .add(EscanearCodigoEvent());
                                   _startScanner();
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(

@@ -3,7 +3,7 @@ part of 'escaner_bloc.dart';
 @immutable
 sealed class EscanerEvent {}
 
-class EscanerarCodigoEvent extends EscanerEvent {}
+class EscanearCodigoEvent extends EscanerEvent {}
 
 class VerListadoProductosEscaneadosEvent extends EscanerEvent {} // guardar
 
@@ -22,7 +22,7 @@ class QrCodeScannedEvent extends EscanerEvent {
 }
 
 class GuardarProductosEvent extends EscanerEvent {
-  final List<ProductoScaneado> productos;
+  final List<ProductoEscaneado> productos;
   
   GuardarProductosEvent(this.productos);
 }

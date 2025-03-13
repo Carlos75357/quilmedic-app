@@ -23,20 +23,20 @@ final class HospitalesCargados extends EscanerState {
 
 final class EscanearCodigosState extends EscanerState {}
 
-final class ProductoScaneadoExistenteState extends EscanerState {
-  final ProductoScaneado producto;
+final class ProductoEscaneadoExistenteState extends EscanerState {
+  final ProductoEscaneado producto;
   
-  ProductoScaneadoExistenteState(this.producto);
+  ProductoEscaneadoExistenteState(this.producto);
 }
 
-final class ProductoScaneadoGuardadoState extends EscanerState {
-  final ProductoScaneado producto;
+final class ProductoEscaneadoGuardadoState extends EscanerState {
+  final ProductoEscaneado producto;
   
-  ProductoScaneadoGuardadoState(this.producto);
+  ProductoEscaneadoGuardadoState(this.producto);
 }
 
 final class ProductosListadosState extends EscanerState {
-  final List<ProductoScaneado> productos;
+  final List<ProductoEscaneado> productos;
   
   ProductosListadosState(this.productos);
 }

@@ -5,8 +5,18 @@ sealed class ListaProductosState {}
 
 final class ListaProductosInitial extends ListaProductosState {}
 
+final class ListaProductosLoading extends ListaProductosState {}
+
+final class ListaProductosSuccess extends ListaProductosState {}
+
+final class ListaProductosError extends ListaProductosState {
+  final String message;
+
+  ListaProductosError(this.message);
+}
+
 final class ProductosCargadosState extends ListaProductosState {
-  final List<ProductoScaneado> productos;
+  final List<ProductoEscaneado> productos;
 
   ProductosCargadosState(this.productos);
 }

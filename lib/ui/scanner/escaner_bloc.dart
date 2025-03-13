@@ -7,12 +7,12 @@ part 'escaner_event.dart';
 part 'escaner_state.dart';
 
 class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
-  List<ProductoScaneado> productosEscaneados = [];
+  List<ProductoEscaneado> productosEscaneados = [];
   Hospital? hospitalSeleccionado;
 
   EscanerBloc() : super(EscanerInitial()) {
     on<LoadHospitales>(cargarHospitales);
-    on<EscanerarCodigoEvent>(escanearCodigo);
+    on<EscanearCodigoEvent>(escanearCodigo);
     on<VerListadoProductosEscaneadosEvent>(listarProductos);
     on<ElegirHospitalEvent>(elegirHospitales);
     on<QrCodeScannedEvent>(_procesarCodigoDeBarras);
@@ -31,7 +31,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(HospitalesCargados(hospitales));
   }
 
-  escanearCodigo(EscanerarCodigoEvent event, Emitter<EscanerState> emit) {
+  escanearCodigo(EscanearCodigoEvent event, Emitter<EscanerState> emit) {
     if (hospitalSeleccionado == null) {
       emit(EscanerError("Debe seleccionar un hospital primero"));
       return;
@@ -56,7 +56,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       final int barcodeNumber = int.parse(barcode);
       final int timestamp = DateTime.now().millisecondsSinceEpoch;
       
-      final ProductoScaneado nuevoProducto = ProductoScaneado(
+      final ProductoEscaneado nuevoProducto = ProductoEscaneado(
         timestamp,
         barcodeNumber,
       );
@@ -66,10 +66,10 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       );
       
       if (productoExistente) {
-        emit(ProductoScaneadoExistenteState(nuevoProducto));
+        emit(ProductoEscaneadoExistenteState(nuevoProducto));
       } else {
         productosEscaneados.add(nuevoProducto);
-        emit(ProductoScaneadoGuardadoState(nuevoProducto));
+        emit(ProductoEscaneadoGuardadoState(nuevoProducto));
         // Emitimos el estado con la lista actualizada solo si se añadió un producto nuevo
         emit(ProductosListadosState(productosEscaneados));
       }
