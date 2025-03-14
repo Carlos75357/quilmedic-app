@@ -2,6 +2,9 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
+import 'package:quilmedic/data/respository/hospital_repository.dart';
+import 'package:quilmedic/data/respository/producto_repository.dart';
+import 'package:quilmedic/data/json/api_client.dart';
 
 part 'escaner_event.dart';
 part 'escaner_state.dart';
@@ -10,25 +13,37 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   List<ProductoEscaneado> productosEscaneados = [];
   Hospital? hospitalSeleccionado;
 
+  final ApiClient apiClient = ApiClient();
+  late HospitalRepository hospitalRepository = HospitalRepository(apiClient: apiClient);
+  late ProductoRepository productoRepository = ProductoRepository(apiClient: apiClient);
+
   EscanerBloc() : super(EscanerInitial()) {
     on<LoadHospitales>(cargarHospitales);
     on<EscanearCodigoEvent>(escanearCodigo);
     on<VerListadoProductosEscaneadosEvent>(listarProductos);
     on<ElegirHospitalEvent>(elegirHospitales);
     on<QrCodeScannedEvent>(_procesarCodigoDeBarras);
+    on<GuardarProductosEvent>(guardarProductos);
   }
 
-  cargarHospitales(LoadHospitales event, Emitter<EscanerState> emit) {
+  cargarHospitales(LoadHospitales event, Emitter<EscanerState> emit) async {
     emit(EscanerLoading());
 
-    List<Hospital> hospitales = [
-      Hospital(1, 'Hospital 1'),
-      Hospital(2, 'Hospital 2'),
-      Hospital(3, 'Hospital 3'),
-      Hospital(4, 'Hospital 4'),
-    ];
+    try {
+      // List<Hospital> hospitales = [
+      //   Hospital(1, 'Hospital 1'),
+      //   Hospital(2, 'Hospital 2'),
+      //   Hospital(3, 'Hospital 3'),
+      //   Hospital(4, 'Hospital 4'),
+      // ];
 
-    emit(HospitalesCargados(hospitales));
+      List<Hospital> hospitales = await hospitalRepository.getAllHospitals();
+
+      emit(HospitalesCargados(hospitales));
+    } catch (e) {
+      emit(EscanerError(e.toString()));
+    }
+
   }
 
   escanearCodigo(EscanearCodigoEvent event, Emitter<EscanerState> emit) {
@@ -97,7 +112,33 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(ProductosListadosState(productosEscaneados));
   }
 
-  guardarProductos(GuardarProductosEvent event, Emitter<EscanerState> emit) {
-    emit(GuardarSuccess());
+  guardarProductos(GuardarProductosEvent event, Emitter<EscanerState> emit) async {
+    try {
+      if (hospitalSeleccionado == null) {
+        emit(EscanerError("Debe seleccionar un hospital primero"));
+        return;
+      }
+      
+      if (productosEscaneados.isEmpty) {
+        emit(EscanerError("No hay productos escaneados para guardar"));
+        return;
+      }
+      
+      emit(EscanerLoading());
+      
+      // Enviar los productos escaneados al servidor
+      await productoRepository.enviarProductosEscaneados(
+        hospitalSeleccionado!.codigo,
+        productosEscaneados,
+      );
+      
+      // Limpiar la lista de productos escaneados después de guardarlos
+      productosEscaneados.clear();
+      
+      emit(GuardarSuccess());
+      emit(ProductosListadosState(productosEscaneados));
+    } catch (e) {
+      emit(EscanerError("Error al guardar productos: ${e.toString()}"));
+    }
   }
 }

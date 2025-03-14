@@ -4,17 +4,17 @@ class Hospital {
 
   Hospital(this.codigo, this.nombre);
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toJson() {
     return {
       'codigo': codigo,
       'nombre': nombre,
     };
   }
 
-  factory Hospital.fromMap(Map<String, dynamic> map) {
+  factory Hospital.fromJson(Map<String, dynamic> json) {
     return Hospital(
-      map['codigo'] ?? 0,
-      map['nombre'] ?? '',
+      json['codigo'] ?? 0,
+      json['nombre'] ?? '',
     );
   }
 }
