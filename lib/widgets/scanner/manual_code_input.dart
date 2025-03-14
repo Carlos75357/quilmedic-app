@@ -53,16 +53,16 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
                   prefixIcon: Icon(Icons.qr_code),
                 ),
                 keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                // inputFormatters: [
+                //   FilteringTextInputFormatter.digitsOnly,
+                // ],
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese un código';
                   }
-                  if (!RegExp(r'^\d+$').hasMatch(value)) {
-                    return 'El código debe contener solo números';
-                  }
+                  // if (!RegExp(r'^\d+$').hasMatch(value)) {
+                  //   return 'El código debe contener solo números';
+                  // }
                   return null;
                 },
                 autofocus: true,

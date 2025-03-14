@@ -10,55 +10,53 @@ class ProductoRepository {
 
   ProductoRepository({required this.apiClient});
 
-  /// Envía los productos escaneados al servidor
-  /// 
-  /// [hospitalId] es el ID del hospital seleccionado
-  /// [productos] es la lista de productos escaneados
-  Future<dynamic> enviarProductosEscaneados(int hospitalId, List<ProductoEscaneado> productos) async {
+  Future<List<dynamic>> enviarProductosEscaneados(
+    int hospitalId,
+    List<ProductoEscaneado> productos,
+  ) async {
+    final List<dynamic> resultados = [];
+
     try {
-      // Extraer solo los números de serie de los productos
-      final List<int> seriesProductos = productos.map((p) => p.serie).toList();
+      // Obtener todas las series de productos para filtrar
+      for (var producto in productos) {
+        // Obtenemos todos los productos
+        final response = await apiClient.getAll(
+          '${ApiConfig.productosEndpoint}?codigoalmacen=$hospitalId&serie=${producto.serie}',
+          null,
+        );
+        
+        // Filtramos manualmente los productos que coinciden con nuestras series
+        if (response is List) {
+          for (var producto in response) {
+            if (producto is Map<String, dynamic> && 
+                producto['serie'] != null && 
+                producto['serie'] == producto['serie']) {
+              resultados.add(producto);
+            }
+          }
+        }  
+      }
       
-      // Crear el objeto de parámetros para la solicitud
-      final Map<String, dynamic> params = {
-        'hospitalId': hospitalId,
-        'series': seriesProductos,
-      };
-      
-      // Crear la solicitud JSON-RPC
-      var jsonRequest = JsonRequest({
-        'jsonrpc': '2.0',
-        'method': 'enviarProductos',
-        'params': params,
-      });
-      
-      // Enviar la solicitud al servidor
-      final response = await apiClient.call(
-        ApiConfig.productosEndpoint,
-        jsonRequest,
-      );
-      
-      return response;
+
+      return resultados;
     } catch (e) {
       throw Exception('Error al enviar productos: ${e.toString()}');
     }
   }
 
-  /// Verifica si un producto existe en la base de datos
-  Future<bool> verificarProductoExistente(int serie) async {
+  Future<bool> verificarProductoExistente(String serie) async {
     try {
-      // Crear la solicitud JSON-RPC
       var jsonRequest = JsonRequest({
         'jsonrpc': '2.0',
         'method': 'verificarProducto',
         'params': {'serie': serie},
       });
-      
+
       final response = await apiClient.call(
         ApiConfig.productosEndpoint,
         jsonRequest,
       );
-      
+
       return response['existe'] ?? false;
     } catch (e) {
       throw Exception('Error al verificar producto: ${e.toString()}');

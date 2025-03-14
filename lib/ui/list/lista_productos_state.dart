@@ -16,7 +16,7 @@ final class ListaProductosError extends ListaProductosState {
 }
 
 final class ProductosCargadosState extends ListaProductosState {
-  final List<ProductoEscaneado> productos;
+  final List<Producto> productos;
 
   ProductosCargadosState(this.productos);
 }

@@ -41,4 +41,14 @@ final class ProductosListadosState extends EscanerState {
   ProductosListadosState(this.productos);
 }
 
-class GuardarSuccess extends EscanerState {}
+class GuardarSuccess extends EscanerState {
+  final List<Producto> productos;
+  
+  GuardarSuccess({required this.productos});
+}
+
+class ProductosRecibidosState extends EscanerState {
+  final List<Producto> productos;
+  
+  ProductosRecibidosState(this.productos);
+}

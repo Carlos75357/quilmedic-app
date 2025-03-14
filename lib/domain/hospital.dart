@@ -1,19 +1,19 @@
 class Hospital {
-  int codigo;
+  int id;
   String nombre;
 
-  Hospital(this.codigo, this.nombre);
+  Hospital(this.id, this.nombre);
 
   Map<String, dynamic> toJson() {
     return {
-      'codigo': codigo,
+      'id': id,
       'nombre': nombre,
     };
   }
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
     return Hospital(
-      json['codigo'] ?? 0,
+      json['id'] ?? 0,
       json['nombre'] ?? '',
     );
   }

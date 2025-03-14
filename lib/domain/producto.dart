@@ -8,7 +8,7 @@ class Producto {
   int numerodeproducto; // codigo referenciado al producto
   String descripcion1;
   int codigoalmacen1;
-  int serie;
+  String serie;
   DateTime fechacaducidad;
 
   Producto(

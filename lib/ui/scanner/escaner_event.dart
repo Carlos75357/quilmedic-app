@@ -21,8 +21,10 @@ class QrCodeScannedEvent extends EscanerEvent {
   QrCodeScannedEvent(this.qrCode);
 }
 
-class GuardarProductosEvent extends EscanerEvent {
-  final List<ProductoEscaneado> productos;
+class GuardarProductosEvent extends EscanerEvent {}
+
+class IrAListaProductosEvent extends EscanerEvent {
+  final List<Producto> productos;
   
-  GuardarProductosEvent(this.productos);
+  IrAListaProductosEvent(this.productos);
 }

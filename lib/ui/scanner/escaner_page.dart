@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
+import 'package:quilmedic/ui/list/lista_productos_page.dart';
 import 'package:quilmedic/widgets/scanner/empty_products_view.dart';
 import 'package:quilmedic/widgets/scanner/manual_code_input.dart';
 import 'package:quilmedic/widgets/scanner/productos_list.dart';
@@ -160,14 +161,18 @@ class _EscanerPageState extends State<EscanerPage> {
               });
             } else if (state is GuardarSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text('Productos guardados correctamente'),
                   backgroundColor: Colors.green,
                 ),
               );
-              setState(() {
-                productos = [];
-              });
+            } else if (state is ProductosRecibidosState) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ListaProductosPage(productos: state.productos),
+                    ),
+                  );
             }
           },
           child: BlocBuilder<EscanerBloc, EscanerState>(
@@ -318,7 +323,7 @@ class _EscanerPageState extends State<EscanerPage> {
                           onPressed: () {
                             BlocProvider.of<EscanerBloc>(
                               context,
-                            ).add(GuardarProductosEvent(productos));
+                            ).add(GuardarProductosEvent());
                           },
                         ),
                     ],
