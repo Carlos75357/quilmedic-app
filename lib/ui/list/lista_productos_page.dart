@@ -195,7 +195,20 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                               onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
                             ),
                             DataCell(
-                              Text('${productosAlmacenActual[index].stock}'),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _getColorForStock(productosAlmacenActual[index].stock),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  '${productosAlmacenActual[index].stock}',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                               onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
                             ),
                             DataCell(
@@ -294,7 +307,20 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                                 onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
                               ),
                               DataCell(
-                                Text('${productosOtrosAlmacenes[index].stock}'),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: _getColorForStock(productosOtrosAlmacenes[index].stock),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '${productosOtrosAlmacenes[index].stock}',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                                 onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
                               ),
                               DataCell(
@@ -355,6 +381,14 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
       return Colors.green[200]!.withOpacity(0.3); // > 6 meses (verde claro)
     } else {
       return Colors.green[600]!.withOpacity(0.3); // > 1 año (verde oscuro)
+    }
+  }
+
+  Color _getColorForStock(int stock) {
+    if (stock <= 0) {
+      return Colors.red[400]!.withOpacity(0.3); // Sin stock
+    } else {
+      return Colors.green[400]!.withOpacity(0.3); // Con stock
     }
   }
 }

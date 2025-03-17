@@ -247,6 +247,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
             
             const SizedBox(height: 16),
             
+            _buildStockRow(context),
+            
+            const SizedBox(height: 16),
+            
             _buildInfoRow(
               context, 
               'Código de almacén:', 
@@ -303,6 +307,60 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         ),
       ],
     );
+  }
+
+  Widget _buildStockRow(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.inventory,
+          size: 24,
+          color: theme.colorScheme.primary,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Stock:',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _getColorForStock(widget.producto.stock),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '${widget.producto.stock}',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getColorForStock(int stock) {
+    if (stock <= 0) {
+      return Colors.red[400]!.withOpacity(0.3); // Sin stock
+    } else {
+      return Colors.green[400]!.withOpacity(0.3); // Con stock
+    }
   }
 
   Widget _buildActionButtons(BuildContext context) {

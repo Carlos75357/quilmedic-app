@@ -1,8 +1,5 @@
 import 'package:quilmedic/data/config.dart';
 import 'package:quilmedic/data/json/api_client.dart';
-import 'package:quilmedic/data/json/json_rpc.dart';
-import 'package:quilmedic/domain/hospital.dart';
-import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/data/respository/repository_response.dart';
 
@@ -19,7 +16,6 @@ class ProductoRepository {
 
     try {
       for (var producto in productos) {
-        // Buscar el producto por serie sin filtrar por almacén
         final response = await apiClient.getAll(
           '${ApiConfig.productosEndpoint}?serie=${producto.serie}',
           null,
@@ -42,32 +38,11 @@ class ProductoRepository {
     }
   }
 
-  Future<bool> verificarProductoExistente(String serie) async {
-    try {
-      var jsonRequest = JsonRequest({
-        'jsonrpc': '2.0',
-        'method': 'verificarProducto',
-        'params': {'serie': serie},
-      });
-
-      final response = await apiClient.call(
-        ApiConfig.productosEndpoint,
-        jsonRequest,
-      );
-
-      return response['existe'] ?? false;
-    } catch (e) {
-      throw Exception('Error al verificar producto: ${e.toString()}');
-    }
-  }
-
   Future<RepositoryResponse> trasladarProducto(int productoId, int newHospitalId) async {
     try {
-      // Obtenemos todos los productos
       final getAllResponse = await apiClient.getAll(ApiConfig.productosEndpoint, {});
       
       if (getAllResponse != null && getAllResponse is List) {
-        // Buscar el producto con el numproducto correspondiente
         dynamic producto;
         try {
           producto = getAllResponse.firstWhere(
@@ -78,7 +53,6 @@ class ProductoRepository {
         }
         
         if (producto != null) {
-          // Verificar si el producto ya está en el almacén de destino
           if (producto['codigoalmacen'] == newHospitalId) {
             return RepositoryResponse.success(
               producto, 
@@ -86,7 +60,6 @@ class ProductoRepository {
             );
           }
           
-          // Actualizamos el producto con el nuevo almacén
           final response = await apiClient.patch(
             '${ApiConfig.productosEndpoint}/${producto['id']}',
             {'codigoalmacen': newHospitalId, 'stock': producto['stock']},
@@ -109,7 +82,6 @@ class ProductoRepository {
       final getAllResponse = await apiClient.getAll(ApiConfig.productosEndpoint, {});
       
       if (getAllResponse != null && getAllResponse is List) {
-        // Buscar el producto con el numproducto correspondiente
         dynamic producto;
         try {
           producto = getAllResponse.firstWhere(
@@ -120,14 +92,12 @@ class ProductoRepository {
         }
         
         if (producto != null) {
-          // Verificar si el producto pertenece al almacén especificado
           if (producto['codigoalmacen'] == almacenId) {
             return RepositoryResponse.success(
               producto, 
               message: 'Producto encontrado en el almacén especificado'
             );
           } else {
-            // El producto existe pero está en otro almacén
             return RepositoryResponse.error(
               'El producto existe pero está asignado al almacén ${producto['codigoalmacen']}',
               data: producto
@@ -149,7 +119,6 @@ class ProductoRepository {
       final getAllResponse = await apiClient.getAll(ApiConfig.productosEndpoint, {});
       
       if (getAllResponse != null && getAllResponse is List) {
-        // Buscar el producto con la serie correspondiente
         dynamic producto;
         try {
           producto = getAllResponse.firstWhere(
@@ -160,14 +129,12 @@ class ProductoRepository {
         }
         
         if (producto != null) {
-          // Verificar si el producto pertenece al almacén especificado
           if (producto['codigoalmacen'] == almacenId) {
             return RepositoryResponse.success(
               producto, 
               message: 'Producto encontrado en el almacén especificado'
             );
           } else {
-            // El producto existe pero está en otro almacén
             return RepositoryResponse.error(
               'El producto existe pero está asignado al almacén ${producto['codigoalmacen']}',
               data: producto
