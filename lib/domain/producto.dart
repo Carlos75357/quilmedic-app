@@ -10,6 +10,7 @@ class Producto {
   int codigoalmacen1;
   String serie;
   DateTime fechacaducidad;
+  int stock;
 
   Producto(
     this.numproducto,
@@ -23,6 +24,7 @@ class Producto {
     this.codigoalmacen1,
     this.serie,
     this.fechacaducidad,
+    {this.stock = 1}
   );
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class Producto {
       'codigoalmacen1': codigoalmacen1,
       'serie': serie,
       'fechacaducidad': fechacaducidad.toIso8601String(),
+      'stock': stock,
     };
   }
 
@@ -54,6 +57,7 @@ class Producto {
       map['codigoalmacen1'] ?? 0,
       map['serie'] ?? 0,
       DateTime.parse(map['fechacaducidad']),
+      stock: map['stock'] ?? 1,
     );
   }
 }

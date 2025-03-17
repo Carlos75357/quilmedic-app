@@ -32,15 +32,28 @@ class ApiClient {
   }
 
   Future<dynamic> update(String endpoint, dynamic values) async {
-    Map<String, dynamic> valuesMap = values.toJson();
-
-    var jsonRequest = JsonRequest({
-      'jsonrpc': '2.0',
-      'method': 'update',
-      'params': valuesMap,
-    });
-
     try {
+      var jsonRequest = JsonRequest({
+        'jsonrpc': '2.0',
+        'method': 'update',
+        'params': values,
+      });
+      
+      var response = await client.call(endpoint, jsonRequest);
+      return response;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<dynamic> patch(String endpoint, dynamic values) async {
+    try {
+      var jsonRequest = JsonRequest({
+        'jsonrpc': '2.0',
+        'method': 'patch',
+        'params': values,
+      });
+      
       var response = await client.call(endpoint, jsonRequest);
       return response;
     } catch (e) {

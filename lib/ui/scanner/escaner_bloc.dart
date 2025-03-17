@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
@@ -26,18 +25,20 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
   EscanerBloc() : super(EscanerInitial()) {
     on<LoadHospitales>(cargarHospitales);
-    on<EscanearCodigoEvent>(escanearCodigo);
-    on<VerListadoProductosEscaneadosEvent>(listarProductos);
     on<ElegirHospitalEvent>(elegirHospitales);
     on<QrCodeScannedEvent>(_procesarCodigoDeBarras);
     on<GuardarProductosEvent>(guardarProductos);
+    on<GuardarProductosForzadoEvent>(_guardarProductosForzado);
+    on<EliminarProductoEvent>(_eliminarProducto);
   }
 
   cargarHospitales(LoadHospitales event, Emitter<EscanerState> emit) async {
     emit(EscanerLoading());
 
     try {
-      List<Hospital> hospitales = await hospitalRepository.getAllHospitals();
+      List<Hospital> hospitales = await hospitalRepository.getAllHospitals().then(
+        (value) => value.data,
+      );
 
       emit(HospitalesCargados(hospitales));
     } catch (e) {
@@ -45,18 +46,10 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  escanearCodigo(EscanearCodigoEvent event, Emitter<EscanerState> emit) {
-    if (hospitalSeleccionado == null) {
-      emit(EscanerError("Debe seleccionar un hospital primero"));
-      return;
-    }
-    emit(EscanearCodigosState());
-  }
-
   void _procesarCodigoDeBarras(
     QrCodeScannedEvent event,
     Emitter<EscanerState> emit,
-  ) {
+  ) async {
     try {
       if (hospitalSeleccionado == null) {
         emit(EscanerError("Debe seleccionar un hospital primero"));
@@ -73,34 +66,31 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       final int timestamp = DateTime.now().millisecondsSinceEpoch;
 
+      // Crear un producto escaneado básico
       final ProductoEscaneado nuevoProducto = ProductoEscaneado(
         timestamp,
         barcode,
       );
 
+      // Verificar si el producto ya existe en la lista de escaneados
       final productoExistente = productosEscaneados.any(
         (p) => p.serie == nuevoProducto.serie,
       );
 
       if (productoExistente) {
         emit(ProductoEscaneadoExistenteState(nuevoProducto));
-      } else {
-        productosEscaneados.add(nuevoProducto);
-        emit(ProductoEscaneadoGuardadoState(nuevoProducto));
-        emit(ProductosListadosState(productosEscaneados));
+        return;
       }
+
+      // Simplemente agregamos el producto a la lista
+      productosEscaneados.add(nuevoProducto);
+      emit(ProductoEscaneadoGuardadoState(nuevoProducto));
+      emit(ProductosListadosState(productosEscaneados));
     } catch (e) {
       emit(
         EscanerError("Error al procesar el código de barras: ${e.toString()}"),
       );
     }
-  }
-
-  listarProductos(
-    VerListadoProductosEscaneadosEvent event,
-    Emitter<EscanerState> emit,
-  ) {
-    emit(ProductosListadosState(productosEscaneados));
   }
 
   elegirHospitales(ElegirHospitalEvent event, Emitter<EscanerState> emit) {
@@ -126,6 +116,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       emit(EscanerLoading());
 
+      // Enviar todos los productos escaneados sin verificar nuevamente el almacén
       var response = await productoRepository.enviarProductosEscaneados(
         hospitalSeleccionado!.id,
         productosEscaneados,
@@ -133,9 +124,9 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       productosEscaneados.clear();
 
-      if (response.isNotEmpty) {
+      if (response.success) {
         List<Producto> productos = [];
-        productos = response.map((item) => _convertirMapaAProducto(item)).toList();
+        productos = List<Producto>.from(response.data.map((item) => _convertirMapaAProducto(item)));
       
         emit(GuardarSuccess(productos: productos));
 
@@ -146,6 +137,53 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     } catch (e) {
       emit(EscanerError("Error al guardar productos: ${e.toString()}"));
     }
+  }
+
+  void _guardarProductosForzado(
+    GuardarProductosForzadoEvent event,
+    Emitter<EscanerState> emit,
+  ) async {
+    try {
+      if (hospitalSeleccionado == null) {
+        emit(EscanerError("Debe seleccionar un hospital primero"));
+        return;
+      }
+
+      if (productosEscaneados.isEmpty) {
+        emit(EscanerError("No hay productos escaneados para guardar"));
+        return;
+      }
+
+      emit(EscanerLoading());
+
+      var response = await productoRepository.enviarProductosEscaneados(
+        hospitalSeleccionado!.id,
+        productosEscaneados,
+      );
+
+      productosEscaneados.clear();
+
+      if (response.success) {
+        List<Producto> productos = [];
+        productos = List<Producto>.from(response.data.map((item) => _convertirMapaAProducto(item)));
+      
+        emit(GuardarSuccess(productos: productos));
+
+        emit(ProductosRecibidosState(productos));
+      } else {
+        emit(EscanerError("No se encontraron productos con las series escaneadas"));
+      }
+    } catch (e) {
+      emit(EscanerError("Error al guardar productos: ${e.toString()}"));
+    }
+  }
+
+  void _eliminarProducto(
+    EliminarProductoEvent event,
+    Emitter<EscanerState> emit,
+  ) {
+    productosEscaneados.removeWhere((p) => p.id == event.producto.id);
+    emit(ProductosListadosState(productosEscaneados));
   }
 
   Producto _convertirMapaAProducto(Map<String, dynamic> mapa) {
@@ -186,7 +224,10 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ListaProductosPage(productos: productos),
+        builder: (context) => ListaProductosPage(
+          productos: productos,
+          hospitalId: hospitalSeleccionado?.id ?? 0,
+        ),
       ),
     );
   }

@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
+import 'package:quilmedic/ui/product/producto_detalle_page.dart';
 
-/// Página que muestra una lista de productos
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
-  
-  const ListaProductosPage({super.key, this.productos});
+  final int hospitalId;
+
+  const ListaProductosPage({
+    super.key, 
+    this.productos,
+    required this.hospitalId,
+  });
 
   @override
   State<ListaProductosPage> createState() => _ListaProductosPageState();
@@ -19,10 +24,8 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   @override
   void initState() {
     super.initState();
-    // Inicializar la lista con los productos recibidos o una lista vacía
     productos = widget.productos ?? [];
-    
-    // Si no hay productos recibidos y hay un BlocProvider disponible, cargar productos
+
     if (productos.isEmpty && context.read<ListaProductosBloc?>() != null) {
       BlocProvider.of<ListaProductosBloc>(context).add(CargarProductosEvent());
     }
@@ -31,122 +34,327 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Productos'),
-      ),
+      appBar: AppBar(title: const Text('Productos')),
       body: SafeArea(
-        child: widget.productos != null 
-            ? _buildProductosTable() 
-            : BlocListener<ListaProductosBloc, ListaProductosState>(
-                listener: (context, state) {
-                  if (state is ListaProductosError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  } else if (state is ProductosCargadosState) {
-                    setState(() {
-                      productos = state.productos;
-                    });
-                  }
-                },
-                child: BlocBuilder<ListaProductosBloc, ListaProductosState>(
-                  builder: (context, state) {
-                    if (state is ListaProductosLoading) {
-                      return const Center(child: CircularProgressIndicator());
+        child:
+            widget.productos != null
+                ? _buildProductosTable()
+                : BlocListener<ListaProductosBloc, ListaProductosState>(
+                  listener: (context, state) {
+                    if (state is ListaProductosError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.message),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } else if (state is ProductosCargadosState) {
+                      setState(() {
+                        productos = state.productos;
+                      });
                     }
-                    return _buildProductosTable();
                   },
+                  child: BlocBuilder<ListaProductosBloc, ListaProductosState>(
+                    builder: (context, state) {
+                      if (state is ListaProductosLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      return _buildProductosTable();
+                    },
+                  ),
                 ),
-              ),
       ),
     );
   }
-  
+
   Widget _buildProductosTable() {
     if (productos.isEmpty) {
       return const Center(
-        child: Text('No hay productos para mostrar', 
+        child: Text(
+          'No hay productos para mostrar',
           style: TextStyle(fontSize: 18),
         ),
       );
     }
+
+    final List<Producto> productosAlmacenActual = [];
+    final List<Producto> productosOtrosAlmacenes = [];
     
-    return SingleChildScrollView(
+    final int hospitalId = widget.hospitalId; 
+
+    for (var producto in productos) {
+      if (producto.codigoalmacen == hospitalId) {
+        productosAlmacenActual.add(producto);
+      } else {
+        productosOtrosAlmacenes.add(producto);
+      }
+    }
+
+    return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Productos: ${productos.length}',
-            style: const TextStyle(
-              fontSize: 18, 
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Table(
-            border: TableBorder.all(color: Colors.grey.shade300),
-            columnWidths: const <int, TableColumnWidth>{
-              0: FlexColumnWidth(1),  // Descripción
-              1: FlexColumnWidth(2),  // Fecha
-              2: FlexColumnWidth(1),  // Serie
-            },
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Encabezado de la tabla
-              TableRow(
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade100,
+              Text(
+                'Productos: ${productos.length}',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Descripción', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Caducidad', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Serie', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ],
               ),
-              // Filas de productos
-              ...List.generate(
-                productos.length,
-                (index) => TableRow(
-                  decoration: index % 2 == 0
-                      ? BoxDecoration(color: Colors.grey.shade100)
-                      : null,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(productos[index].descripcion ?? ''),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(_formatDate(productos[index].fechacaducidad)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(productos[index].serie),
-                    ),
-                  ],
+              Text(
+                'Toca una fila para ver detalles',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey.shade700,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Contenedor para ambas tablas
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Primera tabla
+                Text(
+                  'Productos del almacén $hospitalId (${productosAlmacenActual.length})',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  flex: 1,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      headingRowColor: WidgetStateColor.resolveWith(
+                        (states) => Colors.blue.shade100,
+                      ),
+                      dataRowMinHeight: 64,
+                      dataRowMaxHeight: 80,
+                      columnSpacing: 24,
+                      headingTextStyle: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      dataTextStyle: const TextStyle(fontSize: 16),
+                      columns: const [
+                        DataColumn(label: Expanded(child: Text('Descripción'))),
+                        DataColumn(label: Expanded(child: Text('Caducidad'))),
+                        DataColumn(label: Expanded(child: Text('Stock'))),
+                        DataColumn(label: Expanded(child: Text('Acciones'))),
+                      ],
+                      rows: List<DataRow>.generate(
+                        productosAlmacenActual.length,
+                        (index) => DataRow(
+                          color: WidgetStateProperty.resolveWith<Color?>((
+                            Set<WidgetState> states,
+                          ) {
+                            if (index % 2 == 0) {
+                              return Colors.grey.shade50;
+                            }
+                            return null;
+                          }),
+                          cells: [
+                            DataCell(
+                              SizedBox(
+                                width: 100,
+                                child: Text(
+                                  productosAlmacenActual[index].descripcion ?? '',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                              ),
+                              onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
+                            ),
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: _getColorForExpiryDate(productosAlmacenActual[index].fechacaducidad),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  _formatDate(productosAlmacenActual[index].fechacaducidad),
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
+                            ),
+                            DataCell(
+                              Text('${productosAlmacenActual[index].stock}'),
+                              onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
+                            ),
+                            DataCell(
+                              ElevatedButton.icon(
+                                onPressed:
+                                    () => _navegarADetalle(context, productosAlmacenActual[index]),
+                                icon: const Icon(Icons.visibility, size: 20),
+                                label: const Text('Ver'),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                
+                // Segunda tabla (si hay productos de otros almacenes)
+                if (productosOtrosAlmacenes.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Productos de otros almacenes (${productosOtrosAlmacenes.length})',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    flex: 1,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: DataTable(
+                        headingRowColor: WidgetStateColor.resolveWith(
+                          (states) => Colors.orange.shade100,
+                        ),
+                        dataRowMinHeight: 64,
+                        dataRowMaxHeight: 80,
+                        columnSpacing: 24,
+                        headingTextStyle: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        dataTextStyle: const TextStyle(fontSize: 16),
+                        columns: const [
+                          DataColumn(label: Expanded(child: Text('Descripción'))),
+                          DataColumn(label: Expanded(child: Text('Caducidad'))),
+                          DataColumn(label: Expanded(child: Text('Stock'))),
+                          DataColumn(label: Expanded(child: Text('Acciones'))),
+                        ],
+                        rows: List<DataRow>.generate(
+                          productosOtrosAlmacenes.length,
+                          (index) => DataRow(
+                            color: WidgetStateProperty.resolveWith<Color?>((
+                              Set<WidgetState> states,
+                            ) {
+                              if (index % 2 == 0) {
+                                return Colors.orange.shade50;
+                              }
+                              return null;
+                            }),
+                            cells: [
+                              DataCell(
+                                SizedBox(
+                                  width: 100,
+                                  child: Text(
+                                    productosOtrosAlmacenes[index].descripcion ?? '',
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                  ),
+                                ),
+                                onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
+                              ),
+                              DataCell(
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: _getColorForExpiryDate(productosOtrosAlmacenes[index].fechacaducidad),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    _formatDate(productosOtrosAlmacenes[index].fechacaducidad),
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
+                              ),
+                              DataCell(
+                                Text('${productosOtrosAlmacenes[index].stock}'),
+                                onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
+                              ),
+                              DataCell(
+                                ElevatedButton.icon(
+                                  onPressed:
+                                      () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
+                                  icon: const Icon(Icons.visibility, size: 20),
+                                  label: const Text('Ver'),
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-  
+
+  void _navegarADetalle(BuildContext context, Producto producto) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductoDetallePage(producto: producto),
+      ),
+    );
+  }
+
   String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Color _getColorForExpiryDate(DateTime expiryDate) {
+    final now = DateTime.now();
+    final difference = expiryDate.difference(now).inDays;
+    
+    if (difference <= 1) {
+      return Colors.grey[800]!.withOpacity(0.3); // <= 1 día
+    } else if (difference < 30) {
+      return Colors.red[400]!.withOpacity(0.3); // < 1 mes
+    } else if (difference < 90) {
+      return Colors.orange[300]!.withOpacity(0.3); // < 3 meses
+    } else if (difference < 180) {
+      return Colors.yellow[300]!.withOpacity(0.3); // < 6 meses
+    } else if (difference < 365) {
+      return Colors.green[200]!.withOpacity(0.3); // > 6 meses (verde claro)
+    } else {
+      return Colors.green[600]!.withOpacity(0.3); // > 1 año (verde oscuro)
+    }
   }
 }

@@ -155,6 +155,16 @@ class _EscanerPageState extends State<EscanerPage> {
                   backgroundColor: Colors.green,
                 ),
               );
+            } else if (state is ProductoEnOtroAlmacenState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'El producto ${state.productoEscaneado.serie} está asignado al almacén ${state.almacenCorrecto}',
+                  ),
+                  backgroundColor: Colors.amber,
+                  duration: const Duration(seconds: 5),
+                ),
+              );
             } else if (state is ProductosListadosState) {
               setState(() {
                 productos = state.productos;
@@ -170,7 +180,10 @@ class _EscanerPageState extends State<EscanerPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ListaProductosPage(productos: state.productos),
+                      builder: (context) => ListaProductosPage(
+                        productos: state.productos,
+                        hospitalId: context.read<EscanerBloc>().hospitalSeleccionado?.id ?? 0,
+                      ),
                     ),
                   );
             }

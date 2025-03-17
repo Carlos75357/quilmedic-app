@@ -19,11 +19,12 @@ class RepositoryResponse<T> {
     );
   }
 
-  factory RepositoryResponse.error(String message, {Exception? error}) {
+  factory RepositoryResponse.error(String message, {Exception? error, T? data}) {
     return RepositoryResponse(
       success: false,
       message: message,
       error: error,
+      data: data,
     );
   }
 }
