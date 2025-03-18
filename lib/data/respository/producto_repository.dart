@@ -20,28 +20,37 @@ class ProductoRepository {
           '${ApiConfig.productosEndpoint}?serie=${producto.serie}',
           null,
         );
-        
+
         if (response is List) {
           for (var item in response) {
-            if (item is Map<String, dynamic> && 
-                item['serie'] != null && 
+            if (item is Map<String, dynamic> &&
+                item['serie'] != null &&
                 item['serie'] == producto.serie) {
               resultados.add(item);
             }
           }
-        }  
+        }
       }
-      
-      return RepositoryResponse.success(resultados, message: 'Productos enviados correctamente');
+
+      return RepositoryResponse.success(
+        resultados,
+        message: 'Productos enviados correctamente',
+      );
     } catch (e) {
       throw Exception('Error al enviar productos: ${e.toString()}');
     }
   }
 
-  Future<RepositoryResponse> trasladarProducto(int productoId, int newHospitalId) async {
+  Future<RepositoryResponse> trasladarProducto(
+    int productoId,
+    int newHospitalId,
+  ) async {
     try {
-      final getAllResponse = await apiClient.getAll(ApiConfig.productosEndpoint, {});
-      
+      final getAllResponse = await apiClient.getAll(
+        ApiConfig.productosEndpoint,
+        {},
+      );
+
       if (getAllResponse != null && getAllResponse is List) {
         dynamic producto;
         try {
@@ -49,63 +58,80 @@ class ProductoRepository {
             (p) => p['numproducto'] == productoId,
           );
         } catch (e) {
-          return RepositoryResponse.error('No se encontró el producto con numproducto: $productoId');
+          return RepositoryResponse.error(
+            'No se encontró el producto con numproducto: $productoId',
+          );
         }
-        
+
         if (producto != null) {
-          // Verificar si el producto ya está en el almacén destino
           final currentAlmacen = producto['codigoalmacen'];
           int currentAlmacenId;
-          
-          // Convertir el código de almacén actual a entero si es necesario
+
           if (currentAlmacen is String) {
             try {
               currentAlmacenId = int.parse(currentAlmacen);
             } catch (e) {
-              return RepositoryResponse.error('Error en formato de codigoalmacen actual: $currentAlmacen');
+              return RepositoryResponse.error(
+                'Error en formato de codigoalmacen actual: $currentAlmacen',
+              );
             }
           } else {
             currentAlmacenId = currentAlmacen;
           }
-          
+
           if (currentAlmacenId == newHospitalId) {
             return RepositoryResponse.success(
-              producto, 
-              message: 'El producto ya se encuentra en el almacén especificado'
+              producto,
+              message: 'El producto ya se encuentra en el almacén especificado',
             );
           }
-          
+
           final String productoDbId = producto['id'];
-          
+
           final Map<String, dynamic> updateData = {
             'codigoalmacen': newHospitalId,
           };
-          
+
           if (producto['stock'] != null) {
             updateData['stock'] = producto['stock'];
           }
-          
+
           final response = await apiClient.patch(
             '${ApiConfig.productosEndpoint}/$productoDbId',
             updateData,
           );
-          
-          return RepositoryResponse.success(response, message: 'Producto trasladado correctamente');
+
+          return RepositoryResponse.success(
+            response,
+            message: 'Producto trasladado correctamente',
+          );
         } else {
-          return RepositoryResponse.error('No se encontró el producto con numproducto: $productoId');
+          return RepositoryResponse.error(
+            'No se encontró el producto con numproducto: $productoId',
+          );
         }
       } else {
-        return RepositoryResponse.error('Error al obtener la lista de productos');
+        return RepositoryResponse.error(
+          'Error al obtener la lista de productos',
+        );
       }
     } catch (e) {
-      return RepositoryResponse.error('Error al trasladar producto: ${e.toString()}');
+      return RepositoryResponse.error(
+        'Error al trasladar producto: ${e.toString()}',
+      );
     }
   }
 
-  Future<RepositoryResponse> getProductoByNumeroAndAlmacen(int numproducto, int almacenId) async {
+  Future<RepositoryResponse> getProductoByNumeroAndAlmacen(
+    int numproducto,
+    int almacenId,
+  ) async {
     try {
-      final getAllResponse = await apiClient.getAll(ApiConfig.productosEndpoint, {});
-      
+      final getAllResponse = await apiClient.getAll(
+        ApiConfig.productosEndpoint,
+        {},
+      );
+
       if (getAllResponse != null && getAllResponse is List) {
         dynamic producto;
         try {
@@ -113,81 +139,101 @@ class ProductoRepository {
             (p) => p['numproducto'] == numproducto,
           );
         } catch (e) {
-          return RepositoryResponse.error('No se encontró el producto con numproducto: $numproducto');
+          return RepositoryResponse.error(
+            'No se encontró el producto con numproducto: $numproducto',
+          );
         }
-        
+
         if (producto != null) {
-          // Obtener el código de almacén y convertirlo a entero si es necesario
           final currentAlmacen = producto['codigoalmacen'];
           int currentAlmacenId;
-          
-          // Convertir el código de almacén a entero si es necesario
+
           if (currentAlmacen is String) {
             try {
               currentAlmacenId = int.parse(currentAlmacen);
             } catch (e) {
-              return RepositoryResponse.error('Error en formato de codigoalmacen: $currentAlmacen');
+              return RepositoryResponse.error(
+                'Error en formato de codigoalmacen: $currentAlmacen',
+              );
             }
           } else {
             currentAlmacenId = currentAlmacen;
           }
-          
+
           if (currentAlmacenId == almacenId) {
             return RepositoryResponse.success(
-              producto, 
-              message: 'Producto encontrado en el almacén especificado'
+              producto,
+              message: 'Producto encontrado en el almacén especificado',
             );
           } else {
             return RepositoryResponse.error(
               'El producto existe pero está asignado al almacén $currentAlmacenId',
-              data: producto
+              data: producto,
             );
           }
         } else {
-          return RepositoryResponse.error('No se encontró el producto con numproducto: $numproducto');
+          return RepositoryResponse.error(
+            'No se encontró el producto con numproducto: $numproducto',
+          );
         }
       } else {
-        return RepositoryResponse.error('Error al obtener la lista de productos');
+        return RepositoryResponse.error(
+          'Error al obtener la lista de productos',
+        );
       }
     } catch (e) {
-      return RepositoryResponse.error('Error al obtener el producto: ${e.toString()}');
+      return RepositoryResponse.error(
+        'Error al obtener el producto: ${e.toString()}',
+      );
     }
   }
-  
-  Future<RepositoryResponse> getProductoBySerieAndAlmacen(String serie, int almacenId) async {
+
+  Future<RepositoryResponse> getProductoBySerieAndAlmacen(
+    String serie,
+    int almacenId,
+  ) async {
     try {
-      final getAllResponse = await apiClient.getAll(ApiConfig.productosEndpoint, {});
-      
+      final getAllResponse = await apiClient.getAll(
+        ApiConfig.productosEndpoint,
+        {},
+      );
+
       if (getAllResponse != null && getAllResponse is List) {
         dynamic producto;
         try {
-          producto = getAllResponse.firstWhere(
-            (p) => p['serie'] == serie,
-          );
+          producto = getAllResponse.firstWhere((p) => p['serie'] == serie);
         } catch (e) {
-          return RepositoryResponse.error('No se encontró el producto con serie: $serie');
+          return RepositoryResponse.error(
+            'No se encontró el producto con serie: $serie',
+          );
         }
-        
+
         if (producto != null) {
           if (producto['codigoalmacen'] == almacenId) {
             return RepositoryResponse.success(
-              producto, 
-              message: 'Producto encontrado en el almacén especificado'
+              producto,
+              message: 'Producto encontrado en el almacén especificado',
             );
           } else {
             return RepositoryResponse.error(
               'El producto existe pero está asignado al almacén ${producto['codigoalmacen']}',
-              data: producto
+              data: producto,
             );
           }
         } else {
-          return RepositoryResponse.error('No se encontró el producto con serie: $serie');
+          return RepositoryResponse.error(
+            'No se encontró el producto con serie: $serie',
+          );
         }
       } else {
-        return RepositoryResponse.error('Error al obtener la lista de productos');
+        return RepositoryResponse.error(
+          'Error al obtener la lista de productos',
+        );
       }
     } catch (e) {
-      return RepositoryResponse.error('Error al obtener el producto: ${e.toString()}');
+      return RepositoryResponse.error(
+        'Error al obtener el producto: ${e.toString()}',
+      );
     }
   }
 }

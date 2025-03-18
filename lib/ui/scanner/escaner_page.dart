@@ -205,7 +205,6 @@ class _EscanerPageState extends State<EscanerPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Selector de hospital
                       BlocBuilder<EscanerBloc, EscanerState>(
                         buildWhen:
                             (previous, current) =>
@@ -230,7 +229,6 @@ class _EscanerPageState extends State<EscanerPage> {
 
                       const SizedBox(height: 12),
 
-                      // Botón de escaneo
                       if (isScanning)
                         ScannerView(
                           controller: _scannerController!,
@@ -295,7 +293,6 @@ class _EscanerPageState extends State<EscanerPage> {
 
                       const SizedBox(height: 12),
 
-                      // Título de la lista de productos
                       if (productos.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -312,7 +309,6 @@ class _EscanerPageState extends State<EscanerPage> {
                           ),
                         ),
 
-                      // Listado de productos o mensaje de vacío
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.35,
                         child:
@@ -341,7 +337,6 @@ class _EscanerPageState extends State<EscanerPage> {
                                 : const EmptyProductsView(),
                       ),
 
-                      // Botón de guardar
                       if (productos.isNotEmpty)
                         SaveButton(
                           onPressed: () {

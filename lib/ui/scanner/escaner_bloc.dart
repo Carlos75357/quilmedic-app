@@ -1,12 +1,14 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:quilmedic/domain/producto.dart';
-import 'package:quilmedic/domain/producto_scaneado.dart';
-import 'package:quilmedic/domain/hospital.dart';
+import 'package:meta/meta.dart';
+import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
 import 'package:quilmedic/data/respository/producto_repository.dart';
-import 'package:quilmedic/data/json/api_client.dart';
+import 'package:quilmedic/domain/hospital.dart';
+import 'package:quilmedic/domain/producto.dart';
+import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/ui/list/lista_productos_page.dart';
+import 'package:quilmedic/data/local/producto_local_storage.dart';
 
 part 'escaner_event.dart';
 part 'escaner_state.dart';
@@ -118,6 +120,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         productos = List<Producto>.from(
           response.data.map((item) => _convertirMapaAProducto(item)),
         );
+        
+        await _guardarProductosEscaneadosLocalmente(productos);
 
         emit(GuardarSuccess(productos: productos));
 
@@ -158,6 +162,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         productos = List<Producto>.from(
           response.data.map((item) => _convertirMapaAProducto(item)),
         );
+        
+        await _guardarProductosEscaneadosLocalmente(productos);
 
         emit(GuardarSuccess(productos: productos));
 
@@ -174,7 +180,32 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
   void _eliminarProducto(EliminarProductoEvent event, Emitter<EscanerState> emit) {
     productosEscaneados.removeWhere((p) => p.id == event.producto.id);
+    
+    _eliminarProductoPorSerie(event.producto.serie);
+    
     emit(ProductosListadosState(productosEscaneados));
+  }
+  
+  Future<void> _eliminarProductoPorSerie(String serie) async {
+    try {
+      final response = await apiClient.getAll('/productos', null);
+      
+      if (response is List) {
+        for (var item in response) {
+          if (item is Map<String, dynamic> && 
+              item['serie'] != null && 
+              item['serie'] == serie &&
+              item['numproducto'] != null) {
+            
+            final int numProducto = item['numproducto'];
+            await ProductoLocalStorage.eliminarProductoEscaneado(numProducto);
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      throw Exception('Error al eliminar producto por serie: ${e.toString()}');
+    }
   }
 
   Producto _convertirMapaAProducto(Map<String, dynamic> mapa) {
@@ -222,5 +253,17 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
             ),
       ),
     );
+  }
+
+  Future<void> _guardarProductosEscaneadosLocalmente(List<Producto> productos) async {
+    try {
+      final List<int> productosIds = productos.map((p) => p.numproducto).toList();
+      
+      for (final id in productosIds) {
+        await ProductoLocalStorage.agregarProductoEscaneado(id);
+      }
+    } catch (e) {
+      throw Exception('Error al guardar productos escaneados localmente: ${e.toString()}');
+    }
   }
 }

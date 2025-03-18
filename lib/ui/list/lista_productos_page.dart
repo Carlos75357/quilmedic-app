@@ -97,7 +97,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Encabezado
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -120,13 +119,11 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
           ),
           const SizedBox(height: 16),
           
-          // Contenido principal con scroll
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Sección de productos del almacén actual
                   ProductListSection(
                     title: 'Productos del almacén $hospitalId',
                     productos: productosAlmacenActual,
@@ -135,7 +132,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                     onProductTap: (producto) => _navegarADetalle(context, producto),
                   ),
                   
-                  // Sección de productos de otros almacenes (si existen)
                   if (productosOtrosAlmacenes.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     ProductListSection(
