@@ -53,14 +53,29 @@ class ProductoRepository {
         }
         
         if (producto != null) {
-          if (producto['codigoalmacen'] == newHospitalId) {
+          // Verificar si el producto ya está en el almacén destino
+          final currentAlmacen = producto['codigoalmacen'];
+          int currentAlmacenId;
+          
+          // Convertir el código de almacén actual a entero si es necesario
+          if (currentAlmacen is String) {
+            try {
+              currentAlmacenId = int.parse(currentAlmacen);
+            } catch (e) {
+              return RepositoryResponse.error('Error en formato de codigoalmacen actual: $currentAlmacen');
+            }
+          } else {
+            currentAlmacenId = currentAlmacen;
+          }
+          
+          if (currentAlmacenId == newHospitalId) {
             return RepositoryResponse.success(
               producto, 
               message: 'El producto ya se encuentra en el almacén especificado'
             );
           }
           
-          final int productoDbId = producto['id'];
+          final String productoDbId = producto['id'];
           
           final Map<String, dynamic> updateData = {
             'codigoalmacen': newHospitalId,
@@ -102,14 +117,29 @@ class ProductoRepository {
         }
         
         if (producto != null) {
-          if (producto['codigoalmacen'] == almacenId) {
+          // Obtener el código de almacén y convertirlo a entero si es necesario
+          final currentAlmacen = producto['codigoalmacen'];
+          int currentAlmacenId;
+          
+          // Convertir el código de almacén a entero si es necesario
+          if (currentAlmacen is String) {
+            try {
+              currentAlmacenId = int.parse(currentAlmacen);
+            } catch (e) {
+              return RepositoryResponse.error('Error en formato de codigoalmacen: $currentAlmacen');
+            }
+          } else {
+            currentAlmacenId = currentAlmacen;
+          }
+          
+          if (currentAlmacenId == almacenId) {
             return RepositoryResponse.success(
               producto, 
               message: 'Producto encontrado en el almacén especificado'
             );
           } else {
             return RepositoryResponse.error(
-              'El producto existe pero está asignado al almacén ${producto['codigoalmacen']}',
+              'El producto existe pero está asignado al almacén $currentAlmacenId',
               data: producto
             );
           }

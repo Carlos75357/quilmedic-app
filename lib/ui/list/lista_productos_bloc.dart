@@ -22,7 +22,7 @@ class ListaProductosBloc
       emit(ListaProductosLoading());
       
       final response = await apiClient.getAll(
-        'productos',
+        '/productos',
         null,
       );
       

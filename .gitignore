@@ -46,3 +46,4 @@ app.*.map.json
 
 /json-server
 /node_modules
+/errores

@@ -4,6 +4,8 @@ import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 import 'package:quilmedic/ui/product/producto_detalle_page.dart';
 import 'package:provider/provider.dart';
+import 'package:quilmedic/widgets/list/empty_products_message.dart';
+import 'package:quilmedic/widgets/list/product_list_section.dart';
 
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
@@ -39,7 +41,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
       body: SafeArea(
         child:
             widget.productos != null
-                ? _buildProductosTable()
+                ? _buildProductosContent()
                 : BlocListener<ListaProductosBloc, ListaProductosState>(
                   listener: (context, state) {
                     if (state is ListaProductosError) {
@@ -60,7 +62,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                       if (state is ListaProductosLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      return _buildProductosTable();
+                      return _buildProductosContent();
                     },
                   ),
                 ),
@@ -68,16 +70,15 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     );
   }
 
-  Widget _buildProductosTable() {
+  Widget _buildProductosContent() {
     if (productos.isEmpty) {
-      return const Center(
-        child: Text(
-          'No hay productos para mostrar',
-          style: TextStyle(fontSize: 18),
-        ),
-      );
+      return const EmptyProductsMessage();
     }
 
+    return _buildProductosLayout();
+  }
+
+  Widget _buildProductosLayout() {
     final List<Producto> productosAlmacenActual = [];
     final List<Producto> productosOtrosAlmacenes = [];
     
@@ -96,6 +97,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Encabezado
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -118,231 +120,34 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
           ),
           const SizedBox(height: 16),
           
+          // Contenido principal con scroll
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Productos del almacén $hospitalId (${productosAlmacenActual.length})',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Sección de productos del almacén actual
+                  ProductListSection(
+                    title: 'Productos del almacén $hospitalId',
+                    productos: productosAlmacenActual,
+                    headerColor: Colors.blue,
+                    rowColor: Colors.grey.shade50,
+                    onProductTap: (producto) => _navegarADetalle(context, producto),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  flex: 1,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: DataTable(
-                      headingRowColor: WidgetStateColor.resolveWith(
-                        (states) => Colors.blue.shade100,
-                      ),
-                      dataRowMinHeight: 64,
-                      dataRowMaxHeight: 80,
-                      columnSpacing: 24,
-                      headingTextStyle: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                      dataTextStyle: const TextStyle(fontSize: 16),
-                      columns: const [
-                        DataColumn(label: Expanded(child: Text('Descripción'))),
-                        DataColumn(label: Expanded(child: Text('Caducidad'))),
-                        DataColumn(label: Expanded(child: Text('Stock'))),
-                        DataColumn(label: Expanded(child: Text('Acciones'))),
-                      ],
-                      rows: List<DataRow>.generate(
-                        productosAlmacenActual.length,
-                        (index) => DataRow(
-                          color: WidgetStateProperty.resolveWith<Color?>((
-                            Set<WidgetState> states,
-                          ) {
-                            if (index % 2 == 0) {
-                              return Colors.grey.shade50;
-                            }
-                            return null;
-                          }),
-                          cells: [
-                            DataCell(
-                              SizedBox(
-                                width: 100,
-                                child: Text(
-                                  productosAlmacenActual[index].descripcion ?? '',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                ),
-                              ),
-                              onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
-                            ),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: _getColorForExpiryDate(productosAlmacenActual[index].fechacaducidad),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  _formatDate(productosAlmacenActual[index].fechacaducidad),
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
-                            ),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: _getColorForStock(productosAlmacenActual[index].stock),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  '${productosAlmacenActual[index].stock}',
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              onTap: () => _navegarADetalle(context, productosAlmacenActual[index]),
-                            ),
-                            DataCell(
-                              ElevatedButton.icon(
-                                onPressed:
-                                    () => _navegarADetalle(context, productosAlmacenActual[index]),
-                                icon: const Icon(Icons.visibility, size: 20),
-                                label: const Text('Ver'),
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                  
+                  // Sección de productos de otros almacenes (si existen)
+                  if (productosOtrosAlmacenes.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    ProductListSection(
+                      title: 'Productos de otros almacenes',
+                      productos: productosOtrosAlmacenes,
+                      headerColor: Colors.orange,
+                      rowColor: Colors.orange.shade50,
+                      onProductTap: (producto) => _navegarADetalle(context, producto),
                     ),
-                  ),
-                ),
-                
-                if (productosOtrosAlmacenes.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    'Productos de otros almacenes (${productosOtrosAlmacenes.length})',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    flex: 1,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: DataTable(
-                        headingRowColor: WidgetStateColor.resolveWith(
-                          (states) => Colors.orange.shade100,
-                        ),
-                        dataRowMinHeight: 64,
-                        dataRowMaxHeight: 80,
-                        columnSpacing: 24,
-                        headingTextStyle: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        dataTextStyle: const TextStyle(fontSize: 16),
-                        columns: const [
-                          DataColumn(label: Expanded(child: Text('Descripción'))),
-                          DataColumn(label: Expanded(child: Text('Caducidad'))),
-                          DataColumn(label: Expanded(child: Text('Stock'))),
-                          DataColumn(label: Expanded(child: Text('Acciones'))),
-                        ],
-                        rows: List<DataRow>.generate(
-                          productosOtrosAlmacenes.length,
-                          (index) => DataRow(
-                            color: WidgetStateProperty.resolveWith<Color?>((
-                              Set<WidgetState> states,
-                            ) {
-                              if (index % 2 == 0) {
-                                return Colors.orange.shade50;
-                              }
-                              return null;
-                            }),
-                            cells: [
-                              DataCell(
-                                SizedBox(
-                                  width: 100,
-                                  child: Text(
-                                    productosOtrosAlmacenes[index].descripcion ?? '',
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                  ),
-                                ),
-                                onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
-                              ),
-                              DataCell(
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: _getColorForExpiryDate(productosOtrosAlmacenes[index].fechacaducidad),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    _formatDate(productosOtrosAlmacenes[index].fechacaducidad),
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
-                              ),
-                              DataCell(
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: _getColorForStock(productosOtrosAlmacenes[index].stock),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    '${productosOtrosAlmacenes[index].stock}',
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                onTap: () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
-                              ),
-                              DataCell(
-                                ElevatedButton.icon(
-                                  onPressed:
-                                      () => _navegarADetalle(context, productosOtrosAlmacenes[index]),
-                                  icon: const Icon(Icons.visibility, size: 20),
-                                  label: const Text('Ver'),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ],
@@ -372,37 +177,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
           ),
         );
       }
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  Color _getColorForExpiryDate(DateTime expiryDate) {
-    final now = DateTime.now();
-    final difference = expiryDate.difference(now).inDays;
-    
-    if (difference <= 1) {
-      return Colors.grey[800]!.withValues(alpha: 0.3); // <= 1 día
-    } else if (difference < 30) {
-      return Colors.red[400]!.withValues(alpha: 0.3); // < 1 mes
-    } else if (difference < 90) {
-      return Colors.orange[300]!.withValues(alpha: 0.3); // < 3 meses
-    } else if (difference < 180) {
-      return Colors.yellow[300]!.withValues(alpha: 0.3); // < 6 meses
-    } else if (difference < 365) {
-      return Colors.green[200]!.withValues(alpha: 0.3); // > 6 meses
-    } else {
-      return Colors.green[600]!.withValues(alpha: 0.3); // > 1 año
-    }
-  }
-
-  Color _getColorForStock(int stock) {
-    if (stock <= 0) {
-      return Colors.red[400]!.withValues(alpha: 0.3); // Sin stock
-    } else {
-      return Colors.green[400]!.withValues(alpha: 0.3); // Con stock
     }
   }
 }

@@ -8,6 +8,8 @@ class ProductTransferDialogs {
     required Function(int) onHospitalSelected,
     required VoidCallback onCancel,
   }) {
+    int? selectedHospitalId;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -24,10 +26,7 @@ class ProductTransferDialogs {
             );
           }).toList(),
           onChanged: (value) {
-            if (value != null) {
-              Navigator.of(context).pop();
-              onHospitalSelected(value);
-            }
+            selectedHospitalId = value;
           },
         ),
         actions: [
@@ -37,6 +36,15 @@ class ProductTransferDialogs {
               onCancel();
             },
             child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (selectedHospitalId != null) {
+                onHospitalSelected(selectedHospitalId!);
+              }
+            },
+            child: const Text('Trasladar'),
           ),
         ],
       ),
