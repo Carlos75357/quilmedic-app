@@ -46,10 +46,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  void _procesarCodigoDeBarras(
-    QrCodeScannedEvent event,
-    Emitter<EscanerState> emit,
-  ) async {
+  void _procesarCodigoDeBarras(QrCodeScannedEvent event, Emitter<EscanerState> emit,) async {
     try {
       if (hospitalSeleccionado == null) {
         emit(EscanerError("Debe seleccionar un hospital primero"));
@@ -95,54 +92,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(ProductosListadosState(productosEscaneados));
   }
 
-  guardarProductos(
-    GuardarProductosEvent event,
-    Emitter<EscanerState> emit,
-  ) async {
-    try {
-      if (hospitalSeleccionado == null) {
-        emit(EscanerError("Debe seleccionar un hospital primero"));
-        return;
-      }
-
-      if (productosEscaneados.isEmpty) {
-        emit(EscanerError("No hay productos escaneados para guardar"));
-        return;
-      }
-
-      emit(EscanerLoading());
-
-      // Enviar todos los productos escaneados sin verificar nuevamente el almacén
-      var response = await productoRepository.enviarProductosEscaneados(
-        hospitalSeleccionado!.id,
-        productosEscaneados,
-      );
-
-      productosEscaneados.clear();
-
-      if (response.success) {
-        List<Producto> productos = [];
-        productos = List<Producto>.from(
-          response.data.map((item) => _convertirMapaAProducto(item)),
-        );
-
-        emit(GuardarSuccess(productos: productos));
-
-        emit(ProductosRecibidosState(productos));
-      } else {
-        emit(
-          EscanerError("No se encontraron productos con las series escaneadas"),
-        );
-      }
-    } catch (e) {
-      emit(EscanerError("Error al guardar productos: ${e.toString()}"));
-    }
-  }
-
-  void _guardarProductosForzado(
-    GuardarProductosForzadoEvent event,
-    Emitter<EscanerState> emit,
-  ) async {
+  guardarProductos(GuardarProductosEvent event, Emitter<EscanerState> emit) async {
     try {
       if (hospitalSeleccionado == null) {
         emit(EscanerError("Debe seleccionar un hospital primero"));
@@ -182,10 +132,47 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  void _eliminarProducto(
-    EliminarProductoEvent event,
-    Emitter<EscanerState> emit,
-  ) {
+  void _guardarProductosForzado(GuardarProductosForzadoEvent event, Emitter<EscanerState> emit) async {
+    try {
+      if (hospitalSeleccionado == null) {
+        emit(EscanerError("Debe seleccionar un hospital primero"));
+        return;
+      }
+
+      if (productosEscaneados.isEmpty) {
+        emit(EscanerError("No hay productos escaneados para guardar"));
+        return;
+      }
+
+      emit(EscanerLoading());
+
+      var response = await productoRepository.enviarProductosEscaneados(
+        hospitalSeleccionado!.id,
+        productosEscaneados,
+      );
+
+      productosEscaneados.clear();
+
+      if (response.success) {
+        List<Producto> productos = [];
+        productos = List<Producto>.from(
+          response.data.map((item) => _convertirMapaAProducto(item)),
+        );
+
+        emit(GuardarSuccess(productos: productos));
+
+        emit(ProductosRecibidosState(productos));
+      } else {
+        emit(
+          EscanerError("No se encontraron productos con las series escaneadas"),
+        );
+      }
+    } catch (e) {
+      emit(EscanerError("Error al guardar productos: ${e.toString()}"));
+    }
+  }
+
+  void _eliminarProducto(EliminarProductoEvent event, Emitter<EscanerState> emit) {
     productosEscaneados.removeWhere((p) => p.id == event.producto.id);
     emit(ProductosListadosState(productosEscaneados));
   }

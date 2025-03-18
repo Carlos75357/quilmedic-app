@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 import 'package:quilmedic/ui/product/producto_detalle_page.dart';
+import 'package:provider/provider.dart';
 
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
@@ -117,12 +118,10 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
           ),
           const SizedBox(height: 16),
           
-          // Contenedor para ambas tablas
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Primera tabla
                 Text(
                   'Productos del almacén $hospitalId (${productosAlmacenActual.length})',
                   style: const TextStyle(
@@ -232,7 +231,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                   ),
                 ),
                 
-                // Segunda tabla (si hay productos de otros almacenes)
                 if (productosOtrosAlmacenes.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text(
@@ -353,7 +351,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   }
 
   void _navegarADetalle(BuildContext context, Producto producto) async {
-    // Esperamos el resultado de la navegación
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -361,18 +358,15 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
       ),
     );
     
-    // Si result es true, significa que se realizó un traslado y debemos recargar los datos
-    if (result == true) {
-      // Recargamos los productos
-      if (widget.productos == null && context.read<ListaProductosBloc?>() != null) {
-        BlocProvider.of<ListaProductosBloc>(context).add(CargarProductosEvent());
+    if (result == true && context.mounted) {
+      if (widget.productos == null && Provider.of<ListaProductosBloc?>(context, listen: false) != null) {
+        Provider.of<ListaProductosBloc>(context, listen: false).add(CargarProductosEvent());
       } else if (widget.productos != null) {
-        // Si tenemos productos pasados como parámetro, necesitamos recargar la página completa
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => ListaProductosPage(
-              productos: null,  // Forzamos a que se carguen nuevamente
+              productos: null, 
               hospitalId: widget.hospitalId,
             ),
           ),

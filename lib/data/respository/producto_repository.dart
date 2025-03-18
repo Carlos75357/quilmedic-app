@@ -60,15 +60,12 @@ class ProductoRepository {
             );
           }
           
-          // Guardamos el ID original del producto para la actualización
           final int productoDbId = producto['id'];
           
-          // Actualizamos el almacén del producto
           final Map<String, dynamic> updateData = {
             'codigoalmacen': newHospitalId,
           };
           
-          // Si el producto tiene stock, lo incluimos en la actualización
           if (producto['stock'] != null) {
             updateData['stock'] = producto['stock'];
           }

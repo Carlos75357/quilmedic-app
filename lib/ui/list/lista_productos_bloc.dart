@@ -17,21 +17,16 @@ class ListaProductosBloc
     on<MostrarProductosEvent>(_mostrarProductos);
   }
   
-  Future<void> _cargarProductos(
-    CargarProductosEvent event,
-    Emitter<ListaProductosState> emit,
-  ) async {
+  Future<void> _cargarProductos(CargarProductosEvent event, Emitter<ListaProductosState> emit) async {
     try {
       emit(ListaProductosLoading());
       
-      // Obtenemos todos los productos del repositorio
       final response = await apiClient.getAll(
         'productos',
         null,
       );
       
       if (response is List) {
-        // Convertimos los datos a objetos Producto
         List<Producto> productos = [];
         for (var item in response) {
           if (item is Map<String, dynamic>) {
@@ -54,7 +49,7 @@ class ListaProductosBloc
                 ),
               );
             } catch (e) {
-              // Ignoramos elementos que no se pueden convertir
+              emit(ListaProductosError('Error al cargar productos: ${e.toString()}'));
             }
           }
         }

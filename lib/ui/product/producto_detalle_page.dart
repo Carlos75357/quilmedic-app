@@ -141,7 +141,6 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                   backgroundColor: Colors.green,
                 ),
               );
-              // Regresamos a la página anterior con un resultado que indique que se debe recargar
               Navigator.pop(context, true);
             } else if (state is ErrorTrasladoProductoState) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -151,12 +150,11 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                 ),
               );
             } else if (state is ProductoEnOtroAlmacenState) {
-              // Mostrar diálogo de confirmación
               _mostrarDialogoConfirmacionTraslado(
                 context,
                 state.mensaje,
                 state.producto,
-                state.almacenDestino, // Pasamos el almacén de destino
+                state.almacenDestino, 
               );
             }
           },

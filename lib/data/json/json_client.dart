@@ -59,7 +59,6 @@ class JsonClient {
           throw Exception(response.body);
         }
       } else {
-        // Para métodos personalizados, usamos POST
         final response = await http.post(
           Uri.parse(ApiConfig.baseUrl + endpoint),
           headers: ApiConfig.headers,
