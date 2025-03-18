@@ -25,13 +25,15 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
   
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
+    
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -40,34 +42,40 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
             children: [
               Text(
                 'Ingresar código manualmente',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: isSmallScreen ? 14 : null,
+                ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: isSmallScreen ? 12 : 16),
               TextFormField(
                 controller: _controller,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Código de barras',
-                  hintText: 'Ingrese el código numérico',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.qr_code),
+                  hintText: 'Ingrese el código',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: Icon(
+                    Icons.qr_code,
+                    size: isSmallScreen ? 18 : 24,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 12 : 16,
+                    vertical: isSmallScreen ? 8 : 12,
+                  ),
                 ),
-                keyboardType: TextInputType.number,
-                // inputFormatters: [
-                //   FilteringTextInputFormatter.digitsOnly,
-                // ],
+                keyboardType: TextInputType.text,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese un código';
                   }
-                  // if (!RegExp(r'^\d+$').hasMatch(value)) {
-                  //   return 'El código debe contener solo números';
-                  // }
                   return null;
                 },
                 autofocus: true,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 14 : 16,
+                ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: isSmallScreen ? 12 : 16),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -75,7 +83,17 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
                     _controller.clear();
                   }
                 },
-                child: const Text('Añadir producto'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    vertical: isSmallScreen ? 8 : 12,
+                  ),
+                ),
+                child: Text(
+                  'Añadir producto',
+                  style: TextStyle(
+                    fontSize: isSmallScreen ? 14 : 16,
+                  ),
+                ),
               ),
             ],
           ),

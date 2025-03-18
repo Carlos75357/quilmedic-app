@@ -103,7 +103,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
               Navigator.of(context).pop();
               _productoDetalleBloc.add(
                 ConfirmarTrasladoProductoEvent(
-                  productoId: producto['numproducto'],
+                  productoId: widget.producto.numproducto,
                   nuevoHospitalId: almacenDestino,
                 ),
               );
@@ -141,7 +141,8 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                   backgroundColor: Colors.green,
                 ),
               );
-              Navigator.pop(context);
+              // Regresamos a la página anterior con un resultado que indique que se debe recargar
+              Navigator.pop(context, true);
             } else if (state is ErrorTrasladoProductoState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -155,7 +156,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                 context,
                 state.mensaje,
                 state.producto,
-                widget.producto.codigoalmacen, // Pasamos el almacén de destino
+                state.almacenDestino, // Pasamos el almacén de destino
               );
             }
           },

@@ -177,21 +177,30 @@ class _EscanerPageState extends State<EscanerPage> {
                 ),
               );
             } else if (state is ProductosRecibidosState) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ListaProductosPage(
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => ListaProductosPage(
                         productos: state.productos,
-                        hospitalId: context.read<EscanerBloc>().hospitalSeleccionado?.id ?? 0,
+                        hospitalId:
+                            context
+                                .read<EscanerBloc>()
+                                .hospitalSeleccionado
+                                ?.id ??
+                            0,
                       ),
-                    ),
-                  );
+                ),
+              );
             }
           },
           child: BlocBuilder<EscanerBloc, EscanerState>(
             builder: (context, state) {
               return Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 8.0,
+                ),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -219,7 +228,7 @@ class _EscanerPageState extends State<EscanerPage> {
                         },
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
                       // Botón de escaneo
                       if (isScanning)
@@ -240,8 +249,10 @@ class _EscanerPageState extends State<EscanerPage> {
                               (code) => _onManualCodeSubmitted(code, context),
                         )
                       else
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        Wrap(
+                          alignment: WrapAlignment.spaceEvenly,
+                          spacing: 8.0,
+                          runSpacing: 8.0,
                           children: [
                             ScannerButton(
                               onPressed: () {
@@ -274,15 +285,15 @@ class _EscanerPageState extends State<EscanerPage> {
                               label: const Text('Ingresar código'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
+                                  horizontal: 12,
+                                  vertical: 10,
                                 ),
                               ),
                             ),
                           ],
                         ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
                       // Título de la lista de productos
                       if (productos.isNotEmpty)
@@ -303,7 +314,7 @@ class _EscanerPageState extends State<EscanerPage> {
 
                       // Listado de productos o mensaje de vacío
                       SizedBox(
-                        height: 300,
+                        height: MediaQuery.of(context).size.height * 0.35,
                         child:
                             productos.isNotEmpty
                                 ? ProductosList(

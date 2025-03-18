@@ -16,6 +16,7 @@ class ScannerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final scannerHeight = screenSize.height < 600 ? screenSize.height * 0.25 : screenSize.height * 0.3;
     
     return Card(
       elevation: 3,
@@ -28,7 +29,7 @@ class ScannerView extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: SizedBox(
-              height: screenSize.height * 0.3,
+              height: scannerHeight,
               width: double.infinity,
               child: MobileScanner(
                 controller: controller,
@@ -44,7 +45,7 @@ class ScannerView extends StatelessWidget {
                 scanWindow: Rect.fromCenter(
                   center: Offset(
                     screenSize.width / 2,
-                    screenSize.height * 0.3 / 2,
+                    scannerHeight / 2,
                   ),
                   width: screenSize.width * 0.7,
                   height: 80,
@@ -87,6 +88,7 @@ class ScannerView extends StatelessWidget {
                     ),
                   ],
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),

@@ -36,9 +36,9 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanerLoading());
 
     try {
-      List<Hospital> hospitales = await hospitalRepository.getAllHospitals().then(
-        (value) => value.data,
-      );
+      List<Hospital> hospitales = await hospitalRepository
+          .getAllHospitals()
+          .then((value) => value.data);
 
       emit(HospitalesCargados(hospitales));
     } catch (e) {
@@ -58,7 +58,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       final String barcode = event.qrCode.trim();
 
-      // Validar que el código de barras no esté vacío
       if (barcode.isEmpty) {
         emit(EscanerError("Código de barras inválido: No puede estar vacío"));
         return;
@@ -66,13 +65,11 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       final int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-      // Crear un producto escaneado básico
       final ProductoEscaneado nuevoProducto = ProductoEscaneado(
         timestamp,
         barcode,
       );
 
-      // Verificar si el producto ya existe en la lista de escaneados
       final productoExistente = productosEscaneados.any(
         (p) => p.serie == nuevoProducto.serie,
       );
@@ -82,7 +79,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         return;
       }
 
-      // Simplemente agregamos el producto a la lista
       productosEscaneados.add(nuevoProducto);
       emit(ProductoEscaneadoGuardadoState(nuevoProducto));
       emit(ProductosListadosState(productosEscaneados));
@@ -126,13 +122,17 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       if (response.success) {
         List<Producto> productos = [];
-        productos = List<Producto>.from(response.data.map((item) => _convertirMapaAProducto(item)));
-      
+        productos = List<Producto>.from(
+          response.data.map((item) => _convertirMapaAProducto(item)),
+        );
+
         emit(GuardarSuccess(productos: productos));
 
         emit(ProductosRecibidosState(productos));
       } else {
-        emit(EscanerError("No se encontraron productos con las series escaneadas"));
+        emit(
+          EscanerError("No se encontraron productos con las series escaneadas"),
+        );
       }
     } catch (e) {
       emit(EscanerError("Error al guardar productos: ${e.toString()}"));
@@ -165,13 +165,17 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       if (response.success) {
         List<Producto> productos = [];
-        productos = List<Producto>.from(response.data.map((item) => _convertirMapaAProducto(item)));
-      
+        productos = List<Producto>.from(
+          response.data.map((item) => _convertirMapaAProducto(item)),
+        );
+
         emit(GuardarSuccess(productos: productos));
 
         emit(ProductosRecibidosState(productos));
       } else {
-        emit(EscanerError("No se encontraron productos con las series escaneadas"));
+        emit(
+          EscanerError("No se encontraron productos con las series escaneadas"),
+        );
       }
     } catch (e) {
       emit(EscanerError("Error al guardar productos: ${e.toString()}"));
@@ -224,10 +228,11 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ListaProductosPage(
-          productos: productos,
-          hospitalId: hospitalSeleccionado?.id ?? 0,
-        ),
+        builder:
+            (context) => ListaProductosPage(
+              productos: productos,
+              hospitalId: hospitalSeleccionado?.id ?? 0,
+            ),
       ),
     );
   }

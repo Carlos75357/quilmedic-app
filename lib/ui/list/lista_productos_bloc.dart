@@ -24,13 +24,47 @@ class ListaProductosBloc
     try {
       emit(ListaProductosLoading());
       
-      // Aquí iría la lógica para cargar productos desde el repositorio
-      // Por ahora, como ejemplo, devolvemos una lista vacía
-      List<Producto> productos = [];
+      // Obtenemos todos los productos del repositorio
+      final response = await apiClient.getAll(
+        'productos',
+        null,
+      );
       
-      emit(ProductosCargadosState(productos));
+      if (response is List) {
+        // Convertimos los datos a objetos Producto
+        List<Producto> productos = [];
+        for (var item in response) {
+          if (item is Map<String, dynamic>) {
+            try {
+              productos.add(
+                Producto(
+                  item['numproducto'] ?? 0,
+                  item['descripcion'] ?? '',
+                  item['codigoalmacen'] ?? 0,
+                  item['ubicacion'] ?? '',
+                  item['numerolote'] ?? 0,
+                  item['descripcionlote'] ?? '',
+                  item['numerodeproducto'] ?? 0,
+                  item['descripcion1'] ?? 'Sin descripción',
+                  item['codigoalmacen1'] ?? 0,
+                  item['serie'] ?? '',
+                  item['fechacaducidad'] != null
+                      ? DateTime.parse(item['fechacaducidad'])
+                      : DateTime.now(),
+                ),
+              );
+            } catch (e) {
+              // Ignoramos elementos que no se pueden convertir
+            }
+          }
+        }
+        
+        emit(ProductosCargadosState(productos));
+      } else {
+        emit(ListaProductosError('Error al cargar productos: formato de respuesta inválido'));
+      }
     } catch (e) {
-      emit(ListaProductosError(e.toString()));
+      emit(ListaProductosError('Error al cargar productos: ${e.toString()}'));
     }
   }
   

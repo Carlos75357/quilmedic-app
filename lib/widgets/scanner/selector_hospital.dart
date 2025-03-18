@@ -56,6 +56,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
     
     return Card(
       elevation: 2,
@@ -63,7 +64,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -72,28 +73,31 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                 Icon(
                   Icons.local_hospital,
                   color: theme.colorScheme.primary,
-                  size: 20,
+                  size: 18,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Seleccionar Hospital',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    'Seleccionar Hospital',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 14 : 16,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             DropdownButtonFormField<Hospital>(
               isExpanded: true,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey.shade100,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: isSmallScreen ? 12 : 16,
+                  vertical: isSmallScreen ? 6 : 8,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -103,6 +107,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                 prefixIcon: Icon(
                   Icons.search,
                   color: Colors.grey.shade600,
+                  size: isSmallScreen ? 18 : 24,
                 ),
               ),
               value: _selectedHospital,
@@ -110,7 +115,13 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                 (Hospital value) {
                   return DropdownMenuItem(
                     value: value,
-                    child: Text(value.nombre),
+                    child: Text(
+                      value.nombre,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 13 : 14,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   );
                 },
               ).toList(),
@@ -134,7 +145,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                   'No hay hospitales disponibles',
                   style: TextStyle(
                     color: Colors.grey.shade600,
-                    fontSize: 14,
+                    fontSize: isSmallScreen ? 12 : 14,
                   ),
                 ),
               ),

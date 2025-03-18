@@ -352,13 +352,33 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     );
   }
 
-  void _navegarADetalle(BuildContext context, Producto producto) {
-    Navigator.push(
+  void _navegarADetalle(BuildContext context, Producto producto) async {
+    // Esperamos el resultado de la navegación
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ProductoDetallePage(producto: producto),
       ),
     );
+    
+    // Si result es true, significa que se realizó un traslado y debemos recargar los datos
+    if (result == true) {
+      // Recargamos los productos
+      if (widget.productos == null && context.read<ListaProductosBloc?>() != null) {
+        BlocProvider.of<ListaProductosBloc>(context).add(CargarProductosEvent());
+      } else if (widget.productos != null) {
+        // Si tenemos productos pasados como parámetro, necesitamos recargar la página completa
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ListaProductosPage(
+              productos: null,  // Forzamos a que se carguen nuevamente
+              hospitalId: widget.hospitalId,
+            ),
+          ),
+        );
+      }
+    }
   }
 
   String _formatDate(DateTime date) {

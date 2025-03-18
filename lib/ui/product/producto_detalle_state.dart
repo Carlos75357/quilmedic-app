@@ -31,8 +31,9 @@ final class ProductoEnOtroAlmacenState extends ProductoDetalleState {
   final String mensaje;
   final dynamic producto;
   final int almacenActual;
+  final int almacenDestino;
   
-  ProductoEnOtroAlmacenState(this.mensaje, this.producto, this.almacenActual);
+  ProductoEnOtroAlmacenState(this.mensaje, this.producto, this.almacenActual, {this.almacenDestino = 0});
 }
 
 final class ErrorTrasladoProductoState extends ProductoDetalleState {

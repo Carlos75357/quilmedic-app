@@ -15,13 +15,15 @@ class ProductosList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 360;
+    
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListView.separated(
-        padding: const EdgeInsets.all(8),
+        padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
         itemCount: productos.length,
         separatorBuilder: (context, index) => Divider(
           color: Colors.grey.shade300,
@@ -56,15 +58,17 @@ class ProductosList extends StatelessWidget {
               );
             },
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: isSmallScreen ? 10 : 16,
+                vertical: isSmallScreen ? 6 : 8,
               ),
               title: Text(
                 producto.serie.toString(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  fontSize: isSmallScreen ? 14 : 16,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,14 +78,18 @@ class ProductosList extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.numbers,
-                        size: 16,
+                        size: isSmallScreen ? 14 : 16,
                         color: Colors.grey.shade600,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        'ID: ${producto.id}',
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
+                      Expanded(
+                        child: Text(
+                          'ID: ${producto.id}',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: isSmallScreen ? 12 : 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -91,14 +99,18 @@ class ProductosList extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.qr_code,
-                        size: 16,
+                        size: isSmallScreen ? 14 : 16,
                         color: Colors.grey.shade600,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        'Serie: ${producto.serie}',
-                        style: TextStyle(
-                          color: Colors.grey.shade700,
+                      Expanded(
+                        child: Text(
+                          'Serie: ${producto.serie}',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: isSmallScreen ? 12 : 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -106,9 +118,17 @@ class ProductosList extends StatelessWidget {
                 ],
               ),
               trailing: IconButton(
-                icon: const Icon(Icons.delete_outline),
+                icon: Icon(
+                  Icons.delete_outline,
+                  size: isSmallScreen ? 20 : 24,
+                ),
                 color: Colors.red.shade400,
                 onPressed: () => onRemove(producto),
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(
+                  minWidth: isSmallScreen ? 32 : 40,
+                  minHeight: isSmallScreen ? 32 : 40,
+                ),
               ),
             ),
           );

@@ -42,13 +42,11 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
     emit(TrasladandoProductoState());
     
     try {
-      // Primero verificamos si el producto existe y en qué almacén está
       final verificacionResponse = await productoRepository.getProductoByNumeroAndAlmacen(
         event.productoId,
         event.nuevoHospitalId,
       );
       
-      // Si el producto ya está en el almacén correcto, no es necesario trasladarlo
       if (verificacionResponse.success) {
         emit(ProductoTrasladadoState(
           verificacionResponse.message ?? 'El producto ya se encuentra en el almacén especificado'
@@ -56,12 +54,10 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
         return;
       }
       
-      // Si el producto existe pero está en otro almacén, emitimos un estado especial
       if (!verificacionResponse.success && verificacionResponse.data != null) {
         final producto = verificacionResponse.data;
         final almacenActual = producto['codigoalmacen'];
         
-        // Si el usuario quiere trasladar el producto, procedemos con el traslado
         if (event.confirmarTraslado) {
           final response = await productoRepository.trasladarProducto(
             event.productoId,
@@ -78,17 +74,16 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
             ));
           }
         } else {
-          // Si el usuario no ha confirmado el traslado, emitimos el estado para mostrar la confirmación
           emit(ProductoEnOtroAlmacenState(
             verificacionResponse.message ?? 'El producto existe pero está en otro almacén',
             producto,
             almacenActual,
+            almacenDestino: event.nuevoHospitalId,
           ));
         }
         return;
       }
       
-      // Si el producto no existe, emitimos un error
       emit(ErrorTrasladoProductoState(
         verificacionResponse.message ?? 'No se encontró el producto'
       ));
@@ -101,7 +96,6 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
     emit(TrasladandoProductoState());
     
     try {
-      // Aquí realizamos el traslado con la confirmación
       final response = await productoRepository.trasladarProducto(
         event.productoId,
         event.nuevoHospitalId,
