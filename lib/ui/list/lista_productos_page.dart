@@ -390,25 +390,25 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     final difference = expiryDate.difference(now).inDays;
     
     if (difference <= 1) {
-      return Colors.grey[800]!.withOpacity(0.3); // <= 1 día
+      return Colors.grey[800]!.withValues(alpha: 0.3); // <= 1 día
     } else if (difference < 30) {
-      return Colors.red[400]!.withOpacity(0.3); // < 1 mes
+      return Colors.red[400]!.withValues(alpha: 0.3); // < 1 mes
     } else if (difference < 90) {
-      return Colors.orange[300]!.withOpacity(0.3); // < 3 meses
+      return Colors.orange[300]!.withValues(alpha: 0.3); // < 3 meses
     } else if (difference < 180) {
-      return Colors.yellow[300]!.withOpacity(0.3); // < 6 meses
+      return Colors.yellow[300]!.withValues(alpha: 0.3); // < 6 meses
     } else if (difference < 365) {
-      return Colors.green[200]!.withOpacity(0.3); // > 6 meses (verde claro)
+      return Colors.green[200]!.withValues(alpha: 0.3); // > 6 meses
     } else {
-      return Colors.green[600]!.withOpacity(0.3); // > 1 año (verde oscuro)
+      return Colors.green[600]!.withValues(alpha: 0.3); // > 1 año
     }
   }
 
   Color _getColorForStock(int stock) {
     if (stock <= 0) {
-      return Colors.red[400]!.withOpacity(0.3); // Sin stock
+      return Colors.red[400]!.withValues(alpha: 0.3); // Sin stock
     } else {
-      return Colors.green[400]!.withOpacity(0.3); // Con stock
+      return Colors.green[400]!.withValues(alpha: 0.3); // Con stock
     }
   }
 }

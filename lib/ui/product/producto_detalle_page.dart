@@ -336,10 +336,6 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
               const SizedBox(height: 4),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _getColorForStock(widget.producto.stock),
-                  borderRadius: BorderRadius.circular(6),
-                ),
                 child: Text(
                   '${widget.producto.stock}',
                   style: theme.textTheme.bodyLarge?.copyWith(
@@ -354,14 +350,6 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         ),
       ],
     );
-  }
-
-  Color _getColorForStock(int stock) {
-    if (stock <= 0) {
-      return Colors.red[400]!.withOpacity(0.3); // Sin stock
-    } else {
-      return Colors.green[400]!.withOpacity(0.3); // Con stock
-    }
   }
 
   Widget _buildActionButtons(BuildContext context) {
