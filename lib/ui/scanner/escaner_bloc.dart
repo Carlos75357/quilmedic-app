@@ -9,6 +9,7 @@ import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/ui/list/lista_productos_page.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
+import 'package:quilmedic/utils/connectivity_service.dart';
 
 part 'escaner_event.dart';
 part 'escaner_state.dart';
@@ -32,6 +33,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     on<GuardarProductosEvent>(guardarProductos);
     on<GuardarProductosForzadoEvent>(_guardarProductosForzado);
     on<EliminarProductoEvent>(_eliminarProducto);
+    on<SincronizarProductosPendientesEvent>(_sincronizarProductosPendientes);
   }
 
   cargarHospitales(LoadHospitales event, Emitter<EscanerState> emit) async {
@@ -69,11 +71,23 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         barcode,
       );
 
-      final productoExistente = productosEscaneados.any(
+      // Verificar si el producto ya existe en la lista actual
+      final productoExistenteActual = productosEscaneados.any(
         (p) => p.serie == nuevoProducto.serie,
       );
 
-      if (productoExistente) {
+      if (productoExistenteActual) {
+        emit(ProductoEscaneadoExistenteState(nuevoProducto));
+        return;
+      }
+
+      // Verificar si el producto ya existe en los productos pendientes
+      final productosPendientes = await ProductoLocalStorage.obtenerProductosPendientes();
+      final productoExistentePendiente = productosPendientes.any(
+        (p) => p.serie == nuevoProducto.serie,
+      );
+
+      if (productoExistentePendiente) {
         emit(ProductoEscaneadoExistenteState(nuevoProducto));
         return;
       }
@@ -101,38 +115,125 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         return;
       }
 
+      emit(EscanerLoading());
+
+      // Verificar si hay productos pendientes en almacenamiento local
+      List<ProductoEscaneado> productosPendientes = [];
+      int? hospitalIdPendiente;
+      
+      try {
+        productosPendientes = await ProductoLocalStorage.obtenerProductosPendientes();
+        hospitalIdPendiente = await ProductoLocalStorage.obtenerHospitalPendiente();
+      } catch (e) {
+        // Si hay error al obtener productos pendientes, continuamos con los actuales
+      }
+      
+      // Si hay productos pendientes y son del mismo hospital, los incluimos
+      if (productosPendientes.isNotEmpty && hospitalIdPendiente == hospitalSeleccionado!.id) {
+        // Combinar productos sin duplicados
+        for (var productoPendiente in productosPendientes) {
+          bool yaExiste = productosEscaneados.any((p) => p.serie == productoPendiente.serie);
+          if (!yaExiste) {
+            productosEscaneados.add(productoPendiente);
+          }
+        }
+        
+        // Limpiar productos pendientes ya que los estamos incluyendo ahora
+        await ProductoLocalStorage.limpiarProductosPendientes();
+        
+        // Actualizar la UI con la lista combinada
+        emit(ProductosListadosState(productosEscaneados));
+      }
+
       if (productosEscaneados.isEmpty) {
         emit(EscanerError("No hay productos escaneados para guardar"));
         return;
       }
 
-      emit(EscanerLoading());
+      bool hayConexion = false;
+      try {
+        hayConexion = await ConnectivityService.hayConexionInternet();
+      } catch (e) {
+        try {
+          await ProductoLocalStorage.guardarProductosPendientes(
+            productosEscaneados,
+            hospitalSeleccionado!.id,
+          );
+          
+          productosEscaneados.clear();
+          
+          emit(GuardarOfflineSuccess());
+        } catch (storageError) {
+          emit(EscanerError("Error al guardar productos localmente: ${storageError.toString()}"));
+        }
+        return;
+      }
+      
+      if (!hayConexion) {
+        try {
+          await ProductoLocalStorage.guardarProductosPendientes(
+            productosEscaneados,
+            hospitalSeleccionado!.id,
+          );
+          
+          productosEscaneados.clear();
+          
+          emit(GuardarOfflineSuccess());
+        } catch (storageError) {
+          emit(EscanerError("Error al guardar productos localmente: ${storageError.toString()}"));
+        }
+        return;
+      }
 
-      var response = await productoRepository.enviarProductosEscaneados(
-        hospitalSeleccionado!.id,
-        productosEscaneados,
-      );
-
-      productosEscaneados.clear();
-
-      if (response.success) {
-        List<Producto> productos = [];
-        productos = List<Producto>.from(
-          response.data.map((item) => _convertirMapaAProducto(item)),
-        );
+      try {
+        await Future.delayed(const Duration(milliseconds: 300));
         
-        await _guardarProductosEscaneadosLocalmente(productos);
-
-        emit(GuardarSuccess(productos: productos));
-
-        emit(ProductosRecibidosState(productos));
-      } else {
-        emit(
-          EscanerError("No se encontraron productos con las series escaneadas"),
+        var response = await productoRepository.enviarProductosEscaneados(
+          hospitalSeleccionado!.id,
+          productosEscaneados,
         );
+
+        productosEscaneados.clear();
+
+        if (response.success) {
+          List<Producto> productos = [];
+          productos = List<Producto>.from(
+            response.data.map((item) => _convertirMapaAProducto(item)),
+          );
+          
+          await _guardarProductosEscaneadosLocalmente(productos);
+
+          emit(GuardarSuccess(productos: productos));
+          emit(ProductosRecibidosState(productos));
+        } else {
+          List<ProductoEscaneado> productosCopia = List.from(productosEscaneados);
+          productosEscaneados.clear();
+          
+          await ProductoLocalStorage.guardarProductosPendientes(
+            productosCopia,
+            hospitalSeleccionado!.id,
+          );
+          
+          emit(
+            EscanerError("Error al guardar productos en el servidor. Se han guardado localmente: ${response.message}"),
+          );
+        }
+      } catch (e) {
+        try {
+          await ProductoLocalStorage.guardarProductosPendientes(
+            productosEscaneados,
+            hospitalSeleccionado!.id,
+          );
+          
+          productosEscaneados.clear();
+          
+          emit(GuardarOfflineSuccess());
+        } catch (storageError) {
+          emit(EscanerError("Error al guardar productos: ${e.toString()}. Error al guardar localmente: ${storageError.toString()}"));
+        }
       }
     } catch (e) {
-      emit(EscanerError("Error al guardar productos: ${e.toString()}"));
+      emit(EscanerError("Error general al guardar productos: ${e.toString()}"));
     }
   }
 
@@ -264,6 +365,105 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       }
     } catch (e) {
       throw Exception('Error al guardar productos escaneados localmente: ${e.toString()}');
+    }
+  }
+
+  Future<void> _sincronizarProductosPendientes(
+    SincronizarProductosPendientesEvent event, 
+    Emitter<EscanerState> emit
+  ) async {
+    try {
+      bool hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
+      
+      if (!hayPendientes) {
+        emit(SinProductosPendientesState());
+        return;
+      }
+      
+      bool hayConexion = false;
+      try {
+        hayConexion = await ConnectivityService.hayConexionInternet();
+      } catch (e) {
+        emit(EscanerError("Error al verificar la conectividad: ${e.toString()}"));
+        return;
+      }
+      
+      if (!hayConexion) {
+        emit(EscanerError("No hay conexión a internet para sincronizar"));
+        return;
+      }
+      
+      emit(EscanerLoading());
+      
+      List<ProductoEscaneado> productosPendientes = [];
+      int? hospitalId;
+      
+      try {
+        productosPendientes = await ProductoLocalStorage.obtenerProductosPendientes();
+        hospitalId = await ProductoLocalStorage.obtenerHospitalPendiente();
+      } catch (e) {
+        emit(EscanerError("Error al obtener productos pendientes: ${e.toString()}"));
+        return;
+      }
+      
+      if (productosPendientes.isEmpty || hospitalId == null) {
+        await ProductoLocalStorage.limpiarProductosPendientes();
+        emit(SinProductosPendientesState());
+        return;
+      }
+      
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      try {
+        var response = await productoRepository.enviarProductosEscaneados(
+          hospitalId,
+          productosPendientes,
+        );
+        
+        if (response.success) {
+          await ProductoLocalStorage.limpiarProductosPendientes();
+          
+          List<Producto> productos = [];
+          productos = List<Producto>.from(
+            response.data.map((item) => _convertirMapaAProducto(item)),
+          );
+          
+          await _guardarProductosEscaneadosLocalmente(productos);
+          
+          // Actualizar el hospital seleccionado si no está definido o es diferente
+          if (hospitalSeleccionado == null || hospitalSeleccionado!.id != hospitalId) {
+            try {
+              List<Hospital> hospitales = await hospitalRepository
+                  .getAllHospitals()
+                  .then((value) => value.data);
+              
+              for (var hospital in hospitales) {
+                if (hospital.id == hospitalId) {
+                  hospitalSeleccionado = hospital;
+                  break;
+                }
+              }
+            } catch (e) {
+              // Si no podemos obtener el hospital, continuamos con el proceso
+            }
+          }
+          
+          // Limpiar la lista actual y actualizar la UI
+          productosEscaneados.clear();
+          
+          emit(SincronizacionCompletaState(productos));
+          emit(GuardarSuccess(productos: productos));
+          emit(ProductosRecibidosState(productos));
+        } else {
+          emit(
+            EscanerError("Error al sincronizar productos pendientes: ${response.message}"),
+          );
+        }
+      } catch (e) {
+        emit(EscanerError("Error durante la sincronización: ${e.toString()}"));
+      }
+    } catch (e) {
+      emit(EscanerError("Error general durante la sincronización: ${e.toString()}"));
     }
   }
 }

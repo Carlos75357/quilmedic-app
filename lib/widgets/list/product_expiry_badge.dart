@@ -37,13 +37,13 @@ class ProductExpiryBadge extends StatelessWidget {
     } else if (difference < 30) {
       return Colors.red[400]!.withValues(alpha: 0.3); // < 1 mes
     } else if (difference < 90) {
-      return Colors.orange[300]!.withValues(alpha: 0.3); // < 3 meses
+      return const Color.fromARGB(255, 228, 137, 1).withValues(alpha: 0.3); // < 3 meses
     } else if (difference < 180) {
-      return Colors.yellow[300]!.withValues(alpha: 0.3); // < 6 meses
+      return const Color.fromARGB(255, 255, 230, 0).withValues(alpha: 0.3); // < 6 meses
     } else if (difference < 365) {
-      return Colors.green[200]!.withValues(alpha: 0.3); // > 6 meses
+      return const Color.fromARGB(255, 125, 248, 129).withValues(alpha: 0.3); // > 6 meses
     } else {
-      return Colors.green[600]!.withValues(alpha: 0.3); // > 1 año
+      return const Color.fromARGB(255, 18, 143, 24).withValues(alpha: 0.3); // > 1 año
     }
   }
 }

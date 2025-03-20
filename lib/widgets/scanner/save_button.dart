@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class SaveButton extends StatelessWidget {
   final VoidCallback onPressed;
+  final bool hayConexion;
   
   const SaveButton({
     super.key,
     required this.onPressed,
+    this.hayConexion = true,
   });
 
   @override
@@ -15,10 +17,10 @@ class SaveButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: ElevatedButton.icon(
-        icon: const Icon(Icons.save),
-        label: const Text('GUARDAR PRODUCTOS'),
+        icon: Icon(hayConexion ? Icons.save : Icons.save_outlined),
+        label: Text(hayConexion ? 'GUARDAR PRODUCTOS' : 'GUARDAR LOCALMENTE'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: theme.colorScheme.primary,
+          backgroundColor: hayConexion ? theme.colorScheme.primary : Colors.amber,
           foregroundColor: theme.colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(
             vertical: 16,

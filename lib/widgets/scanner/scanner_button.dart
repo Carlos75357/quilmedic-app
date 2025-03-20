@@ -21,7 +21,7 @@ class ScannerButton extends StatelessWidget {
           foregroundColor: theme.colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(
             horizontal: 24,
-            vertical: 16,
+            vertical: 20,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

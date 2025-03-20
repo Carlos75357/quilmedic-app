@@ -80,3 +80,21 @@ final class ProductosEnOtroAlmacenState extends EscanerState {
     required this.almacenActual,
   });
 }
+
+class GuardarOfflineSuccess extends EscanerState {
+  final String message;
+  
+  GuardarOfflineSuccess({this.message = "Productos guardados localmente. Se sincronizarán automáticamente cuando haya conexión a internet. También puede sincronizarlos manualmente usando el botón de sincronización."});
+}
+
+class SincronizacionCompletaState extends EscanerState {
+  final List<Producto> productos;
+  
+  SincronizacionCompletaState(this.productos);
+}
+
+class SinProductosPendientesState extends EscanerState {
+  final String message;
+  
+  SinProductosPendientesState({this.message = "No hay productos pendientes para sincronizar."});
+}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 
-class ProductosList extends StatelessWidget {
+class ProductosList extends StatefulWidget {
   final List<ProductoEscaneado> productos;
   final Function(ProductoEscaneado) onRemove;
   final Function(ProductoEscaneado, int) onUndoRemove;
@@ -14,6 +14,11 @@ class ProductosList extends StatelessWidget {
   });
 
   @override
+  State<ProductosList> createState() => _ProductosListState();
+}
+
+class _ProductosListState extends State<ProductosList> {
+  @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 360;
     
@@ -23,14 +28,16 @@ class ProductosList extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListView.separated(
+        shrinkWrap: true,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
-        itemCount: productos.length,
+        itemCount: widget.productos.length,
         separatorBuilder: (context, index) => Divider(
           color: Colors.grey.shade300,
           height: 1,
         ),
         itemBuilder: (context, index) {
-          final producto = productos[index];
+          final producto = widget.productos[index];
           return Dismissible(
             key: Key(producto.id.toString() + producto.serie.toString()),
             background: Container(
@@ -44,14 +51,14 @@ class ProductosList extends StatelessWidget {
             ),
             direction: DismissDirection.endToStart,
             onDismissed: (direction) {
-              onRemove(producto);
+              widget.onRemove(producto);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Producto "${producto.serie}" eliminado'),
                   action: SnackBarAction(
                     label: 'Deshacer',
                     onPressed: () {
-                      onUndoRemove(producto, index);
+                      widget.onUndoRemove(producto, index);
                     },
                   ),
                 ),
@@ -123,7 +130,7 @@ class ProductosList extends StatelessWidget {
                   size: isSmallScreen ? 20 : 24,
                 ),
                 color: Colors.red.shade400,
-                onPressed: () => onRemove(producto),
+                onPressed: () => widget.onRemove(producto),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(
                   minWidth: isSmallScreen ? 32 : 40,

@@ -11,6 +11,9 @@ import 'package:quilmedic/widgets/scanner/save_button.dart';
 import 'package:quilmedic/widgets/scanner/scanner_button.dart';
 import 'package:quilmedic/widgets/scanner/scanner_view.dart';
 import 'package:quilmedic/widgets/scanner/selector_hospital.dart';
+import 'package:quilmedic/data/local/producto_local_storage.dart';
+import 'package:quilmedic/utils/connectivity_service.dart';
+import 'dart:async';
 import 'escaner_bloc.dart';
 
 class EscanerPage extends StatefulWidget {
@@ -28,18 +31,69 @@ class _EscanerPageState extends State<EscanerPage> {
   bool isScanning = false;
   bool _isManualInput = false;
   bool _isProcessingBarcode = false;
+  bool _hayConexion = true;
+  bool _hayProductosPendientes = false;
+  Timer? _conectividadTimer;
 
   @override
   void initState() {
     super.initState();
+    _checkPendingProducts();
     BlocProvider.of<EscanerBloc>(context).add(LoadHospitales());
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _verificarConectividad();
+        _conectividadTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+          if (mounted) {
+            _verificarConectividad();
+          }
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _hospitalesController.dispose();
     _scannerController?.dispose();
+    _conectividadTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _verificarConectividad() async {
+    try {
+      final hayConexion = await ConnectivityService.hayConexionInternet();
+      if (mounted) {
+        if (hayConexion && !_hayConexion && _hayProductosPendientes) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              BlocProvider.of<EscanerBloc>(
+                context,
+              ).add(SincronizarProductosPendientesEvent());
+            }
+          });
+        }
+        setState(() {
+          _hayConexion = hayConexion;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hayConexion = false;
+        });
+      }
+      print('Error al verificar la conectividad: $e');
+    }
+  }
+
+  Future<void> _checkPendingProducts() async {
+    final hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
+    if (mounted) {
+      setState(() {
+        _hayProductosPendientes = hayPendientes;
+      });
+    }
   }
 
   void _startScanner() {
@@ -121,12 +175,32 @@ class _EscanerPageState extends State<EscanerPage> {
         foregroundColor: theme.colorScheme.onPrimary,
         elevation: 2,
         actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Tooltip(
+              message: _hayConexion ? 'Conectado a internet' : 'Sin conexión a internet',
+              child: Icon(
+                _hayConexion ? Icons.wifi : Icons.wifi_off,
+                color: _hayConexion ? Colors.green : Colors.red,
+              ),
+            ),
+          ),
           IconButton(
             icon: Icon(_isManualInput ? Icons.qr_code_scanner : Icons.keyboard),
             onPressed: _toggleManualInput,
             tooltip:
                 _isManualInput ? 'Usar escáner' : 'Ingresar código manualmente',
           ),
+          if (_hayProductosPendientes)
+            IconButton(
+              icon: const Icon(Icons.sync),
+              onPressed: () {
+                BlocProvider.of<EscanerBloc>(
+                  context,
+                ).add(SincronizarProductosPendientesEvent());
+              },
+              tooltip: 'Sincronizar productos pendientes',
+            ),
         ],
       ),
       body: SafeArea(
@@ -176,6 +250,28 @@ class _EscanerPageState extends State<EscanerPage> {
                   backgroundColor: Colors.green,
                 ),
               );
+            } else if (state is GuardarOfflineSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.blue,
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+              setState(() {
+                productos = [];
+                _hayProductosPendientes = true;
+              });
+            } else if (state is SincronizacionCompletaState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Productos sincronizados correctamente'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              setState(() {
+                _hayProductosPendientes = false;
+              });
             } else if (state is ProductosRecibidosState) {
               Navigator.push(
                 context,
@@ -192,6 +288,16 @@ class _EscanerPageState extends State<EscanerPage> {
                       ),
                 ),
               );
+            } else if (state is SinProductosPendientesState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.blue,
+                ),
+              );
+              setState(() {
+                _hayProductosPendientes = false;
+              });
             }
           },
           child: BlocBuilder<EscanerBloc, EscanerState>(
@@ -201,152 +307,189 @@ class _EscanerPageState extends State<EscanerPage> {
                   horizontal: 12.0,
                   vertical: 8.0,
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      BlocBuilder<EscanerBloc, EscanerState>(
-                        buildWhen:
-                            (previous, current) =>
-                                current is HospitalesCargados ||
-                                previous is EscanerInitial,
-                        builder: (context, state) {
-                          List<Hospital> hospitales = [];
-                          if (state is HospitalesCargados) {
-                            hospitales = state.hospitales;
-                          }
-                          return SelectorHospital(
-                            hospitales: hospitales,
-                            selectedHospital: selectedHospital,
-                            onHospitalSelected: (hospital) {
-                              setState(() {
-                                selectedHospital = hospital;
-                              });
-                            },
-                          );
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    BlocBuilder<EscanerBloc, EscanerState>(
+                      buildWhen:
+                          (previous, current) =>
+                              current is HospitalesCargados ||
+                              previous is EscanerInitial,
+                      builder: (context, state) {
+                        List<Hospital> hospitales = [];
+                        if (state is HospitalesCargados) {
+                          hospitales = state.hospitales;
+                        }
+                        return SelectorHospital(
+                          hospitales: hospitales,
+                          selectedHospital: selectedHospital,
+                          onHospitalSelected: (hospital) {
+                            setState(() {
+                              selectedHospital = hospital;
+                            });
+                          },
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    if (isScanning)
+                      ScannerView(
+                        controller: _scannerController!,
+                        onBarcodeDetected:
+                            (barcode) => _onBarcodeDetected(barcode, context),
+                        onClose: () {
+                          setState(() {
+                            isScanning = false;
+                          });
+                          _stopScanner();
                         },
+                      )
+                    else if (_isManualInput)
+                      ManualCodeInput(
+                        onCodeSubmitted:
+                            (code) => _onManualCodeSubmitted(code, context),
+                      )
+                    else
+                      Wrap(
+                        alignment: WrapAlignment.spaceEvenly,
+                        spacing: 8.0,
+                        runSpacing: 8.0,
+                        children: [
+                          ScannerButton(
+                            onPressed: () {
+                              if (selectedHospital != null) {
+                                setState(() {
+                                  isScanning = true;
+                                });
+                                BlocProvider.of<EscanerBloc>(
+                                  context,
+                                ).add(ElegirHospitalEvent(selectedHospital!));
+                                BlocProvider.of<EscanerBloc>(
+                                  context,
+                                ).add(EscanearCodigoEvent());
+                                _startScanner();
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Debe seleccionar un hospital',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: _toggleManualInput,
+                            icon: const Icon(Icons.keyboard),
+                            label: const Text('Ingresar código'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
-                      const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                      if (isScanning)
-                        ScannerView(
-                          controller: _scannerController!,
-                          onBarcodeDetected:
-                              (barcode) => _onBarcodeDetected(barcode, context),
-                          onClose: () {
-                            setState(() {
-                              isScanning = false;
-                            });
-                            _stopScanner();
-                          },
-                        )
-                      else if (_isManualInput)
-                        ManualCodeInput(
-                          onCodeSubmitted:
-                              (code) => _onManualCodeSubmitted(code, context),
-                        )
-                      else
-                        Wrap(
-                          alignment: WrapAlignment.spaceEvenly,
-                          spacing: 8.0,
-                          runSpacing: 8.0,
+                    if (productos.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            ScannerButton(
-                              onPressed: () {
-                                if (selectedHospital != null) {
-                                  setState(() {
-                                    isScanning = true;
-                                  });
-                                  BlocProvider.of<EscanerBloc>(
-                                    context,
-                                  ).add(ElegirHospitalEvent(selectedHospital!));
-                                  BlocProvider.of<EscanerBloc>(
-                                    context,
-                                  ).add(EscanearCodigoEvent());
-                                  _startScanner();
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Debe seleccionar un hospital',
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: _toggleManualInput,
-                              icon: const Icon(Icons.keyboard),
-                              label: const Text('Ingresar código'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
-                                ),
+                            Text(
+                              'Productos escaneados (${productos.length})',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
+                      ),
 
-                      const SizedBox(height: 12),
+                    Expanded(
+                      child: productos.isNotEmpty
+                          ? ProductosList(
+                              productos: productos,
+                              onRemove: (producto) {
+                                BlocProvider.of<EscanerBloc>(
+                                  context,
+                                ).add(EliminarProductoEvent(producto));
+                              },
+                              onUndoRemove: (producto, index) {
+                                setState(() {
+                                  if (index < productos.length) {
+                                    productos.insert(index, producto);
+                                  } else {
+                                    productos.add(producto);
+                                  }
+                                });
+                              },
+                            )
+                          : const EmptyProductsView(),
+                    ),
 
-                      if (productos.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    if (_hayProductosPendientes)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade100,
+                            borderRadius: BorderRadius.circular(8.0),
+                            border: Border.all(color: Colors.amber.shade300),
+                          ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Productos escaneados (${productos.length})',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                              Icon(Icons.sync_problem, color: Colors.amber.shade800),
+                              const SizedBox(width: 8.0),
+                              Expanded(
+                                child: Text(
+                                  'Hay productos pendientes por sincronizar',
+                                  style: TextStyle(color: Colors.amber.shade900),
+                                ),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  BlocProvider.of<EscanerBloc>(context)
+                                      .add(SincronizarProductosPendientesEvent());
+                                },
+                                icon: const Icon(Icons.sync, size: 16),
+                                label: const Text('Sincronizar'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amber.shade700,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.35,
-                        child:
-                            productos.isNotEmpty
-                                ? ProductosList(
-                                  productos: productos,
-                                  onRemove: (producto) {
-                                    setState(() {
-                                      productos.removeWhere(
-                                        (p) =>
-                                            p.id == producto.id &&
-                                            p.serie == producto.serie,
-                                      );
-                                    });
-                                  },
-                                  onUndoRemove: (producto, index) {
-                                    setState(() {
-                                      if (index < productos.length) {
-                                        productos.insert(index, producto);
-                                      } else {
-                                        productos.add(producto);
-                                      }
-                                    });
-                                  },
-                                )
-                                : const EmptyProductsView(),
                       ),
 
-                      if (productos.isNotEmpty)
+                    if (state is! EscanerLoading) ...[
+                      if (selectedHospital != null)
                         SaveButton(
                           onPressed: () {
                             BlocProvider.of<EscanerBloc>(
                               context,
                             ).add(GuardarProductosEvent());
                           },
+                          hayConexion: _hayConexion,
                         ),
                     ],
-                  ),
+                  ],
                 ),
               );
             },

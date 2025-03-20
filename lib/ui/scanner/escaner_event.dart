@@ -36,3 +36,5 @@ class EliminarProductoEvent extends EscanerEvent {
   
   EliminarProductoEvent(this.producto);
 }
+
+class SincronizarProductosPendientesEvent extends EscanerEvent {}
