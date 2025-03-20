@@ -4,6 +4,7 @@ import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
 import 'package:quilmedic/data/respository/producto_repository.dart';
 import 'package:quilmedic/domain/hospital.dart';
+import 'package:quilmedic/utils/connectivity_service.dart';
 
 part 'producto_detalle_event.dart';
 part 'producto_detalle_state.dart';
@@ -42,6 +43,19 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
     emit(TrasladandoProductoState());
     
     try {
+      bool hayConexion = false;
+      try {
+        hayConexion = await ConnectivityService.hayConexionInternet();
+      } catch (e) {
+        emit(ErrorTrasladoProductoState('Error al verificar la conectividad: No se pudo verificar la conexión a internet'));
+        return;
+      }
+      
+      if (!hayConexion) {
+        emit(ErrorTrasladoProductoState('No hay conexión a internet para realizar el traslado. Intente nuevamente cuando tenga conexión.'));
+        return;
+      }
+      
       final verificacionResponse = await productoRepository.getProductoByNumeroAndAlmacen(
         event.productoId,
         event.nuevoHospitalId,
@@ -88,7 +102,13 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
         verificacionResponse.message ?? 'No se encontró el producto'
       ));
     } catch (e) {
-      emit(ErrorTrasladoProductoState('Error al trasladar producto: ${e.toString()}'));
+      if (e.toString().contains('SocketException') || 
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('Network is unreachable')) {
+        emit(ErrorTrasladoProductoState('No hay conexión a internet para realizar el traslado. Intente nuevamente cuando tenga conexión.'));
+      } else {
+        emit(ErrorTrasladoProductoState('Error al trasladar producto: Ocurrió un problema durante el proceso'));
+      }
     }
   }
   
@@ -96,6 +116,19 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
     emit(TrasladandoProductoState());
     
     try {
+      bool hayConexion = false;
+      try {
+        hayConexion = await ConnectivityService.hayConexionInternet();
+      } catch (e) {
+        emit(ErrorTrasladoProductoState('Error al verificar la conectividad: No se pudo verificar la conexión a internet'));
+        return;
+      }
+      
+      if (!hayConexion) {
+        emit(ErrorTrasladoProductoState('No hay conexión a internet para realizar el traslado. Intente nuevamente cuando tenga conexión.'));
+        return;
+      }
+      
       final response = await productoRepository.trasladarProducto(
         event.productoId,
         event.nuevoHospitalId,
@@ -111,7 +144,13 @@ class ProductoDetalleBloc extends Bloc<ProductoDetalleEvent, ProductoDetalleStat
         ));
       }
     } catch (e) {
-      emit(ErrorTrasladoProductoState('Error al trasladar producto: ${e.toString()}'));
+      if (e.toString().contains('SocketException') || 
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('Network is unreachable')) {
+        emit(ErrorTrasladoProductoState('No hay conexión a internet para realizar el traslado. Intente nuevamente cuando tenga conexión.'));
+      } else {
+        emit(ErrorTrasladoProductoState('Error al trasladar producto: Ocurrió un problema durante el proceso'));
+      }
     }
   }
 }

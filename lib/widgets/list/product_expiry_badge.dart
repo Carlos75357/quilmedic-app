@@ -3,26 +3,32 @@ import 'package:flutter/material.dart';
 class ProductExpiryBadge extends StatelessWidget {
   final DateTime expiryDate;
   final String formattedDate;
+  final bool isSmallScreen;
 
   const ProductExpiryBadge({
     super.key,
     required this.expiryDate,
     required this.formattedDate,
+    this.isSmallScreen = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 4 : 8, 
+        vertical: isSmallScreen ? 2 : 4
+      ),
       decoration: BoxDecoration(
         color: _getColorForExpiryDate(expiryDate),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         formattedDate,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.black,
           fontWeight: FontWeight.bold,
+          fontSize: isSmallScreen ? 11 : null,
         ),
       ),
     );

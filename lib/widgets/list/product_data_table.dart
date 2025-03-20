@@ -19,8 +19,14 @@ class ProductDataTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Detectar si estamos en una pantalla pequeña
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final isVerySmallScreen = MediaQuery.of(context).size.width < 360;
+    final isExtremelySmallScreen = MediaQuery.of(context).size.width < 320;
+    
+    // Para pantallas extremadamente pequeñas, mostrar una vista de lista en lugar de tabla
+    if (isExtremelySmallScreen) {
+      return _buildCompactList(context);
+    }
     
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -32,36 +38,35 @@ class ProductDataTable extends StatelessWidget {
           ),
           dataRowMinHeight: 64,
           dataRowMaxHeight: 80,
-          // Reducir el espaciado entre columnas en pantallas pequeñas
-          columnSpacing: isSmallScreen ? 12 : 24,
-          horizontalMargin: isSmallScreen ? 8 : 24,
+          columnSpacing: isVerySmallScreen ? 8 : (isSmallScreen ? 12 : 24),
+          horizontalMargin: isVerySmallScreen ? 4 : (isSmallScreen ? 8 : 24),
           headingTextStyle: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: isSmallScreen ? 14 : 16,
+            fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
           ),
-          dataTextStyle: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+          dataTextStyle: TextStyle(fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16)),
           columns: [
             DataColumn(
-              label: Container(
-                width: isSmallScreen ? 100 : 150,
+              label: SizedBox(
+                width: isVerySmallScreen ? 80 : (isSmallScreen ? 100 : 150),
                 child: const Text('Descripción'),
               ),
             ),
             DataColumn(
-              label: Container(
-                width: isSmallScreen ? 80 : 100,
+              label: SizedBox(
+                width: isVerySmallScreen ? 70 : (isSmallScreen ? 80 : 100),
                 child: const Text('Caducidad'),
               ),
             ),
             DataColumn(
-              label: Container(
-                width: isSmallScreen ? 60 : 80,
+              label: SizedBox(
+                width: isVerySmallScreen ? 40 : (isSmallScreen ? 60 : 80),
                 child: const Text('Stock'),
               ),
             ),
             DataColumn(
-              label: Container(
-                width: isSmallScreen ? 70 : 90,
+              label: SizedBox(
+                width: isVerySmallScreen ? 50 : (isSmallScreen ? 70 : 90),
                 child: const Text('Acciones'),
               ),
             ),
@@ -79,41 +84,54 @@ class ProductDataTable extends StatelessWidget {
               }),
               cells: [
                 DataCell(
-                  Container(
-                    width: isSmallScreen ? 100 : 150,
+                  SizedBox(
+                    width: isVerySmallScreen ? 80 : (isSmallScreen ? 100 : 150),
                     child: Text(
                       productos[index].descripcion ?? '',
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
+                      style: TextStyle(
+                        fontSize: isVerySmallScreen ? 11 : null,
+                      ),
                     ),
                   ),
                   onTap: () => onProductTap(productos[index]),
                 ),
                 DataCell(
-                  Container(
-                    width: isSmallScreen ? 80 : 100,
+                  SizedBox(
+                    width: isVerySmallScreen ? 70 : (isSmallScreen ? 80 : 100),
                     child: ProductExpiryBadge(
                       expiryDate: productos[index].fechacaducidad,
                       formattedDate: _formatDate(productos[index].fechacaducidad),
+                      isSmallScreen: isVerySmallScreen,
                     ),
                   ),
                   onTap: () => onProductTap(productos[index]),
                 ),
                 DataCell(
-                  Container(
-                    width: isSmallScreen ? 60 : 80,
-                    child: ProductStockBadge(stock: productos[index].stock),
+                  SizedBox(
+                    width: isVerySmallScreen ? 40 : (isSmallScreen ? 60 : 80),
+                    child: ProductStockBadge(
+                      stock: productos[index].stock,
+                      isSmallScreen: isVerySmallScreen,
+                    ),
                   ),
                   onTap: () => onProductTap(productos[index]),
                 ),
                 DataCell(
-                  Container(
-                    width: isSmallScreen ? 70 : 90,
+                  SizedBox(
+                    width: isVerySmallScreen ? 50 : (isSmallScreen ? 70 : 90),
                     child: isSmallScreen 
                       ? IconButton(
-                          icon: const Icon(Icons.visibility, color: Colors.blue),
+                          icon: Icon(
+                            Icons.visibility, 
+                            color: Colors.blue,
+                            size: isVerySmallScreen ? 18 : 24,
+                          ),
                           onPressed: () => onProductTap(productos[index]),
                           tooltip: 'Ver detalles',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         )
                       : ElevatedButton.icon(
                           onPressed: () => onProductTap(productos[index]),
@@ -138,5 +156,67 @@ class ProductDataTable extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Widget _buildCompactList(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: productos.length,
+      itemBuilder: (context, index) {
+        final producto = productos[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          color: index % 2 == 0 ? rowColor : null,
+          child: InkWell(
+            onTap: () => onProductTap(producto),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    producto.descripcion ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Text('Cad: ', style: TextStyle(fontSize: 12)),
+                            ProductExpiryBadge(
+                              expiryDate: producto.fechacaducidad,
+                              formattedDate: _formatDate(producto.fechacaducidad),
+                              isSmallScreen: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          const Text('Stock: ', style: TextStyle(fontSize: 12)),
+                          ProductStockBadge(
+                            stock: producto.stock,
+                            isSmallScreen: true,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

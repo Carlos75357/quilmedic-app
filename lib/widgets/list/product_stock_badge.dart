@@ -2,25 +2,31 @@ import 'package:flutter/material.dart';
 
 class ProductStockBadge extends StatelessWidget {
   final int stock;
+  final bool isSmallScreen;
 
   const ProductStockBadge({
     super.key,
     required this.stock,
+    this.isSmallScreen = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallScreen ? 4 : 8, 
+        vertical: isSmallScreen ? 2 : 4
+      ),
       decoration: BoxDecoration(
         color: _getColorForStock(stock),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         '$stock',
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.black,
           fontWeight: FontWeight.bold,
+          fontSize: isSmallScreen ? 11 : null,
         ),
       ),
     );

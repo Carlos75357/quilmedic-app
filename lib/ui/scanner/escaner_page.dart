@@ -55,8 +55,18 @@ class _EscanerPageState extends State<EscanerPage> {
   @override
   void dispose() {
     _hospitalesController.dispose();
-    _scannerController?.dispose();
     _conectividadTimer?.cancel();
+    
+    if (_scannerController != null) {
+      try {
+        _scannerController!.stop();
+      } catch (e) {
+        debugPrint('Error al detener el escáner en dispose: $e');
+      } finally {
+        _scannerController = null;
+      }
+    }
+    
     super.dispose();
   }
 
@@ -83,7 +93,7 @@ class _EscanerPageState extends State<EscanerPage> {
           _hayConexion = false;
         });
       }
-      print('Error al verificar la conectividad: $e');
+      debugPrint('Error al verificar la conectividad: $e');
     }
   }
 
@@ -97,30 +107,68 @@ class _EscanerPageState extends State<EscanerPage> {
   }
 
   void _startScanner() {
-    _scannerController ??= MobileScannerController(
-      detectionSpeed: DetectionSpeed.normal,
-      facing: CameraFacing.back,
-      torchEnabled: false,
-      formats: const [
-        BarcodeFormat.ean8,
-        BarcodeFormat.ean13,
-        BarcodeFormat.code39,
-        BarcodeFormat.code93,
-        BarcodeFormat.code128,
-        BarcodeFormat.itf,
-        BarcodeFormat.upcA,
-        BarcodeFormat.upcE,
-        BarcodeFormat.codabar,
-        BarcodeFormat.dataMatrix,
-        BarcodeFormat.qrCode,
-      ],
-    );
-    _scannerController!.start();
+    try {
+      if (_scannerController != null && isScanning) {
+        debugPrint('El escáner ya está iniciado, no es necesario iniciarlo de nuevo');
+        return;
+      }
+      
+      _scannerController ??= MobileScannerController(
+        detectionSpeed: DetectionSpeed.normal,
+        facing: CameraFacing.back,
+        torchEnabled: false,
+        formats: const [
+          BarcodeFormat.ean8,
+          BarcodeFormat.ean13,
+          BarcodeFormat.code39,
+          BarcodeFormat.code93,
+          BarcodeFormat.code128,
+          BarcodeFormat.itf,
+          BarcodeFormat.upcA,
+          BarcodeFormat.upcE,
+          BarcodeFormat.codabar,
+          BarcodeFormat.dataMatrix,
+          BarcodeFormat.qrCode,
+        ],
+      );
+      
+      _scannerController!.start().then((_) {
+        if (mounted) {
+          setState(() => isScanning = true);
+        }
+      }).catchError((error) {
+        if (mounted) {
+          setState(() => isScanning = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al iniciar la cámara: ${error.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => isScanning = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al inicializar el escáner: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _stopScanner() {
     if (_scannerController != null) {
-      _scannerController!.stop();
+      try {
+        _scannerController!.stop();
+        _scannerController = null;
+      } catch (e) {
+        debugPrint('Error al detener el escáner: $e');
+        _scannerController = null;
+      }
       setState(() => isScanning = false);
     }
   }
@@ -334,7 +382,7 @@ class _EscanerPageState extends State<EscanerPage> {
 
                     const SizedBox(height: 12),
 
-                    if (isScanning)
+                    if (isScanning && _scannerController != null)
                       ScannerView(
                         controller: _scannerController!,
                         onBarcodeDetected:
@@ -360,15 +408,17 @@ class _EscanerPageState extends State<EscanerPage> {
                           ScannerButton(
                             onPressed: () {
                               if (selectedHospital != null) {
-                                setState(() {
-                                  isScanning = true;
-                                });
+                                if (isScanning) {
+                                  _stopScanner();
+                                }
+                                
                                 BlocProvider.of<EscanerBloc>(
                                   context,
                                 ).add(ElegirHospitalEvent(selectedHospital!));
-                                BlocProvider.of<EscanerBloc>(
-                                  context,
-                                ).add(EscanearCodigoEvent());
+                                
+                                setState(() {
+                                  isScanning = true;
+                                });
                                 _startScanner();
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -433,47 +483,100 @@ class _EscanerPageState extends State<EscanerPage> {
                                 });
                               },
                             )
-                          : const EmptyProductsView(),
+                          : LayoutBuilder(
+                              builder: (context, constraints) {
+                                return SingleChildScrollView(
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: constraints.maxHeight,
+                                    ),
+                                    child: const EmptyProductsView(),
+                                  ),
+                                );
+                              },
+                            ),
                     ),
 
                     if (_hayProductosPendientes)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.amber.shade100,
+                      Container(
+                        margin: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade100,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: Colors.amber.shade300),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
                             borderRadius: BorderRadius.circular(8.0),
-                            border: Border.all(color: Colors.amber.shade300),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.sync_problem, color: Colors.amber.shade800),
-                              const SizedBox(width: 8.0),
-                              Expanded(
-                                child: Text(
-                                  'Hay productos pendientes por sincronizar',
-                                  style: TextStyle(color: Colors.amber.shade900),
-                                ),
-                              ),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  BlocProvider.of<EscanerBloc>(context)
-                                      .add(SincronizarProductosPendientesEvent());
-                                },
-                                icon: const Icon(Icons.sync, size: 16),
-                                label: const Text('Sincronizar'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.amber.shade700,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 8,
+                            onTap: () {
+                              BlocProvider.of<EscanerBloc>(context)
+                                  .add(SincronizarProductosPendientesEvent());
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.sync_problem, color: Colors.amber.shade800, size: 24),
+                                  const SizedBox(width: 12.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Productos pendientes',
+                                          style: TextStyle(
+                                            color: Colors.amber.shade900,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Hay productos guardados localmente pendientes de sincronizar',
+                                          style: TextStyle(
+                                            color: Colors.amber.shade800,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.amber.shade600,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.sync,
+                                          color: Colors.white,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Text(
+                                          'Sincronizar',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),

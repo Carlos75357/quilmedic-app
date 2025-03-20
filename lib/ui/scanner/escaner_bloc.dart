@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
 import 'package:quilmedic/data/respository/producto_repository.dart';
@@ -71,7 +70,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         barcode,
       );
 
-      // Verificar si el producto ya existe en la lista actual
       final productoExistenteActual = productosEscaneados.any(
         (p) => p.serie == nuevoProducto.serie,
       );
@@ -81,7 +79,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         return;
       }
 
-      // Verificar si el producto ya existe en los productos pendientes
       final productosPendientes = await ProductoLocalStorage.obtenerProductosPendientes();
       final productoExistentePendiente = productosPendientes.any(
         (p) => p.serie == nuevoProducto.serie,
@@ -117,7 +114,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       emit(EscanerLoading());
 
-      // Verificar si hay productos pendientes en almacenamiento local
       List<ProductoEscaneado> productosPendientes = [];
       int? hospitalIdPendiente;
       
@@ -125,12 +121,11 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         productosPendientes = await ProductoLocalStorage.obtenerProductosPendientes();
         hospitalIdPendiente = await ProductoLocalStorage.obtenerHospitalPendiente();
       } catch (e) {
-        // Si hay error al obtener productos pendientes, continuamos con los actuales
+        emit(EscanerError(e.toString()));
+        return;
       }
       
-      // Si hay productos pendientes y son del mismo hospital, los incluimos
       if (productosPendientes.isNotEmpty && hospitalIdPendiente == hospitalSeleccionado!.id) {
-        // Combinar productos sin duplicados
         for (var productoPendiente in productosPendientes) {
           bool yaExiste = productosEscaneados.any((p) => p.serie == productoPendiente.serie);
           if (!yaExiste) {
@@ -138,10 +133,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           }
         }
         
-        // Limpiar productos pendientes ya que los estamos incluyendo ahora
         await ProductoLocalStorage.limpiarProductosPendientes();
         
-        // Actualizar la UI con la lista combinada
         emit(ProductosListadosState(productosEscaneados));
       }
 
@@ -430,7 +423,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           
           await _guardarProductosEscaneadosLocalmente(productos);
           
-          // Actualizar el hospital seleccionado si no está definido o es diferente
           if (hospitalSeleccionado == null || hospitalSeleccionado!.id != hospitalId) {
             try {
               List<Hospital> hospitales = await hospitalRepository
@@ -444,11 +436,10 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
                 }
               }
             } catch (e) {
-              // Si no podemos obtener el hospital, continuamos con el proceso
+              emit(EscanerError("Error al obtener hospitales: ${e.toString()}"));
             }
           }
           
-          // Limpiar la lista actual y actualizar la UI
           productosEscaneados.clear();
           
           emit(SincronizacionCompletaState(productos));

@@ -34,13 +34,48 @@ class ScannerView extends StatelessWidget {
               child: MobileScanner(
                 controller: controller,
                 onDetect: (capture) {
-                  final List<Barcode> barcodes = capture.barcodes;
-                  for (final barcode in barcodes) {
-                    if (barcode.rawValue != null) {
-                      onBarcodeDetected(barcode);
-                      break;
+                  try {
+                    if (capture.barcodes.isNotEmpty) {
+                      final List<Barcode> barcodes = capture.barcodes;
+                      for (final barcode in barcodes) {
+                        if (barcode.rawValue != null) {
+                          onBarcodeDetected(barcode);
+                          break;
+                        }
+                      }
                     }
+                  } catch (e) {
+                    debugPrint('Error en el escáner: $e');
                   }
+                },
+                errorBuilder: (context, error, child) {
+                  return Container(
+                    color: Colors.white,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 40,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Error al iniciar la cámara',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.red,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            onPressed: onClose,
+                            child: const Text('Cerrar'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 },
                 scanWindow: Rect.fromCenter(
                   center: Offset(

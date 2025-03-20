@@ -36,8 +36,33 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isVerySmallScreen = MediaQuery.of(context).size.width < 320;
+    
     return Scaffold(
-      appBar: AppBar(title: const Text('Productos')),
+      appBar: AppBar(
+        title: const Text('Productos'),
+        actions: isVerySmallScreen ? [] : [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              if (context.read<ListaProductosBloc?>() != null) {
+                BlocProvider.of<ListaProductosBloc>(context)
+                    .add(CargarProductosEvent());
+              }
+            },
+            tooltip: 'Actualizar',
+          ),
+        ],
+      ),
+      floatingActionButton: isVerySmallScreen ? null : FloatingActionButton(
+        onPressed: () {
+          if (context.read<ListaProductosBloc?>() != null) {
+            BlocProvider.of<ListaProductosBloc>(context)
+                .add(CargarProductosEvent());
+          }
+        },
+        child: const Icon(Icons.refresh),
+      ),
       body: SafeArea(
         child:
             widget.productos != null
