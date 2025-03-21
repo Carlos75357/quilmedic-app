@@ -2,6 +2,7 @@ import 'package:quilmedic/data/config.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/data/respository/repository_response.dart';
+import 'package:quilmedic/data/local/producto_local_storage.dart';
 
 class ProductoRepository {
   final ApiClient apiClient;
@@ -9,7 +10,7 @@ class ProductoRepository {
   ProductoRepository({required this.apiClient});
 
   Future<RepositoryResponse> enviarProductosEscaneados(
-    int hospitalId,
+    String hospitalId,
     List<ProductoEscaneado> productos,
   ) async {
     final List<dynamic> resultados = [];
@@ -42,8 +43,8 @@ class ProductoRepository {
   }
 
   Future<RepositoryResponse> trasladarProducto(
-    int productoId,
-    int newHospitalId,
+    String productoId,
+    String newHospitalId,
   ) async {
     try {
       final getAllResponse = await apiClient.getAll(
@@ -101,6 +102,38 @@ class ProductoRepository {
             updateData,
           );
 
+          await _actualizarProductoEnCache(productoId, newHospitalId);
+
+          try {
+            final verificacionResponse = await apiClient.getAll(
+              '${ApiConfig.productosEndpoint}/$productoDbId',
+              {},
+            );
+
+            if (verificacionResponse != null &&
+                verificacionResponse['codigoalmacen'] != null) {
+              int almacenActualizado;
+              if (verificacionResponse['codigoalmacen'] is String) {
+                almacenActualizado = int.parse(
+                  verificacionResponse['codigoalmacen'],
+                );
+              } else {
+                almacenActualizado = verificacionResponse['codigoalmacen'];
+              }
+
+              if (almacenActualizado != newHospitalId) {
+                print(
+                  'Advertencia: El almacén no se actualizó correctamente en el servidor. ' +
+                      'Se usará la información local para mostrar el producto en el almacén correcto.',
+                );
+              }
+            }
+          } catch (e) {
+            print(
+              'Error al verificar la actualización del producto: ${e.toString()}',
+            );
+          }
+
           return RepositoryResponse.success(
             response,
             message: 'Producto trasladado correctamente',
@@ -122,9 +155,23 @@ class ProductoRepository {
     }
   }
 
+  Future<void> _actualizarProductoEnCache(
+    String numproducto,
+    String nuevoHospitalId,
+  ) async {
+    try {
+      await ProductoLocalStorage.guardarInfoTraslado(
+        numproducto,
+        nuevoHospitalId,
+      );
+    } catch (e) {
+      print('Error al actualizar producto en caché: ${e.toString()}');
+    }
+  }
+
   Future<RepositoryResponse> getProductoByNumeroAndAlmacen(
-    int numproducto,
-    int almacenId,
+    String numproducto,
+    String almacenId,
   ) async {
     try {
       final getAllResponse = await apiClient.getAll(
@@ -234,6 +281,31 @@ class ProductoRepository {
       return RepositoryResponse.error(
         'Error al obtener el producto: ${e.toString()}',
       );
+    }
+  }
+
+  Future<RepositoryResponse> getProductByCodigo(int codigo) async {
+    try {
+      final response = await apiClient.getAll(
+        '${ApiConfig.productosEndpoint}?numproducto=$codigo',
+        null,
+      );
+      return RepositoryResponse.success(response);
+    } catch (e) {
+      return RepositoryResponse.error(e.toString());
+    }
+  }
+
+  Future<RepositoryResponse> getProductosByCodigos(List<String> codigos) async {
+    try {
+      final response = await apiClient.getAll(
+        '${ApiConfig.productosEndpoint}?numproducto=${codigos.join(',')}',
+        null,
+      );
+
+      return RepositoryResponse.success(response);
+    } catch (e) {
+      return RepositoryResponse.error(e.toString());
     }
   }
 }

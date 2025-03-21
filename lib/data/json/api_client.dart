@@ -4,10 +4,7 @@ import 'package:quilmedic/data/json/json_rpc.dart';
 class ApiClient {
   JsonClient client = JsonClient();
 
-  Future<dynamic> call(
-    String endpoint,
-    JsonRequest jsonRequest,
-  ) async {
+  Future<dynamic> call(String endpoint, JsonRequest jsonRequest) async {
     try {
       var response = await client.call(endpoint, jsonRequest);
       return response;
@@ -38,7 +35,7 @@ class ApiClient {
         'method': 'update',
         'params': values,
       });
-      
+
       var response = await client.call(endpoint, jsonRequest);
       return response;
     } catch (e) {
@@ -53,7 +50,7 @@ class ApiClient {
         'method': 'patch',
         'params': values,
       });
-      
+
       var response = await client.call(endpoint, jsonRequest);
       return response;
     } catch (e) {

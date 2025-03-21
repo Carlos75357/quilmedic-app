@@ -7,6 +7,6 @@ class CargarProductosEvent extends ListaProductosEvent {}
 
 class MostrarProductosEvent extends ListaProductosEvent {
   final List<Producto> productos;
-  
+
   MostrarProductosEvent(this.productos);
 }

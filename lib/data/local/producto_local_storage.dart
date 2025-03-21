@@ -6,8 +6,9 @@ class ProductoLocalStorage {
   static const String _productosEscaneadosKey = 'productos_escaneados';
   static const String _productosPendientesKey = 'productos_pendientes';
   static const String _hospitalPendienteKey = 'hospital_pendiente';
+  static const String _trasladosKey = 'productos_trasladados';
   
-  static Future<bool> guardarProductosEscaneados(List<int> productosIds) async {
+  static Future<bool> guardarProductosEscaneados(List<String> productosIds) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String jsonString = jsonEncode(productosIds);
@@ -17,7 +18,7 @@ class ProductoLocalStorage {
     }
   }
   
-  static Future<List<int>> obtenerProductosEscaneados() async {
+  static Future<List<String>> obtenerProductosEscaneados() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? jsonString = prefs.getString(_productosEscaneadosKey);
@@ -27,13 +28,13 @@ class ProductoLocalStorage {
       }
       
       final List<dynamic> decodedList = jsonDecode(jsonString);
-      return decodedList.map<int>((item) => item as int).toList();
+      return decodedList.map<String>((item) => item).toList();
     } catch (e) {
       return [];
     }
   }
   
-  static Future<bool> agregarProductoEscaneado(int productoId) async {
+  static Future<bool> agregarProductoEscaneado(String productoId) async {
     try {
       final productosIds = await obtenerProductosEscaneados();
       
@@ -72,8 +73,73 @@ class ProductoLocalStorage {
     }
   }
   
+  static Future<bool> actualizarProductoTrasladado(String productoId) async {
+    try {
+      final infoTraslado = await obtenerInfoTraslado(productoId);
+      if (infoTraslado != null) {
+        // await eliminarProductoEscaneado(productoId);
+        return true;
+      }
+      return true;
+    } catch (e) {
+      print('Error al actualizar producto trasladado: ${e.toString()}');
+      return false;
+    }
+  }
   
-  static Future<bool> guardarProductosPendientes(List<ProductoEscaneado> productos, int hospitalId) async {
+  static Future<bool> guardarInfoTraslado(String productoId, String nuevoHospitalId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      final Map<String, dynamic> traslados = await _obtenerTodosLosTraslados();
+      
+      traslados[productoId.toString()] = {
+        'nuevoHospitalId': nuevoHospitalId,
+        'fechaTraslado': DateTime.now().toIso8601String(),
+      };
+      
+      final String jsonString = jsonEncode(traslados);
+      return await prefs.setString(_trasladosKey, jsonString);
+    } catch (e) {
+      print('Error al guardar info de traslado: ${e.toString()}');
+      return false;
+    }
+  }
+  
+  static Future<Map<String, dynamic>?> obtenerInfoTraslado(String productoId) async {
+    try {
+      final Map<String, dynamic> traslados = await _obtenerTodosLosTraslados();
+      return traslados[productoId.toString()];
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  static Future<Map<String, dynamic>> _obtenerTodosLosTraslados() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonString = prefs.getString(_trasladosKey);
+      
+      if (jsonString == null || jsonString.isEmpty) {
+        return {};
+      }
+      
+      return jsonDecode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      return {};
+    }
+  }
+  
+  static Future<bool> limpiarInfoTraslados() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return await prefs.remove(_trasladosKey);
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  static Future<bool> guardarProductosPendientes(List<ProductoEscaneado> productos, String hospitalId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       
@@ -82,7 +148,7 @@ class ProductoLocalStorage {
       
       final String jsonString = jsonEncode(productosMap);
       
-      await prefs.setInt(_hospitalPendienteKey, hospitalId);
+      await prefs.setString(_hospitalPendienteKey, hospitalId);
       
       return await prefs.setString(_productosPendientesKey, jsonString);
     } catch (e) {
@@ -108,10 +174,10 @@ class ProductoLocalStorage {
     }
   }
   
-  static Future<int?> obtenerHospitalPendiente() async {
+  static Future<String?> obtenerHospitalPendiente() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getInt(_hospitalPendienteKey);
+      return prefs.getString(_hospitalPendienteKey);
     } catch (e) {
       return null;
     }

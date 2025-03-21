@@ -46,7 +46,7 @@ class ProductInfoCard extends StatelessWidget {
             
             ProductInfoRow(
               label: 'ID Producto:', 
-              value: producto.numproducto.toString(),
+              value: producto.numerodeproducto.toString(),
               icon: Icons.tag,
             ),
             
@@ -61,14 +61,6 @@ class ProductInfoCard extends StatelessWidget {
             const SizedBox(height: 16),
             
             ProductInfoRow(
-              label: 'Descripción del lote:', 
-              value: producto.descripcionlote,
-              icon: Icons.description,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            ProductInfoRow(
               label: 'Fecha de caducidad:', 
               value: _formatDate(producto.fechacaducidad),
               icon: Icons.calendar_today,
@@ -76,7 +68,7 @@ class ProductInfoCard extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            ProductStockRow(stock: producto.stock),
+            ProductStockRow(stock: producto.cantidad),
             
             const SizedBox(height: 16),
             
@@ -84,14 +76,6 @@ class ProductInfoCard extends StatelessWidget {
               label: 'Código de almacén:', 
               value: producto.codigoalmacen.toString(),
               icon: Icons.warehouse,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            ProductInfoRow(
-              label: 'Ubicación:', 
-              value: producto.ubicacion,
-              icon: Icons.place,
             ),
           ],
         ),

@@ -6,10 +6,10 @@ sealed class ProductoDetalleEvent {}
 class CargarHospitalesEvent extends ProductoDetalleEvent {}
 
 class TrasladarProductoEvent extends ProductoDetalleEvent {
-  final int productoId;
-  final int nuevoHospitalId;
+  final String productoId;
+  final String nuevoHospitalId;
   final bool confirmarTraslado;
-  
+
   TrasladarProductoEvent({
     required this.productoId,
     required this.nuevoHospitalId,
@@ -18,9 +18,9 @@ class TrasladarProductoEvent extends ProductoDetalleEvent {
 }
 
 class ConfirmarTrasladoProductoEvent extends ProductoDetalleEvent {
-  final int productoId;
-  final int nuevoHospitalId;
-  
+  final String productoId;
+  final String nuevoHospitalId;
+
   ConfirmarTrasladoProductoEvent({
     required this.productoId,
     required this.nuevoHospitalId,

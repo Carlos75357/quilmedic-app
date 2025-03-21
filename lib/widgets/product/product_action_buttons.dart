@@ -19,28 +19,28 @@ class ProductActionButtons extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElevatedButton.icon(
-          onPressed: state is HospitalesCargadosState
-            ? () {
-                final hospitalesState = state as HospitalesCargadosState;
-                final List<Hospital> hospitales = List<Hospital>.from(hospitalesState.hospitales);
-                onTrasladarPressed(hospitales);
-              }
-            : null,
-          icon: const Icon(Icons.swap_horiz, size: 28),
-          label: Text(
-            state is TrasladandoProductoState
-              ? 'Trasladando...'
-              : 'Trasladar de almacén',
-            style: const TextStyle(fontSize: 18),
-          ),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
+        // ElevatedButton.icon(
+        //   onPressed: state is HospitalesCargadosState
+        //     ? () {
+        //         final hospitalesState = state as HospitalesCargadosState;
+        //         final List<Hospital> hospitales = List<Hospital>.from(hospitalesState.hospitales);
+        //         onTrasladarPressed(hospitales);
+        //       }
+        //     : null,
+        //   icon: const Icon(Icons.swap_horiz, size: 28),
+        //   label: Text(
+        //     state is TrasladandoProductoState
+        //       ? 'Trasladando...'
+        //       : 'Trasladar de almacén',
+        //     style: const TextStyle(fontSize: 18),
+        //   ),
+        //   style: ElevatedButton.styleFrom(
+        //     padding: const EdgeInsets.symmetric(vertical: 16),
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(8),
+        //     ),
+        //   ),
+        // ),
         
         const SizedBox(height: 16),
         

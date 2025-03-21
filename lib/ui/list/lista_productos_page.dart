@@ -9,10 +9,10 @@ import 'package:quilmedic/widgets/list/product_list_section.dart';
 
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
-  final int hospitalId;
+  final String hospitalId;
 
   const ListaProductosPage({
-    super.key, 
+    super.key,
     this.productos,
     required this.hospitalId,
   });
@@ -37,32 +37,36 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   @override
   Widget build(BuildContext context) {
     final isVerySmallScreen = MediaQuery.of(context).size.width < 320;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos'),
-        actions: isVerySmallScreen ? [] : [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              if (context.read<ListaProductosBloc?>() != null) {
-                BlocProvider.of<ListaProductosBloc>(context)
-                    .add(CargarProductosEvent());
-              }
-            },
-            tooltip: 'Actualizar',
-          ),
-        ],
+        actions:
+            isVerySmallScreen
+                ? []
+                : [
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () {
+                      if (context.read<ListaProductosBloc?>() != null) {
+                        BlocProvider.of<ListaProductosBloc>(
+                          context,
+                        ).add(CargarProductosEvent());
+                      }
+                    },
+                    tooltip: 'Actualizar',
+                  ),
+                ],
       ),
-      floatingActionButton: isVerySmallScreen ? null : FloatingActionButton(
-        onPressed: () {
-          if (context.read<ListaProductosBloc?>() != null) {
-            BlocProvider.of<ListaProductosBloc>(context)
-                .add(CargarProductosEvent());
-          }
-        },
-        child: const Icon(Icons.refresh),
-      ),
+      // floatingActionButton: isVerySmallScreen ? null : FloatingActionButton(
+      //   onPressed: () {
+      //     if (context.read<ListaProductosBloc?>() != null) {
+      //       BlocProvider.of<ListaProductosBloc>(context)
+      //           .add(CargarProductosEvent());
+      //     }
+      //   },
+      //   child: const Icon(Icons.refresh),
+      // ),
       body: SafeArea(
         child:
             widget.productos != null
@@ -106,8 +110,8 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   Widget _buildProductosLayout() {
     final List<Producto> productosAlmacenActual = [];
     final List<Producto> productosOtrosAlmacenes = [];
-    
-    final int hospitalId = widget.hospitalId; 
+
+    final String hospitalId = widget.hospitalId;
 
     for (var producto in productos) {
       if (producto.codigoalmacen == hospitalId) {
@@ -143,7 +147,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -154,9 +158,10 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                     productos: productosAlmacenActual,
                     headerColor: Colors.blue,
                     rowColor: Colors.grey.shade50,
-                    onProductTap: (producto) => _navegarADetalle(context, producto),
+                    onProductTap:
+                        (producto) => _navegarADetalle(context, producto),
                   ),
-                  
+
                   if (productosOtrosAlmacenes.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     ProductListSection(
@@ -164,7 +169,8 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                       productos: productosOtrosAlmacenes,
                       headerColor: Colors.orange,
                       rowColor: Colors.orange.shade50,
-                      onProductTap: (producto) => _navegarADetalle(context, producto),
+                      onProductTap:
+                          (producto) => _navegarADetalle(context, producto),
                     ),
                   ],
                 ],
@@ -183,18 +189,23 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
         builder: (context) => ProductoDetallePage(producto: producto),
       ),
     );
-    
+
     if (result == true && context.mounted) {
-      if (widget.productos == null && Provider.of<ListaProductosBloc?>(context, listen: false) != null) {
-        Provider.of<ListaProductosBloc>(context, listen: false).add(CargarProductosEvent());
+      if (widget.productos == null &&
+          Provider.of<ListaProductosBloc?>(context, listen: false) != null) {
+        Provider.of<ListaProductosBloc>(
+          context,
+          listen: false,
+        ).add(CargarProductosEvent());
       } else if (widget.productos != null) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ListaProductosPage(
-              productos: null, 
-              hospitalId: widget.hospitalId,
-            ),
+            builder:
+                (context) => ListaProductosPage(
+                  productos: null,
+                  hospitalId: widget.hospitalId,
+                ),
           ),
         );
       }

@@ -6,6 +6,7 @@ import 'package:quilmedic/ui/product/producto_detalle_bloc.dart';
 import 'package:quilmedic/widgets/product/product_info_card.dart';
 import 'package:quilmedic/widgets/product/product_action_buttons.dart';
 import 'package:quilmedic/widgets/product/product_transfer_dialogs.dart';
+import 'package:quilmedic/data/local/producto_local_storage.dart';
 
 class ProductoDetallePage extends StatefulWidget {
   final Producto producto;
@@ -18,14 +19,14 @@ class ProductoDetallePage extends StatefulWidget {
 
 class _ProductoDetallePageState extends State<ProductoDetallePage> {
   late final ProductoDetalleBloc _productoDetalleBloc;
-  
+
   @override
   void initState() {
     super.initState();
     _productoDetalleBloc = ProductoDetalleBloc();
     _productoDetalleBloc.add(CargarHospitalesEvent());
   }
-  
+
   @override
   void dispose() {
     _productoDetalleBloc.close();
@@ -33,9 +34,8 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
   }
 
   void _mostrarDialogoTraslado(List<Hospital> hospitales) {
-    final hospitalesFiltrados = hospitales
-        .where((h) => h.id != widget.producto.codigoalmacen)
-        .toList();
+    final hospitalesFiltrados =
+        hospitales.where((h) => h.id != widget.producto.codigoalmacen).toList();
 
     if (hospitalesFiltrados.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +53,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
       onHospitalSelected: (hospitalId) {
         _productoDetalleBloc.add(
           TrasladarProductoEvent(
-            productoId: widget.producto.numproducto,
+            productoId: widget.producto.numerodeproducto,
             nuevoHospitalId: hospitalId,
           ),
         );
@@ -66,7 +66,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     BuildContext context,
     String mensaje,
     dynamic producto,
-    int almacenDestino,
+    String almacenDestino,
   ) {
     ProductTransferDialogs.showConfirmationDialog(
       context: context,
@@ -74,7 +74,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
       onConfirm: () {
         _productoDetalleBloc.add(
           ConfirmarTrasladoProductoEvent(
-            productoId: widget.producto.numproducto,
+            productoId: widget.producto.numerodeproducto,
             nuevoHospitalId: almacenDestino,
           ),
         );
@@ -97,10 +97,19 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
           listener: (context, state) {
             if (state is ErrorCargaHospitalesState) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.mensaje),
-                  backgroundColor: Colors.red,
-                ),
+                state.mensaje.contains('Failed to fetch')
+                    ? SnackBar(
+                      content: Text(
+                        "No se ha podido cargar los hospitales porque no se ha podido realizar la conexión",
+                      ),
+                      backgroundColor: Colors.red,
+                    )
+                    : SnackBar(
+                      content: Text(
+                        "Ha habido un error cargando los hospitales",
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
               );
             } else if (state is ProductoTrasladadoState) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -109,20 +118,51 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                   backgroundColor: Colors.green,
                 ),
               );
-              Navigator.pop(context, true);
+              if (context.mounted) {
+                ProductoLocalStorage.actualizarProductoTrasladado(
+                      widget.producto.numerodeproducto,
+                    )
+                    .then((_) {
+                      if (context.mounted) {
+                        Navigator.pop(context, true);
+                      }
+                    })
+                    .catchError((error) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Error al actualizar la información local del producto",
+                            ),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                        Navigator.pop(context, true);
+                      }
+                    });
+              }
             } else if (state is ErrorTrasladoProductoState) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.mensaje),
-                  backgroundColor: Colors.red,
-                ),
+                state.mensaje.contains('Failed to fetch')
+                    ? SnackBar(
+                      content: Text(
+                        "No se ha podido trasladar el producto porque no se ha podido realizar la conexión",
+                      ),
+                      backgroundColor: Colors.red,
+                    )
+                    : SnackBar(
+                      content: Text(
+                        "Ha habido un error trasladando el producto",
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
               );
             } else if (state is ProductoEnOtroAlmacenState) {
               _mostrarDialogoConfirmacionTraslado(
                 context,
                 state.mensaje,
                 state.producto,
-                state.almacenDestino, 
+                state.almacenDestino,
               );
             }
           },
@@ -133,9 +173,9 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ProductInfoCard(producto: widget.producto),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   BlocBuilder<ProductoDetalleBloc, ProductoDetalleState>(
                     builder: (context, state) {
                       return ProductActionButtons(

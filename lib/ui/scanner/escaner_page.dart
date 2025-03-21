@@ -43,7 +43,9 @@ class _EscanerPageState extends State<EscanerPage> {
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         _verificarConectividad();
-        _conectividadTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+        _conectividadTimer = Timer.periodic(const Duration(seconds: 30), (
+          timer,
+        ) {
           if (mounted) {
             _verificarConectividad();
           }
@@ -56,7 +58,7 @@ class _EscanerPageState extends State<EscanerPage> {
   void dispose() {
     _hospitalesController.dispose();
     _conectividadTimer?.cancel();
-    
+
     if (_scannerController != null) {
       try {
         _scannerController!.stop();
@@ -66,7 +68,7 @@ class _EscanerPageState extends State<EscanerPage> {
         _scannerController = null;
       }
     }
-    
+
     super.dispose();
   }
 
@@ -109,10 +111,12 @@ class _EscanerPageState extends State<EscanerPage> {
   void _startScanner() {
     try {
       if (_scannerController != null && isScanning) {
-        debugPrint('El escáner ya está iniciado, no es necesario iniciarlo de nuevo');
+        debugPrint(
+          'El escáner ya está iniciado, no es necesario iniciarlo de nuevo',
+        );
         return;
       }
-      
+
       _scannerController ??= MobileScannerController(
         detectionSpeed: DetectionSpeed.normal,
         facing: CameraFacing.back,
@@ -131,22 +135,27 @@ class _EscanerPageState extends State<EscanerPage> {
           BarcodeFormat.qrCode,
         ],
       );
-      
-      _scannerController!.start().then((_) {
-        if (mounted) {
-          setState(() => isScanning = true);
-        }
-      }).catchError((error) {
-        if (mounted) {
-          setState(() => isScanning = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al iniciar la cámara: ${error.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      });
+
+      _scannerController!
+          .start()
+          .then((_) {
+            if (mounted) {
+              setState(() => isScanning = true);
+            }
+          })
+          .catchError((error) {
+            if (mounted) {
+              setState(() => isScanning = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Error al iniciar la cámara: ${error.toString()}',
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          });
     } catch (e) {
       if (mounted) {
         setState(() => isScanning = false);
@@ -226,7 +235,10 @@ class _EscanerPageState extends State<EscanerPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Tooltip(
-              message: _hayConexion ? 'Conectado a internet' : 'Sin conexión a internet',
+              message:
+                  _hayConexion
+                      ? 'Conectado a internet'
+                      : 'Sin conexión a internet',
               child: Icon(
                 _hayConexion ? Icons.wifi : Icons.wifi_off,
                 color: _hayConexion ? Colors.green : Colors.red,
@@ -332,7 +344,7 @@ class _EscanerPageState extends State<EscanerPage> {
                                 .read<EscanerBloc>()
                                 .hospitalSeleccionado
                                 ?.id ??
-                            0,
+                            "0",
                       ),
                 ),
               );
@@ -411,11 +423,11 @@ class _EscanerPageState extends State<EscanerPage> {
                                 if (isScanning) {
                                   _stopScanner();
                                 }
-                                
+
                                 BlocProvider.of<EscanerBloc>(
                                   context,
                                 ).add(ElegirHospitalEvent(selectedHospital!));
-                                
+
                                 setState(() {
                                   isScanning = true;
                                 });
@@ -465,36 +477,37 @@ class _EscanerPageState extends State<EscanerPage> {
                       ),
 
                     Expanded(
-                      child: productos.isNotEmpty
-                          ? ProductosList(
-                              productos: productos,
-                              onRemove: (producto) {
-                                BlocProvider.of<EscanerBloc>(
-                                  context,
-                                ).add(EliminarProductoEvent(producto));
-                              },
-                              onUndoRemove: (producto, index) {
-                                setState(() {
-                                  if (index < productos.length) {
-                                    productos.insert(index, producto);
-                                  } else {
-                                    productos.add(producto);
-                                  }
-                                });
-                              },
-                            )
-                          : LayoutBuilder(
-                              builder: (context, constraints) {
-                                return SingleChildScrollView(
-                                  child: ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      minHeight: constraints.maxHeight,
+                      child:
+                          productos.isNotEmpty
+                              ? ProductosList(
+                                productos: productos,
+                                onRemove: (producto) {
+                                  BlocProvider.of<EscanerBloc>(
+                                    context,
+                                  ).add(EliminarProductoEvent(producto));
+                                },
+                                onUndoRemove: (producto, index) {
+                                  setState(() {
+                                    if (index < productos.length) {
+                                      productos.insert(index, producto);
+                                    } else {
+                                      productos.add(producto);
+                                    }
+                                  });
+                                },
+                              )
+                              : LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return SingleChildScrollView(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        minHeight: constraints.maxHeight,
+                                      ),
+                                      child: const EmptyProductsView(),
                                     ),
-                                    child: const EmptyProductsView(),
-                                  ),
-                                );
-                              },
-                            ),
+                                  );
+                                },
+                              ),
                     ),
 
                     if (_hayProductosPendientes)
@@ -517,18 +530,27 @@ class _EscanerPageState extends State<EscanerPage> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(8.0),
                             onTap: () {
-                              BlocProvider.of<EscanerBloc>(context)
-                                  .add(SincronizarProductosPendientesEvent());
+                              BlocProvider.of<EscanerBloc>(
+                                context,
+                              ).add(SincronizarProductosPendientesEvent());
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 12.0,
+                              ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.sync_problem, color: Colors.amber.shade800, size: 24),
+                                  Icon(
+                                    Icons.sync_problem,
+                                    color: Colors.amber.shade800,
+                                    size: 24,
+                                  ),
                                   const SizedBox(width: 12.0),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Productos pendientes',
@@ -554,7 +576,10 @@ class _EscanerPageState extends State<EscanerPage> {
                                       color: Colors.amber.shade600,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [

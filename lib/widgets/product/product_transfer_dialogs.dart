@@ -5,22 +5,22 @@ class ProductTransferDialogs {
   static void showHospitalSelectionDialog({
     required BuildContext context,
     required List<Hospital> hospitales,
-    required Function(int) onHospitalSelected,
+    required Function(String) onHospitalSelected,
     required VoidCallback onCancel,
   }) {
-    int? selectedHospitalId;
+    String? selectedHospitalId;
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Trasladar Producto'),
-        content: DropdownButtonFormField<int>(
+        content: DropdownButtonFormField<String>(
           decoration: const InputDecoration(
             labelText: 'Seleccionar Hospital Destino',
             border: OutlineInputBorder(),
           ),
           items: hospitales.map((hospital) {
-            return DropdownMenuItem<int>(
+            return DropdownMenuItem<String>(
               value: hospital.id,
               child: Text(hospital.nombre),
             );

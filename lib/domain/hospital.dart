@@ -1,5 +1,5 @@
 class Hospital {
-  int id;
+  String id;
   String nombre;
 
   Hospital(this.id, this.nombre);
@@ -13,18 +13,18 @@ class Hospital {
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
     final id = json['id'];
-    int hospitalId;
+    String hospitalId;
 
     if (id is int) {
-      hospitalId = id;
+      hospitalId = id as String;
     } else if (id is String) {
       try {
-        hospitalId = int.parse(id);
+        hospitalId = id;
       } catch (_) {
-        hospitalId = 0;
+        hospitalId = "0";
       }
     } else {
-      hospitalId = 0;
+      hospitalId = "0";
     }
 
     return Hospital(
