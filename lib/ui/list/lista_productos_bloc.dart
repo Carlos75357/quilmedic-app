@@ -119,19 +119,18 @@ class ListaProductosBloc
         final response = await apiClient.getAll('/productos', null);
         
         if (response is List) {
-          final Map<int, Producto> productosMap = {};
+          final Map<String, Producto> productosMap = {};
           
           for (var item in response) {
             if (item is Map<String, dynamic>) {
               try {
-                final int numProducto = item['numproducto'] ?? 0;
+                final String numProducto = item['numerodeproducto'] ?? "0";
                 
                 if (productosEscaneadosIds.contains(numProducto)) {
-                  int codigoAlmacen = item['codigoalmacen'] ?? 0;
+                  String codigoAlmacen = item['codigoalmacen'] ?? "0";
                   
-                  final String numProductoStr = numProducto.toString();
-                  if (traslados.containsKey(numProductoStr)) {
-                    final Map<String, dynamic> infoTraslado = traslados[numProductoStr];
+                  if (traslados.containsKey(numProducto)) {
+                    final Map<String, dynamic> infoTraslado = traslados[numProducto];
                     if (infoTraslado.containsKey('nuevoHospitalId')) {
                       codigoAlmacen = infoTraslado['nuevoHospitalId'];
                     }
@@ -140,7 +139,7 @@ class ListaProductosBloc
                   final producto = Producto(
                     item['numerodeproducto'] ?? 0,
                     item['descripcion'] ?? '',
-                    item['codigoalmacen'] ?? 0, 
+                    codigoAlmacen,
                     item['numerolote'] ?? 0,
                     item['serie'] ?? '',
                     item['fechacaducidad'] != null
