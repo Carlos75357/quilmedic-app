@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/domain/producto.dart';
+import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 import 'package:quilmedic/ui/product/producto_detalle_page.dart';
 import 'package:provider/provider.dart';
 import 'package:quilmedic/widgets/list/empty_products_message.dart';
 import 'package:quilmedic/widgets/list/product_list_section.dart';
+import 'package:quilmedic/data/respository/hospital_repository.dart';
+import 'package:quilmedic/data/json/api_client.dart';
 
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
@@ -23,11 +26,16 @@ class ListaProductosPage extends StatefulWidget {
 
 class _ListaProductosPageState extends State<ListaProductosPage> {
   late List<Producto> productos;
+  final ApiClient _apiClient = ApiClient();
+  late final HospitalRepository _hospitalRepository;
+  List<Hospital> _hospitales = [];
+  String? _errorCargaHospitales;
 
   @override
   void initState() {
     super.initState();
     productos = widget.productos ?? [];
+    _hospitalRepository = HospitalRepository(apiClient: _apiClient);
 
     if (productos.isEmpty && context.read<ListaProductosBloc?>() != null) {
       BlocProvider.of<ListaProductosBloc>(context).add(CargarProductosEvent());
@@ -56,17 +64,22 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                     },
                     tooltip: 'Actualizar',
                   ),
+                  if (productos.isNotEmpty)
+                    IconButton(
+                      icon: const Icon(Icons.swap_horiz),
+                      onPressed: () => _cargarHospitalesYMostrarDialogo(),
+                      tooltip: 'Trasladar todos',
+                    ),
                 ],
       ),
-      // floatingActionButton: isVerySmallScreen ? null : FloatingActionButton(
-      //   onPressed: () {
-      //     if (context.read<ListaProductosBloc?>() != null) {
-      //       BlocProvider.of<ListaProductosBloc>(context)
-      //           .add(CargarProductosEvent());
-      //     }
-      //   },
-      //   child: const Icon(Icons.refresh),
-      // ),
+      floatingActionButton: productos.isNotEmpty 
+          ? FloatingActionButton.extended(
+              onPressed: () => _cargarHospitalesYMostrarDialogo(),
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('Trasladar todos'),
+              backgroundColor: Colors.orange,
+            )
+          : null,
       body: SafeArea(
         child:
             widget.productos != null
@@ -201,14 +214,179 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => ListaProductosPage(
-                  productos: null,
-                  hospitalId: widget.hospitalId,
-                ),
+            builder: (context) => ListaProductosPage(
+              productos: widget.productos,
+              hospitalId: widget.hospitalId,
+            ),
           ),
         );
       }
     }
+  }
+  
+  Future<void> _cargarHospitalesYMostrarDialogo() async {
+    setState(() {
+      _errorCargaHospitales = null;
+    });
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Cargando hospitales'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Cargando lista de hospitales...'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancelar'),
+          ),
+        ],
+      ),
+    );
+    
+    try {
+      final response = await _hospitalRepository.getAllHospitals();
+      
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Cerrar diálogo de carga
+        
+        if (response.success) {
+          setState(() {
+            _hospitales = List<Hospital>.from(response.data);
+          });
+          
+          _mostrarDialogoConfirmacionTrasladoMasivo(context, _hospitales);
+        } else {
+          setState(() {
+            _errorCargaHospitales = response.message ?? 'Error al cargar hospitales';
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_errorCargaHospitales!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Cerrar diálogo de carga
+        
+        setState(() {
+          _errorCargaHospitales = 'Error al cargar hospitales: ${e.toString()}';
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_errorCargaHospitales!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+  
+  void _mostrarDialogoConfirmacionTrasladoMasivo(BuildContext context, List<Hospital> hospitales) {
+    String? selectedHospitalId;
+    String? selectedHospitalName;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Trasladar productos'),
+        content: DropdownButtonFormField<String>(
+          decoration: const InputDecoration(
+            labelText: 'Seleccionar Hospital Destino',
+            border: OutlineInputBorder(),
+          ),
+          items: hospitales
+              .where((h) => h.id != widget.hospitalId)
+              .map((hospital) {
+            return DropdownMenuItem<String>(
+              value: hospital.id,
+              child: Text(hospital.nombre),
+            );
+          }).toList(),
+          onChanged: (value) {
+            selectedHospitalId = value;
+            if (value != null) {
+              selectedHospitalName = hospitales
+                  .firstWhere((h) => h.id == value)
+                  .nombre;
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (selectedHospitalId != null && selectedHospitalName != null) {
+                Navigator.of(context).pop();
+                
+                _enviarSolicitudTrasladoMasivo(
+                  selectedHospitalId!,
+                  selectedHospitalName!,
+                  "",
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Debes seleccionar un hospital destino'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  void _enviarSolicitudTrasladoMasivo(String hospitalDestinoId, String hospitalDestinoNombre, String comentarios) {
+    // En una implementación real, aquí enviaríamos los datos al backend
+    // Por ejemplo:
+    // final Map<String, dynamic> data = {
+    //   'productos': productos.map((p) => p.numerodeproducto).toList(),
+    //   'hospital_origen_id': widget.hospitalId,
+    //   'hospital_destino_id': hospitalDestinoId,
+    //   'hospital_destino_nombre': hospitalDestinoNombre,
+    // };
+    // apiClient.post('/solicitudes-traslado-masivo', data);
+    
+    // Por ahora, solo mostramos un mensaje de éxito
+    if (productos.isNotEmpty) {
+      BlocProvider.of<ListaProductosBloc>(context).add(
+        EnviarSolicitudTrasladoEvent(
+          producto: productos.first, 
+          hospitalDestinoId: hospitalDestinoId,
+          hospitalDestinoNombre: hospitalDestinoNombre,
+          comentarios: "",
+        )
+      );
+    }
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Solicitud de traslado enviada correctamente'),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 }

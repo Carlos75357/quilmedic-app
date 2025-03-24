@@ -8,6 +8,7 @@ class ProductDataTable extends StatelessWidget {
   final Color headerColor;
   final Color rowColor;
   final Function(Producto) onProductTap;
+  final Function(Producto)? onTransferTap;
 
   const ProductDataTable({
     super.key,
@@ -15,6 +16,7 @@ class ProductDataTable extends StatelessWidget {
     required this.headerColor,
     required this.rowColor,
     required this.onProductTap,
+    this.onTransferTap,
   });
 
   @override
@@ -24,28 +26,32 @@ class ProductDataTable extends StatelessWidget {
     final isVerySmallScreen = screenWidth < 360;
     final isExtremelySmallScreen = screenWidth < 320;
     final isWideScreen = screenWidth > 1200;
-    
+
     if (isExtremelySmallScreen) {
       return _buildCompactList(context);
     }
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate responsive widths based on available space
         final availableWidth = constraints.maxWidth;
-        final descriptionWidth = isWideScreen 
-            ? (availableWidth * 0.4).toDouble() 
-            : (isVerySmallScreen ? 80.0 : (isSmallScreen ? 100.0 : 150.0));
-        final expiryWidth = isWideScreen 
-            ? (availableWidth * 0.2).toDouble() 
-            : (isVerySmallScreen ? 70.0 : (isSmallScreen ? 80.0 : 100.0));
-        final stockWidth = isWideScreen 
-            ? (availableWidth * 0.15).toDouble() 
-            : (isVerySmallScreen ? 40.0 : (isSmallScreen ? 60.0 : 80.0));
-        final actionsWidth = isWideScreen 
-            ? (availableWidth * 0.15).toDouble() 
-            : (isVerySmallScreen ? 50.0 : (isSmallScreen ? 70.0 : 90.0));
-        
+        final descriptionWidth =
+            isWideScreen
+                ? (availableWidth * 0.4).toDouble()
+                : (isVerySmallScreen ? 80.0 : (isSmallScreen ? 100.0 : 150.0));
+        final expiryWidth =
+            isWideScreen
+                ? (availableWidth * 0.2).toDouble()
+                : (isVerySmallScreen ? 85.0 : (isSmallScreen ? 95.0 : 110.0));
+        final stockWidth =
+            isWideScreen
+                ? (availableWidth * 0.15).toDouble()
+                : (isVerySmallScreen ? 40.0 : (isSmallScreen ? 60.0 : 80.0));
+        final actionsWidth =
+            isWideScreen
+                ? (availableWidth * 0.15).toDouble()
+                : (isVerySmallScreen ? 50.0 : (isSmallScreen ? 70.0 : 90.0));
+
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
@@ -61,13 +67,15 @@ class ProductDataTable extends StatelessWidget {
                 ),
                 dataRowMinHeight: 64,
                 dataRowMaxHeight: 80,
-                columnSpacing: isVerySmallScreen ? 8 : (isSmallScreen ? 12 : 24),
-                horizontalMargin: isVerySmallScreen ? 4 : (isSmallScreen ? 8 : 24),
+                columnSpacing: isVerySmallScreen ? 4 : (isSmallScreen ? 8 : 24),
+                horizontalMargin: isVerySmallScreen ? 2 : (isSmallScreen ? 6 : 24),
                 headingTextStyle: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
                 ),
-                dataTextStyle: TextStyle(fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16)),
+                dataTextStyle: TextStyle(
+                  fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
+                ),
                 columns: [
                   DataColumn(
                     label: SizedBox(
@@ -87,12 +95,12 @@ class ProductDataTable extends StatelessWidget {
                       child: const Text('Stock'),
                     ),
                   ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: actionsWidth,
-                      child: const Text('Acciones'),
-                    ),
-                  ),
+                  // DataColumn(
+                  //   label: SizedBox(
+                  //     width: actionsWidth,
+                  //     child: const Text('Acciones'),
+                  //   ),
+                  // ),
                 ],
                 rows: List<DataRow>.generate(
                   productos.length,
@@ -125,7 +133,9 @@ class ProductDataTable extends StatelessWidget {
                           width: expiryWidth,
                           child: ProductExpiryBadge(
                             expiryDate: productos[index].fechacaducidad,
-                            formattedDate: _formatDate(productos[index].fechacaducidad),
+                            formattedDate: _formatDate(
+                              productos[index].fechacaducidad,
+                            ),
                             isSmallScreen: isVerySmallScreen,
                           ),
                         ),
@@ -141,34 +151,72 @@ class ProductDataTable extends StatelessWidget {
                         ),
                         onTap: () => onProductTap(productos[index]),
                       ),
-                      DataCell(
-                        SizedBox(
-                          width: actionsWidth,
-                          child: isSmallScreen 
-                            ? IconButton(
-                                icon: Icon(
-                                  Icons.visibility, 
-                                  color: Colors.blue,
-                                  size: isVerySmallScreen ? 18 : 24,
-                                ),
-                                onPressed: () => onProductTap(productos[index]),
-                                tooltip: 'Ver detalles',
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              )
-                            : ElevatedButton.icon(
-                                onPressed: () => onProductTap(productos[index]),
-                                icon: const Icon(Icons.visibility, size: 18),
-                                label: const Text('Ver'),
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 6,
-                                  ),
-                                ),
-                              ),
-                        ),
-                      ),
+                      // DataCell(
+                      //   SizedBox(
+                      //     width: actionsWidth,
+                      //     child: isSmallScreen
+                      //       ? Row(
+                      //           mainAxisSize: MainAxisSize.min,
+                      //           children: [
+                      //             IconButton(
+                      //               icon: Icon(
+                      //                 Icons.visibility,
+                      //                 color: Colors.blue,
+                      //                 size: isVerySmallScreen ? 18 : 24,
+                      //               ),
+                      //               onPressed: () => onProductTap(productos[index]),
+                      //               tooltip: 'Ver detalles',
+                      //               padding: EdgeInsets.zero,
+                      //               constraints: const BoxConstraints(),
+                      //             ),
+                      //             if (onTransferTap != null)
+                      //               IconButton(
+                      //                 icon: Icon(
+                      //                   Icons.swap_horiz,
+                      //                   color: Colors.orange,
+                      //                   size: isVerySmallScreen ? 18 : 24,
+                      //                 ),
+                      //                 onPressed: () => onTransferTap!(productos[index]),
+                      //                 tooltip: 'Trasladar',
+                      //                 padding: EdgeInsets.zero,
+                      //                 constraints: const BoxConstraints(),
+                      //               ),
+                      //           ],
+                      //         )
+                      //       : Row(
+                      //           mainAxisSize: MainAxisSize.min,
+                      //           children: [
+                      //             ElevatedButton.icon(
+                      //               onPressed: () => onProductTap(productos[index]),
+                      //               icon: const Icon(Icons.visibility, size: 18),
+                      //               label: const Text('Ver'),
+                      //               style: ElevatedButton.styleFrom(
+                      //                 padding: const EdgeInsets.symmetric(
+                      //                   horizontal: 8,
+                      //                   vertical: 6,
+                      //                 ),
+                      //               ),
+                      //             ),
+                      //             if (onTransferTap != null) ...[
+                      //               const SizedBox(width: 8),
+                      //               ElevatedButton.icon(
+                      //                 onPressed: () => onTransferTap!(productos[index]),
+                      //                 icon: const Icon(Icons.swap_horiz, size: 18),
+                      //                 label: const Text('Trasladar'),
+                      //                 style: ElevatedButton.styleFrom(
+                      //                   padding: const EdgeInsets.symmetric(
+                      //                     horizontal: 8,
+                      //                     vertical: 6,
+                      //                   ),
+                      //                   backgroundColor: Colors.orange,
+                      //                   foregroundColor: Colors.white,
+                      //                 ),
+                      //               ),
+                      //             ],
+                      //           ],
+                      //         ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
@@ -181,7 +229,12 @@ class ProductDataTable extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+    // Asegurar que el mes y día tengan dos dígitos
+    String day = date.day.toString().padLeft(2, '0');
+    String month = date.month.toString().padLeft(2, '0');
+    String year = date.year.toString();
+    
+    return '$day/$month/$year';
   }
 
   Widget _buildCompactList(BuildContext context) {
@@ -220,7 +273,9 @@ class ProductDataTable extends StatelessWidget {
                             const Text('Cad: ', style: TextStyle(fontSize: 12)),
                             ProductExpiryBadge(
                               expiryDate: producto.fechacaducidad,
-                              formattedDate: _formatDate(producto.fechacaducidad),
+                              formattedDate: _formatDate(
+                                producto.fechacaducidad,
+                              ),
                               isSmallScreen: true,
                             ),
                           ],
@@ -228,7 +283,10 @@ class ProductDataTable extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          const Text('Cantidad: ', style: TextStyle(fontSize: 12)),
+                          const Text(
+                            'Cantidad: ',
+                            style: TextStyle(fontSize: 12),
+                          ),
                           ProductStockBadge(
                             stock: producto.cantidad,
                             isSmallScreen: true,
@@ -237,6 +295,26 @@ class ProductDataTable extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (onTransferTap != null) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton.icon(
+                        onPressed: () => onTransferTap!(producto),
+                        icon: const Icon(Icons.swap_horiz, size: 16),
+                        label: const Text('Trasladar'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          textStyle: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

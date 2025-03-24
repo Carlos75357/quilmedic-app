@@ -64,11 +64,17 @@ class ProductInfoCard extends StatelessWidget {
               label: 'Fecha de caducidad:', 
               value: _formatDate(producto.fechacaducidad),
               icon: Icons.calendar_today,
+              color: _getColorForExpiryDate(producto.fechacaducidad),
             ),
             
             const SizedBox(height: 16),
-            
-            ProductStockRow(stock: producto.cantidad),
+
+            ProductInfoRow(
+              label: 'Cantidad:', 
+              value: producto.cantidad.toString(),
+              icon: Icons.inventory,
+              color: _getColorForStock(producto.cantidad),
+            ),
             
             const SizedBox(height: 16),
             
@@ -85,5 +91,32 @@ class ProductInfoCard extends StatelessWidget {
   
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  Color _getColorForExpiryDate(DateTime expiryDate) {
+    final now = DateTime.now();
+    final difference = expiryDate.difference(now).inDays;
+    
+    if (difference <= 1) {
+      return Colors.grey[800]!.withValues(alpha: 0.3); // <= 1 día
+    } else if (difference < 30) {
+      return Colors.red[400]!.withValues(alpha: 0.3); // < 1 mes
+    } else if (difference < 90) {
+      return const Color.fromARGB(255, 228, 137, 1).withValues(alpha: 0.3); // < 3 meses
+    } else if (difference < 180) {
+      return const Color.fromARGB(255, 255, 230, 0).withValues(alpha: 0.3); // < 6 meses
+    } else if (difference < 365) {
+      return const Color.fromARGB(255, 125, 248, 129).withValues(alpha: 0.3); // > 6 meses
+    } else {
+      return const Color.fromARGB(255, 18, 143, 24).withValues(alpha: 0.3); // > 1 año
+    }
+  }
+  
+  Color _getColorForStock(int stock) {
+    if (stock <= 0) {
+      return Colors.red[400]!.withValues(alpha: 0.3); // Sin stock
+    } else {
+      return Colors.green[400]!.withValues(alpha: 0.3); // Con stock
+    }
   }
 }

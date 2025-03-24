@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/hospital.dart';
+import 'package:quilmedic/domain/producto.dart';
 
 class ProductTransferDialogs {
   static void showHospitalSelectionDialog({
@@ -76,6 +77,91 @@ class ProductTransferDialogs {
               onConfirm();
             },
             child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  static void showEmailTransferDialog({
+    required BuildContext context,
+    required Producto producto,
+    required List<Hospital> hospitales,
+    required Function(String, String, String) onSendEmail,
+    required VoidCallback onCancel,
+  }) {
+    String? selectedHospitalId;
+    final TextEditingController commentController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Solicitar Traslado de Producto'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Producto: ${producto.descripcion ?? producto.numerodeproducto}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Esta acción enviará un correo electrónico para solicitar el traslado del producto.',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: 'Seleccionar Hospital Destino',
+                  border: OutlineInputBorder(),
+                ),
+                items: hospitales.map((hospital) {
+                  return DropdownMenuItem<String>(
+                    value: hospital.id,
+                    child: Text(hospital.nombre),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  selectedHospitalId = value;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: commentController,
+                decoration: const InputDecoration(
+                  labelText: 'Comentarios (opcional)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onCancel();
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (selectedHospitalId != null) {
+                final hospitalName = hospitales
+                    .firstWhere((h) => h.id == selectedHospitalId)
+                    .nombre;
+                onSendEmail(
+                  selectedHospitalId!,
+                  hospitalName,
+                  commentController.text,
+                );
+              }
+            },
+            child: const Text('Enviar Solicitud'),
           ),
         ],
       ),

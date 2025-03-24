@@ -232,19 +232,19 @@ class _EscanerPageState extends State<EscanerPage> {
         foregroundColor: theme.colorScheme.onPrimary,
         elevation: 2,
         actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Tooltip(
-              message:
-                  _hayConexion
-                      ? 'Conectado a internet'
-                      : 'Sin conexión a internet',
-              child: Icon(
-                _hayConexion ? Icons.wifi : Icons.wifi_off,
-                color: _hayConexion ? Colors.green : Colors.red,
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          //   child: Tooltip(
+          //     message:
+          //         _hayConexion
+          //             ? 'Conectado a internet'
+          //             : 'Sin conexión a internet',
+          //     child: Icon(
+          //       _hayConexion ? Icons.wifi : Icons.wifi_off,
+          //       color: _hayConexion ? Colors.green : Colors.red,
+          //     ),
+          //   ),
+          // ),
           IconButton(
             icon: Icon(_isManualInput ? Icons.qr_code_scanner : Icons.keyboard),
             onPressed: _toggleManualInput,

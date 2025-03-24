@@ -20,3 +20,33 @@ final class ProductosCargadosState extends ListaProductosState {
 
   ProductosCargadosState(this.productos);
 }
+
+// Estados para la carga de hospitales
+final class CargandoHospitalesState extends ListaProductosState {}
+
+final class HospitalesCargadosState extends ListaProductosState {
+  final List<Hospital> hospitales;
+
+  HospitalesCargadosState(this.hospitales);
+}
+
+final class ErrorCargaHospitalesState extends ListaProductosState {
+  final String mensaje;
+
+  ErrorCargaHospitalesState(this.mensaje);
+}
+
+// Estados para el envío de solicitudes de traslado
+final class EnviandoSolicitudTrasladoState extends ListaProductosState {}
+
+final class SolicitudTrasladoEnviadaState extends ListaProductosState {
+  final String mensaje;
+
+  SolicitudTrasladoEnviadaState(this.mensaje);
+}
+
+final class ErrorSolicitudTrasladoState extends ListaProductosState {
+  final String mensaje;
+
+  ErrorSolicitudTrasladoState(this.mensaje);
+}

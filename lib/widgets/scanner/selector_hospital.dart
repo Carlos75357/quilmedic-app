@@ -78,7 +78,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    'Seleccionar Hospital',
+                    'Seleccionar Almacén',
                     style: TextStyle(
                       fontSize: isSmallScreen ? 14 : 16,
                       fontWeight: FontWeight.bold,

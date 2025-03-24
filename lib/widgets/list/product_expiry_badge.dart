@@ -16,8 +16,8 @@ class ProductExpiryBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isSmallScreen ? 4 : 8, 
-        vertical: isSmallScreen ? 2 : 4
+        horizontal: isSmallScreen ? 6 : 8, 
+        vertical: isSmallScreen ? 4 : 6
       ),
       decoration: BoxDecoration(
         color: _getColorForExpiryDate(expiryDate),
@@ -28,8 +28,9 @@ class ProductExpiryBadge extends StatelessWidget {
         style: TextStyle(
           color: Colors.black,
           fontWeight: FontWeight.bold,
-          fontSize: isSmallScreen ? 11 : null,
+          fontSize: isSmallScreen ? 11 : 12,
         ),
+        textAlign: TextAlign.center,
       ),
     );
   }

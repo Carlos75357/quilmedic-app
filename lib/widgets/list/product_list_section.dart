@@ -9,6 +9,7 @@ class ProductListSection extends StatelessWidget {
   final Color headerColor;
   final Color rowColor;
   final Function(Producto) onProductTap;
+  final Function(Producto)? onTransferTap;
 
   const ProductListSection({
     super.key,
@@ -17,6 +18,7 @@ class ProductListSection extends StatelessWidget {
     required this.headerColor,
     required this.rowColor,
     required this.onProductTap,
+    this.onTransferTap,
   });
 
   @override
@@ -32,9 +34,10 @@ class ProductListSection extends StatelessWidget {
         ),
         ProductDataTable(
           productos: productos,
-          headerColor: headerColor.withValues(alpha: 0.3),
+          headerColor: headerColor.withOpacity(0.3),
           rowColor: rowColor,
           onProductTap: onProductTap,
+          onTransferTap: onTransferTap,
         ),
       ],
     );
