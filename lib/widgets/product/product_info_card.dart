@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/widgets/product/product_info_row.dart';
-import 'package:quilmedic/widgets/product/product_stock_row.dart';
 
 class ProductInfoCard extends StatelessWidget {
   final Producto producto;

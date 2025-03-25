@@ -65,7 +65,7 @@ class ListaProductosBloc
                   productosMap[numerodeproducto] = producto;
                 }
               } catch (e) {
-                print('Error al cargar producto: ${e.toString()}');
+                emit(ListaProductosError('Error al cargar productos: ${e.toString()}'));
               }
             }
           }
@@ -154,7 +154,7 @@ class ListaProductosBloc
                   productosMap[numProducto] = producto;
                 }
               } catch (e) {
-                print('Error al procesar producto desde caché: ${e.toString()}');
+                emit(ListaProductosError('Error al cargar productos desde caché: ${e.toString()}'));
               }
             }
           }
@@ -202,7 +202,7 @@ class ListaProductosBloc
               );
               hospitales.add(hospital);
             } catch (e) {
-              print('Error al procesar hospital: ${e.toString()}');
+              emit(ErrorCargaHospitalesState('Error al cargar hospitales: ${e.toString()}'));
             }
           }
         }
@@ -224,14 +224,13 @@ class ListaProductosBloc
     try {
       emit(EnviandoSolicitudTrasladoState());
       
-      // Preparar los datos para la solicitud de traslado
-      final Map<String, dynamic> data = {
-        'producto_id': event.producto.numerodeproducto,
-        'hospital_origen_id': event.producto.codigoalmacen,
-        'hospital_destino_id': event.hospitalDestinoId,
-        'hospital_destino_nombre': event.hospitalDestinoNombre,
-        'comentarios': event.comentarios,
-      };
+      // final Map<String, dynamic> data = {
+      //   'producto_id': event.producto.numerodeproducto,
+      //   'hospital_origen_id': event.producto.codigoalmacen,
+      //   'hospital_destino_id': event.hospitalDestinoId,
+      //   'hospital_destino_nombre': event.hospitalDestinoNombre,
+      //   'comentarios': event.comentarios,
+      // };
       
       try {
         // final response = await apiClient.post('/solicitudes-traslado', data);
@@ -249,7 +248,7 @@ class ListaProductosBloc
         // }
       } catch (e) {
         // Si hay un error de conexión, simular que se ha enviado correctamente
-        // En una implementación real, se podría guardar localmente para reintento
+        // TODO: En una implementación real, se podría guardar localmente para reintento
         if (e.toString().contains('SocketException') ||
             e.toString().contains('Connection refused') ||
             e.toString().contains('Network is unreachable')) {
@@ -281,7 +280,6 @@ class ListaProductosBloc
       
       return jsonDecode(jsonString) as Map<String, dynamic>;
     } catch (e) {
-      print('Error al obtener traslados: ${e.toString()}');
       return {};
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/widgets/list/product_expiry_badge.dart';
 import 'package:quilmedic/widgets/list/product_stock_badge.dart';
+import 'package:quilmedic/utils/color.dart';
 
 class ProductDataTable extends StatelessWidget {
   final List<Producto> productos;
@@ -47,10 +48,6 @@ class ProductDataTable extends StatelessWidget {
             isWideScreen
                 ? (availableWidth * 0.15).toDouble()
                 : (isVerySmallScreen ? 40.0 : (isSmallScreen ? 60.0 : 80.0));
-        final actionsWidth =
-            isWideScreen
-                ? (availableWidth * 0.15).toDouble()
-                : (isVerySmallScreen ? 50.0 : (isSmallScreen ? 70.0 : 90.0));
 
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -68,7 +65,8 @@ class ProductDataTable extends StatelessWidget {
                 dataRowMinHeight: 64,
                 dataRowMaxHeight: 80,
                 columnSpacing: isVerySmallScreen ? 4 : (isSmallScreen ? 8 : 24),
-                horizontalMargin: isVerySmallScreen ? 2 : (isSmallScreen ? 6 : 24),
+                horizontalMargin:
+                    isVerySmallScreen ? 2 : (isSmallScreen ? 6 : 24),
                 headingTextStyle: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
@@ -129,24 +127,34 @@ class ProductDataTable extends StatelessWidget {
                         onTap: () => onProductTap(productos[index]),
                       ),
                       DataCell(
-                        SizedBox(
-                          width: expiryWidth,
-                          child: ProductExpiryBadge(
-                            expiryDate: productos[index].fechacaducidad,
-                            formattedDate: _formatDate(
+                        SizedBox.expand(
+                          child: Container(
+                            color: ColorAlarm.getColorForExpiryDate(
                               productos[index].fechacaducidad,
                             ),
-                            isSmallScreen: isVerySmallScreen,
+                            width: expiryWidth,
+                            child: ProductExpiryBadge(
+                              expiryDate: productos[index].fechacaducidad,
+                              formattedDate: _formatDate(
+                                productos[index].fechacaducidad,
+                              ),
+                              isSmallScreen: isVerySmallScreen,
+                            ),
                           ),
                         ),
                         onTap: () => onProductTap(productos[index]),
                       ),
                       DataCell(
-                        SizedBox(
-                          width: stockWidth,
-                          child: ProductStockBadge(
-                            stock: productos[index].cantidad,
-                            isSmallScreen: isVerySmallScreen,
+                        SizedBox.expand(
+                          child: Container(
+                            width: stockWidth,
+                            color: ColorAlarm.getColorForStock(
+                              productos[index].cantidad,
+                            ),
+                            child: ProductStockBadge(
+                              stock: productos[index].cantidad,
+                              isSmallScreen: isVerySmallScreen,
+                            ),
                           ),
                         ),
                         onTap: () => onProductTap(productos[index]),
@@ -229,11 +237,10 @@ class ProductDataTable extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    // Asegurar que el mes y día tengan dos dígitos
     String day = date.day.toString().padLeft(2, '0');
     String month = date.month.toString().padLeft(2, '0');
     String year = date.year.toString();
-    
+
     return '$day/$month/$year';
   }
 

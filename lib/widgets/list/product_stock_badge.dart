@@ -17,10 +17,7 @@ class ProductStockBadge extends StatelessWidget {
         horizontal: isSmallScreen ? 4 : 8, 
         vertical: isSmallScreen ? 2 : 4
       ),
-      decoration: BoxDecoration(
-        color: _getColorForStock(stock),
-        borderRadius: BorderRadius.circular(4),
-      ),
+      alignment: Alignment.center,
       child: Text(
         '$stock',
         style: TextStyle(
@@ -28,15 +25,8 @@ class ProductStockBadge extends StatelessWidget {
           fontWeight: FontWeight.bold,
           fontSize: isSmallScreen ? 11 : null,
         ),
+        textAlign: TextAlign.center,
       ),
     );
-  }
-
-  Color _getColorForStock(int stock) {
-    if (stock <= 0) {
-      return Colors.red[400]!.withValues(alpha: 0.3); // Sin stock
-    } else {
-      return Colors.green[400]!.withValues(alpha: 0.3); // Con stock
-    }
   }
 }

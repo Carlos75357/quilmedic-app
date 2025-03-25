@@ -34,7 +34,7 @@ class ProductListSection extends StatelessWidget {
         ),
         ProductDataTable(
           productos: productos,
-          headerColor: headerColor.withOpacity(0.3),
+          headerColor: headerColor.withValues(alpha: 0.3),
           rowColor: rowColor,
           onProductTap: onProductTap,
           onTransferTap: onTransferTap,

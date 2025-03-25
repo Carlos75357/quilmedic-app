@@ -257,7 +257,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
       final response = await _hospitalRepository.getAllHospitals();
       
       if (context.mounted) {
-        Navigator.of(context).pop(); // Cerrar diálogo de carga
+        Navigator.of(context).pop();
         
         if (response.success) {
           setState(() {
@@ -280,7 +280,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.of(context).pop(); // Cerrar diálogo de carga
+        Navigator.of(context).pop();
         
         setState(() {
           _errorCargaHospitales = 'Error al cargar hospitales: ${e.toString()}';
