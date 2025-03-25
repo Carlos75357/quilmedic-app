@@ -1,196 +1,209 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/domain/producto.dart';
-import 'package:quilmedic/domain/hospital.dart';
-import 'package:quilmedic/ui/product/producto_detalle_bloc.dart';
-import 'package:quilmedic/widgets/product/product_info_card.dart';
-import 'package:quilmedic/widgets/product/product_action_buttons.dart';
-import 'package:quilmedic/widgets/product/product_transfer_dialogs.dart';
-import 'package:quilmedic/data/local/producto_local_storage.dart';
+import 'package:quilmedic/utils/color.dart';
 
-class ProductoDetallePage extends StatefulWidget {
+class ProductoDetallePage extends StatelessWidget {
   final Producto producto;
 
   const ProductoDetallePage({super.key, required this.producto});
 
   @override
-  State<ProductoDetallePage> createState() => _ProductoDetallePageState();
-}
-
-class _ProductoDetallePageState extends State<ProductoDetallePage> {
-  late final ProductoDetalleBloc _productoDetalleBloc;
-
-  @override
-  void initState() {
-    super.initState();
-    _productoDetalleBloc = ProductoDetalleBloc();
-    _productoDetalleBloc.add(CargarHospitalesEvent());
-  }
-
-  @override
-  void dispose() {
-    _productoDetalleBloc.close();
-    super.dispose();
-  }
-
-  void _mostrarDialogoTraslado(List<Hospital> hospitales) {
-    final hospitalesFiltrados =
-        hospitales.where((h) => h.id != widget.producto.codigoalmacen).toList();
-
-    if (hospitalesFiltrados.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No hay otros hospitales disponibles para trasladar'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    ProductTransferDialogs.showHospitalSelectionDialog(
-      context: context,
-      hospitales: hospitalesFiltrados,
-      onHospitalSelected: (hospitalId) {
-        _productoDetalleBloc.add(
-          TrasladarProductoEvent(
-            productoId: widget.producto.numerodeproducto,
-            nuevoHospitalId: hospitalId,
-          ),
-        );
-      },
-      onCancel: () {},
-    );
-  }
-
-  void _mostrarDialogoConfirmacionTraslado(
-    BuildContext context,
-    String mensaje,
-    dynamic producto,
-    String almacenDestino,
-  ) {
-    ProductTransferDialogs.showConfirmationDialog(
-      context: context,
-      mensaje: mensaje,
-      onConfirm: () {
-        _productoDetalleBloc.add(
-          ConfirmarTrasladoProductoEvent(
-            productoId: widget.producto.numerodeproducto,
-            nuevoHospitalId: almacenDestino,
-          ),
-        );
-      },
-      onCancel: () {},
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => _productoDetalleBloc,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Detalle del Producto'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        ),
-        body: BlocListener<ProductoDetalleBloc, ProductoDetalleState>(
-          listener: (context, state) {
-            if (state is ErrorCargaHospitalesState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                state.mensaje.contains('Failed to fetch')
-                    ? SnackBar(
-                      content: Text(
-                        "No se ha podido cargar los hospitales porque no se ha podido realizar la conexión",
-                      ),
-                      backgroundColor: Colors.red,
-                    )
-                    : SnackBar(
-                      content: Text(
-                        "Ha habido un error cargando los hospitales",
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-              );
-            } else if (state is ProductoTrasladadoState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.mensaje),
-                  backgroundColor: Colors.green,
-                ),
-              );
-              if (context.mounted) {
-                ProductoLocalStorage.actualizarProductoTrasladado(
-                      widget.producto.numerodeproducto,
-                    )
-                    .then((_) {
-                      if (context.mounted) {
-                        Navigator.pop(context, true);
-                      }
-                    })
-                    .catchError((error) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              "Error al actualizar la información local del producto",
-                            ),
-                            backgroundColor: Colors.orange,
-                          ),
-                        );
-                        Navigator.pop(context, true);
-                      }
-                    });
-              }
-            } else if (state is ErrorTrasladoProductoState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                state.mensaje.contains('Failed to fetch')
-                    ? SnackBar(
-                      content: Text(
-                        "No se ha podido trasladar el producto porque no se ha podido realizar la conexión",
-                      ),
-                      backgroundColor: Colors.red,
-                    )
-                    : SnackBar(
-                      content: Text(
-                        "Ha habido un error trasladando el producto",
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
-              );
-            } else if (state is ProductoEnOtroAlmacenState) {
-              _mostrarDialogoConfirmacionTraslado(
-                context,
-                state.mensaje,
-                state.producto,
-                state.almacenDestino,
-              );
-            }
-          },
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ProductInfoCard(producto: widget.producto),
-
-                  const SizedBox(height: 24),
-
-                  BlocBuilder<ProductoDetalleBloc, ProductoDetalleState>(
-                    builder: (context, state) {
-                      return ProductActionButtons(
-                        state: state,
-                        onTrasladarPressed: _mostrarDialogoTraslado,
-                        onVolverPressed: () => Navigator.pop(context),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detalle del Producto'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoCard(context),
+            const SizedBox(height: 16),
+            _buildExpiryInfo(context),
+            const SizedBox(height: 16),
+            _buildStockInfo(context),
+            const SizedBox(height: 24),
+            _buildLocationInfo(context),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildInfoCard(BuildContext context) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              producto.descripcion ?? 'Sin descripción',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Divider(),
+            _buildInfoRow('ID Producto:', producto.numerodeproducto),
+            _buildInfoRow('Número de Lote:', producto.numerolote.toString()),
+            _buildInfoRow('Serie:', producto.serie),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpiryInfo(BuildContext context) {
+    final expiryColor = ColorAlarm.getColorForExpiryDate(producto.fechacaducidad);
+    
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Información de Caducidad',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Divider(),
+            Row(
+              children: [
+                const Text(
+                  'Fecha de Caducidad:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: expiryColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    _formatDate(producto.fechacaducidad),
+                    style: TextStyle(
+                      color: expiryColor == Colors.red ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStockInfo(BuildContext context) {
+    final stockColor = ColorAlarm.getColorForStock(producto.cantidad);
+    
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Información de Stock',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Divider(),
+            Row(
+              children: [
+                const Text(
+                  'Cantidad Disponible:',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: stockColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    producto.cantidad.toString(),
+                    style: TextStyle(
+                      color: stockColor == Colors.red ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationInfo(BuildContext context) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Información de Ubicación',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Divider(),
+            _buildInfoRow('Código de Almacén:', producto.codigoalmacen),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    String day = date.day.toString().padLeft(2, '0');
+    String month = date.month.toString().padLeft(2, '0');
+    String year = date.year.toString();
+    
+    return '$day/$month/$year';
   }
 }
