@@ -248,7 +248,7 @@ class ListaProductosBloc
         // }
       } catch (e) {
         // Si hay un error de conexión, simular que se ha enviado correctamente
-        // TODO: En una implementación real, se podría guardar localmente para reintento
+        // TODO guardar localmente para reintento
         if (e.toString().contains('SocketException') ||
             e.toString().contains('Connection refused') ||
             e.toString().contains('Network is unreachable')) {

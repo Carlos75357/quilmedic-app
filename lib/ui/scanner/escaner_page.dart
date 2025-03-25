@@ -450,8 +450,11 @@ class _EscanerPageState extends State<EscanerPage> {
                             label: const Text('Ingresar código'),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
+                                horizontal: 24,
+                                vertical: 20,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
                               ),
                             ),
                           ),

@@ -256,7 +256,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     try {
       final response = await _hospitalRepository.getAllHospitals();
       
-      if (context.mounted) {
+      if (mounted) {
         Navigator.of(context).pop();
         
         if (response.success) {
@@ -279,19 +279,21 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
         }
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         Navigator.of(context).pop();
         
         setState(() {
           _errorCargaHospitales = 'Error al cargar hospitales: ${e.toString()}';
         });
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_errorCargaHospitales!),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_errorCargaHospitales!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
@@ -360,7 +362,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   }
   
   void _enviarSolicitudTrasladoMasivo(String hospitalDestinoId, String hospitalDestinoNombre, String comentarios) {
-    // En una implementación real, aquí enviaríamos los datos al backend
+    // Aquí enviaríamos los datos al backend
     // Por ejemplo:
     // final Map<String, dynamic> data = {
     //   'productos': productos.map((p) => p.numerodeproducto).toList(),

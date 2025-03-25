@@ -14,17 +14,17 @@ class ScannerButton extends StatelessWidget {
     
     return Center(
       child: ElevatedButton.icon(
-        icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Escanear Código QR'),
+        icon: const Icon(Icons.barcode_reader, size: 16),
+        label: const Text('Escaner', style: TextStyle(fontSize: 12)),
         style: ElevatedButton.styleFrom(
           backgroundColor: theme.colorScheme.primary,
           foregroundColor: theme.colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 20,
+            horizontal: 16,
+            vertical: 12,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(6),
           ),
         ),
         onPressed: onPressed,
