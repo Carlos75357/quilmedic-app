@@ -324,7 +324,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
               item['serie'] != null &&
               item['serie'] == serie &&
               item['numproducto'] != null) {
-            final int numProducto = item['numproducto'];
+            final String numProducto = item['numproducto'];
             await ProductoLocalStorage.eliminarProductoEscaneado(numProducto);
             break;
           }
@@ -374,9 +374,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     );
   }
 
-  Future<void> _guardarProductosEscaneadosLocalmente(
-    List<Producto> productos,
-  ) async {
+  Future<void> _guardarProductosEscaneadosLocalmente(List<Producto> productos) async {
     try {
       final List<String> productosIds =
           productos.map((p) => p.numerodeproducto).toList();
@@ -391,10 +389,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  Future<void> _sincronizarProductosPendientes(
-    SincronizarProductosPendientesEvent event,
-    Emitter<EscanerState> emit,
-  ) async {
+  Future<void> _sincronizarProductosPendientes(SincronizarProductosPendientesEvent event, Emitter<EscanerState> emit) async {
     try {
       bool hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
 

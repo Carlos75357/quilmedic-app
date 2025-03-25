@@ -2,7 +2,6 @@ import 'package:quilmedic/data/config.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/data/respository/repository_response.dart';
-import 'package:quilmedic/data/local/producto_local_storage.dart';
 
 class ProductoRepository {
   final ApiClient apiClient;
@@ -42,133 +41,6 @@ class ProductoRepository {
     }
   }
 
-  Future<RepositoryResponse> trasladarProducto(
-    String productoId,
-    String newHospitalId,
-  ) async {
-    try {
-      final getAllResponse = await apiClient.getAll(
-        ApiConfig.productosEndpoint,
-        {},
-      );
-
-      if (getAllResponse != null && getAllResponse is List) {
-        dynamic producto;
-        try {
-          producto = getAllResponse.firstWhere(
-            (p) => p['numproducto'] == productoId,
-          );
-        } catch (e) {
-          return RepositoryResponse.error(
-            'No se encontró el producto con numproducto: $productoId',
-          );
-        }
-
-        if (producto != null) {
-          final currentAlmacen = producto['codigoalmacen'];
-          int currentAlmacenId;
-
-          if (currentAlmacen is String) {
-            try {
-              currentAlmacenId = int.parse(currentAlmacen);
-            } catch (e) {
-              return RepositoryResponse.error(
-                'Error en formato de codigoalmacen actual: $currentAlmacen',
-              );
-            }
-          } else {
-            currentAlmacenId = currentAlmacen;
-          }
-
-          if (currentAlmacenId == newHospitalId) {
-            return RepositoryResponse.success(
-              producto,
-              message: 'El producto ya se encuentra en el almacén especificado',
-            );
-          }
-
-          final String productoDbId = producto['id'];
-
-          final Map<String, dynamic> updateData = {
-            'codigoalmacen': newHospitalId,
-          };
-
-          if (producto['stock'] != null) {
-            updateData['stock'] = producto['stock'];
-          }
-
-          final response = await apiClient.patch(
-            '${ApiConfig.productosEndpoint}/$productoDbId',
-            updateData,
-          );
-
-          await _actualizarProductoEnCache(productoId, newHospitalId);
-
-          try {
-            final verificacionResponse = await apiClient.getAll(
-              '${ApiConfig.productosEndpoint}/$productoDbId',
-              {},
-            );
-
-            if (verificacionResponse != null &&
-                verificacionResponse['codigoalmacen'] != null) {
-              int almacenActualizado;
-              if (verificacionResponse['codigoalmacen'] is String) {
-                almacenActualizado = int.parse(
-                  verificacionResponse['codigoalmacen'],
-                );
-              } else {
-                almacenActualizado = verificacionResponse['codigoalmacen'];
-              }
-
-              if (almacenActualizado != newHospitalId) {
-                print(
-                  'Advertencia: El almacén no se actualizó correctamente en el servidor. ' +
-                      'Se usará la información local para mostrar el producto en el almacén correcto.',
-                );
-              }
-            }
-          } catch (e) {
-            print(
-              'Error al verificar la actualización del producto: ${e.toString()}',
-            );
-          }
-
-          return RepositoryResponse.success(
-            response,
-            message: 'Producto trasladado correctamente',
-          );
-        } else {
-          return RepositoryResponse.error(
-            'No se encontró el producto con numproducto: $productoId',
-          );
-        }
-      } else {
-        return RepositoryResponse.error(
-          'Error al obtener la lista de productos',
-        );
-      }
-    } catch (e) {
-      return RepositoryResponse.error(
-        'Error al trasladar producto: ${e.toString()}',
-      );
-    }
-  }
-
-  Future<void> _actualizarProductoEnCache(
-    String numproducto,
-    String nuevoHospitalId,
-  ) async {
-    try {
-      await ProductoLocalStorage.guardarInfoTraslado(
-        numproducto,
-        nuevoHospitalId,
-      );
-    } catch (e) {
-      print('Error al actualizar producto en caché: ${e.toString()}');
-    }
-  }
-
   Future<RepositoryResponse> getProductoByNumeroAndAlmacen(
     String numproducto,
     String almacenId,
@@ -192,20 +64,7 @@ class ProductoRepository {
         }
 
         if (producto != null) {
-          final currentAlmacen = producto['codigoalmacen'];
-          int currentAlmacenId;
-
-          if (currentAlmacen is String) {
-            try {
-              currentAlmacenId = int.parse(currentAlmacen);
-            } catch (e) {
-              return RepositoryResponse.error(
-                'Error en formato de codigoalmacen: $currentAlmacen',
-              );
-            }
-          } else {
-            currentAlmacenId = currentAlmacen;
-          }
+          final currentAlmacenId = producto['codigoalmacen'];
 
           if (currentAlmacenId == almacenId) {
             return RepositoryResponse.success(

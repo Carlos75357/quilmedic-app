@@ -49,7 +49,7 @@ class ProductoLocalStorage {
     }
   }
   
-  static Future<bool> eliminarProductoEscaneado(int productoId) async {
+  static Future<bool> eliminarProductoEscaneado(String productoId) async {
     try {
       final productosIds = await obtenerProductosEscaneados();
       
@@ -82,7 +82,6 @@ class ProductoLocalStorage {
       }
       return true;
     } catch (e) {
-      print('Error al actualizar producto trasladado: ${e.toString()}');
       return false;
     }
   }
@@ -101,7 +100,6 @@ class ProductoLocalStorage {
       final String jsonString = jsonEncode(traslados);
       return await prefs.setString(_trasladosKey, jsonString);
     } catch (e) {
-      print('Error al guardar info de traslado: ${e.toString()}');
       return false;
     }
   }
