@@ -6,24 +6,24 @@ class ProductTransferDialogs {
   static void showHospitalSelectionDialog({
     required BuildContext context,
     required List<Hospital> hospitales,
-    required Function(String) onHospitalSelected,
+    required Function(int) onHospitalSelected,
     required VoidCallback onCancel,
   }) {
-    String? selectedHospitalId;
+    int? selectedHospitalId;
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Trasladar Producto'),
-        content: DropdownButtonFormField<String>(
+        content: DropdownButtonFormField<int>(
           decoration: const InputDecoration(
             labelText: 'Seleccionar Hospital Destino',
             border: OutlineInputBorder(),
           ),
           items: hospitales.map((hospital) {
-            return DropdownMenuItem<String>(
+            return DropdownMenuItem<int>(
               value: hospital.id,
-              child: Text(hospital.nombre),
+              child: Text(hospital.description),
             );
           }).toList(),
           onChanged: (value) {
@@ -87,10 +87,10 @@ class ProductTransferDialogs {
     required BuildContext context,
     required Producto producto,
     required List<Hospital> hospitales,
-    required Function(String, String, String) onSendEmail,
+    required Function(int, String, String) onSendEmail,
     required VoidCallback onCancel,
   }) {
-    String? selectedHospitalId;
+    int? selectedHospitalId;
     final TextEditingController commentController = TextEditingController();
     
     showDialog(
@@ -112,15 +112,15 @@ class ProductTransferDialogs {
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<int>(
                 decoration: const InputDecoration(
                   labelText: 'Seleccionar Hospital Destino',
                   border: OutlineInputBorder(),
                 ),
                 items: hospitales.map((hospital) {
-                  return DropdownMenuItem<String>(
+                  return DropdownMenuItem<int>(
                     value: hospital.id,
-                    child: Text(hospital.nombre),
+                    child: Text(hospital.description),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -153,7 +153,7 @@ class ProductTransferDialogs {
               if (selectedHospitalId != null) {
                 final hospitalName = hospitales
                     .firstWhere((h) => h.id == selectedHospitalId)
-                    .nombre;
+                    .description;
                 onSendEmail(
                   selectedHospitalId!,
                   hospitalName,

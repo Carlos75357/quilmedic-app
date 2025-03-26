@@ -168,7 +168,7 @@ class ProductoDetallePage extends StatelessWidget {
               ),
             ),
             const Divider(),
-            _buildInfoRow('Código de Almacén:', producto.codigoalmacen),
+            _buildInfoRow('Código de Almacén:', producto.codigoalmacen.toString()),
           ],
         ),
       ),
