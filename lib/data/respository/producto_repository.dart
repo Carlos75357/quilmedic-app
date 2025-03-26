@@ -9,7 +9,7 @@ class ProductoRepository {
   ProductoRepository({required this.apiClient});
 
   Future<RepositoryResponse> enviarProductosEscaneados(
-    String hospitalId,
+    int hospitalId,
     List<ProductoEscaneado> productos,
   ) async {
     final List<dynamic> resultados = [];
@@ -17,18 +17,12 @@ class ProductoRepository {
     try {
       for (var producto in productos) {
         final response = await apiClient.getAll(
-          '${ApiConfig.productosEndpoint}?serie=${producto.serie}',
+          '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serie}',
           null,
         );
 
-        if (response is List) {
-          for (var item in response) {
-            if (item is Map<String, dynamic> &&
-                item['serie'] != null &&
-                item['serie'] == producto.serie) {
-              resultados.add(item);
-            }
-          }
+        if (response['serial_number'] == producto.serie && response['serial_number'] != null) {
+          resultados.add(response);
         }
       }
 

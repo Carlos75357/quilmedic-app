@@ -1,35 +1,21 @@
 class Hospital {
-  String id;
-  String nombre;
+  int id;
+  String description;
 
-  Hospital(this.id, this.nombre);
+  Hospital(this.id, this.description);
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nombre': nombre,
+      'description': description,
     };
   }
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
-    final id = json['id'];
-    String hospitalId;
-
-    if (id is int) {
-      hospitalId = id as String;
-    } else if (id is String) {
-      try {
-        hospitalId = id;
-      } catch (_) {
-        hospitalId = "0";
-      }
-    } else {
-      hospitalId = "0";
-    }
 
     return Hospital(
-      hospitalId,
-      json['nombre'] ?? '',
+      json['id'] ?? 0,
+      json['description'] ?? '',
     );
   }
 }

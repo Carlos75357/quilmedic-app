@@ -1,11 +1,12 @@
 class ApiConfig {
   // URL base de la API
   // static const String baseUrl = 'https://api.quilmedic.com';
-  static const String baseUrl = 'http://localhost:3000';
+  // static const String baseUrl = 'http://localhost:3000';
+  static const String baseUrl = 'http://localhost:8000/api';
   
   // Endpoints
-  static const String hospitalesEndpoint = '/almacenes';
-  static const String productosEndpoint = '/productos';
+  static const String hospitalesEndpoint = '/stores';
+  static const String productosEndpoint = '/products';
   
   // Timeouts
   static const int connectionTimeout = 30000;

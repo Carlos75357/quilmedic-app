@@ -21,7 +21,7 @@ class MainApp extends StatelessWidget {
         BlocProvider(create: (context) => ProductoDetalleBloc()),
       ],
       child: MaterialApp(
-        // debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
         home: const EscanerPage(),
       ),
     );

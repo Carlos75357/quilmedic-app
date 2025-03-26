@@ -22,6 +22,11 @@ class ApiClient {
       });
 
       var response = await client.call(endpoint, jsonRequest);
+
+      if (response is Map && response.containsKey('data')) {
+        return response['data'];
+      }
+
       return response;
     } catch (e) {
       throw Exception(e.toString());
