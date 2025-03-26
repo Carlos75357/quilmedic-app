@@ -15,7 +15,7 @@ class CargarHospitalesEvent extends ListaProductosEvent {}
 
 class EnviarSolicitudTrasladoEvent extends ListaProductosEvent {
   final Producto producto;
-  final String hospitalDestinoId;
+  final int hospitalDestinoId;
   final String hospitalDestinoNombre;
   final String comentarios;
 

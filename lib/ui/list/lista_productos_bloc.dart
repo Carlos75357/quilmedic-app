@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:quilmedic/data/respository/hospital_repository.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/data/json/api_client.dart';
@@ -15,6 +16,9 @@ class ListaProductosBloc
     extends Bloc<ListaProductosEvent, ListaProductosState> {
   final ApiClient apiClient = ApiClient();
   late ProductoRepository productoRepository = ProductoRepository(
+    apiClient: apiClient,
+  );
+  late HospitalRepository hospitalRepository = HospitalRepository(
     apiClient: apiClient,
   );
 
@@ -130,7 +134,7 @@ class ListaProductosBloc
                 final String numProducto = item['numerodeproducto'] ?? "0";
                 
                 if (productosEscaneadosIds.contains(numProducto)) {
-                  String codigoAlmacen = item['codigoalmacen'] ?? "0";
+                  int codigoAlmacen = item['codigoalmacen'] ?? 0;
                   
                   if (traslados.containsKey(numProducto)) {
                     final Map<String, dynamic> infoTraslado = traslados[numProducto];
@@ -181,39 +185,18 @@ class ListaProductosBloc
     emit(ProductosCargadosState(event.productos));
   }
 
-  Future<void> _cargarHospitales(
-    CargarHospitalesEvent event,
-    Emitter<ListaProductosState> emit,
-  ) async {
+  Future<void> _cargarHospitales(CargarHospitalesEvent event, Emitter<ListaProductosState> emit) async {
     try {
       emit(CargandoHospitalesState());
       
-      final response = await apiClient.getAll('/hospitales', null);
-      
-      if (response is List) {
-        final List<Hospital> hospitales = [];
-        
-        for (var item in response) {
-          if (item is Map<String, dynamic>) {
-            try {
-              final hospital = Hospital(
-                item['id'] ?? '',
-                item['nombre'] ?? '',
-              );
-              hospitales.add(hospital);
-            } catch (e) {
-              emit(ErrorCargaHospitalesState('Error al cargar hospitales: ${e.toString()}'));
-            }
-          }
-        }
-        
-        if (hospitales.isNotEmpty) {
-          emit(HospitalesCargadosState(hospitales));
-        } else {
-          emit(ErrorCargaHospitalesState('No se encontraron hospitales'));
-        }
+      List<Hospital> hospitales = await hospitalRepository
+        .getAllHospitals()
+        .then((value) => value.data);
+    
+      if (hospitales.isNotEmpty) {
+        emit(HospitalesCargadosState(hospitales));
       } else {
-        emit(ErrorCargaHospitalesState('Formato de respuesta inválido'));
+        emit(ErrorCargaHospitalesState('No se encontraron hospitales'));
       }
     } catch (e) {
       emit(ErrorCargaHospitalesState(e.toString()));
