@@ -30,7 +30,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
     _selectedHospital = widget.selectedHospital;
     
     if (_selectedHospital != null) {
-      _hospitalesController.text = _selectedHospital!.nombre;
+      _hospitalesController.text = _selectedHospital!.description;
     }
   }
 
@@ -40,7 +40,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
     if (widget.selectedHospital != oldWidget.selectedHospital) {
       _selectedHospital = widget.selectedHospital;
       if (_selectedHospital != null) {
-        _hospitalesController.text = _selectedHospital!.nombre;
+        _hospitalesController.text = _selectedHospital!.description;
       } else {
         _hospitalesController.clear();
       }
@@ -116,7 +116,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                   return DropdownMenuItem(
                     value: value,
                     child: Text(
-                      value.nombre,
+                      value.description,
                       style: TextStyle(
                         fontSize: isSmallScreen ? 13 : 14,
                       ),
@@ -129,7 +129,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                 if (value != null) {
                   setState(() {
                     _selectedHospital = value;
-                    _hospitalesController.text = value.nombre;
+                    _hospitalesController.text = value.description;
                   });
                   widget.onHospitalSelected(value);
                   BlocProvider.of<EscanerBloc>(

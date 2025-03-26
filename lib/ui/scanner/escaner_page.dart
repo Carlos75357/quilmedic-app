@@ -8,8 +8,6 @@ import 'package:quilmedic/widgets/scanner/empty_products_view.dart';
 import 'package:quilmedic/widgets/scanner/manual_code_input.dart';
 import 'package:quilmedic/widgets/scanner/productos_list.dart';
 import 'package:quilmedic/widgets/scanner/save_button.dart';
-import 'package:quilmedic/widgets/scanner/scanner_button.dart';
-import 'package:quilmedic/widgets/scanner/scanner_view.dart';
 import 'package:quilmedic/widgets/scanner/selector_hospital.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
 import 'package:quilmedic/utils/connectivity_service.dart';
@@ -344,7 +342,7 @@ class _EscanerPageState extends State<EscanerPage> {
                                 .read<EscanerBloc>()
                                 .hospitalSeleccionado
                                 ?.id ??
-                            "0",
+                            0,
                       ),
                 ),
               );
@@ -394,19 +392,7 @@ class _EscanerPageState extends State<EscanerPage> {
 
                     const SizedBox(height: 12),
 
-                    if (isScanning && _scannerController != null)
-                      ScannerView(
-                        controller: _scannerController!,
-                        onBarcodeDetected:
-                            (barcode) => _onBarcodeDetected(barcode, context),
-                        onClose: () {
-                          setState(() {
-                            isScanning = false;
-                          });
-                          _stopScanner();
-                        },
-                      )
-                    else if (_isManualInput)
+                    if (_isManualInput)
                       ManualCodeInput(
                         onCodeSubmitted:
                             (code) => _onManualCodeSubmitted(code, context),
@@ -417,41 +403,14 @@ class _EscanerPageState extends State<EscanerPage> {
                         spacing: 8.0,
                         runSpacing: 8.0,
                         children: [
-                          ScannerButton(
-                            onPressed: () {
-                              if (selectedHospital != null) {
-                                if (isScanning) {
-                                  _stopScanner();
-                                }
-
-                                BlocProvider.of<EscanerBloc>(
-                                  context,
-                                ).add(ElegirHospitalEvent(selectedHospital!));
-
-                                setState(() {
-                                  isScanning = true;
-                                });
-                                _startScanner();
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Debe seleccionar un hospital',
-                                    ),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            },
-                          ),
                           ElevatedButton.icon(
                             onPressed: _toggleManualInput,
-                            icon: const Icon(Icons.keyboard),
-                            label: const Text('Ingresar código'),
+                            icon: const Icon(Icons.keyboard,  size: 28,),
+                            label: const Text('Ingresar código', style: TextStyle(fontSize: 16),),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 20,
+                                horizontal: 44,
+                                vertical: 24,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(6),

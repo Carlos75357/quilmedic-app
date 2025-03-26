@@ -122,7 +122,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       emit(EscanerLoading());
 
       List<ProductoEscaneado> productosPendientes = [];
-      String? hospitalIdPendiente;
+      int? hospitalIdPendiente;
 
       try {
         productosPendientes =
@@ -211,7 +211,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         if (response.success) {
           List<Producto> productos = [];
           productos = List<Producto>.from(
-            response.data.map((item) => _convertirMapaAProducto(item)),
+            response.data.map((item) => Producto.fromApiMap(item)),
           );
 
           await _guardarProductosEscaneadosLocalmente(productos);
@@ -285,7 +285,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       if (response.success) {
         List<Producto> productos = [];
         productos = List<Producto>.from(
-          response.data.map((item) => _convertirMapaAProducto(item)),
+          response.data.map((item) => Producto.fromApiMap(item)),
         );
 
         await _guardarProductosEscaneadosLocalmente(productos);
@@ -335,32 +335,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  Producto _convertirMapaAProducto(Map<String, dynamic> mapa) {
-    try {
-      return Producto(
-        mapa['numerodeproducto'] ?? 0,
-        mapa['descripcion'],
-        mapa['codigoalmacen'] ?? 0,
-        mapa['numerolote'] ?? 0,
-        mapa['serie'] ?? '',
-        mapa['fechacaducidad'] != null
-            ? DateTime.parse(mapa['fechacaducidad'])
-            : DateTime.now(),
-        mapa['cantidad'] ?? 0,
-      );
-    } catch (e) {
-      return Producto(
-        "0",
-        'Error al procesar producto',
-        "0",
-        0,
-        "",
-        DateTime.now(),
-        0,
-      );
-    }
-  }
-
   navegarAListaProductos(BuildContext context, List<Producto> productos) {
     Navigator.push(
       context,
@@ -368,13 +342,15 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         builder:
             (context) => ListaProductosPage(
               productos: productos,
-              hospitalId: hospitalSeleccionado?.id ?? "0",
+              hospitalId: hospitalSeleccionado?.id ?? 0,
             ),
       ),
     );
   }
 
-  Future<void> _guardarProductosEscaneadosLocalmente(List<Producto> productos) async {
+  Future<void> _guardarProductosEscaneadosLocalmente(
+    List<Producto> productos,
+  ) async {
     try {
       final List<String> productosIds =
           productos.map((p) => p.numerodeproducto).toList();
@@ -389,7 +365,10 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  Future<void> _sincronizarProductosPendientes(SincronizarProductosPendientesEvent event, Emitter<EscanerState> emit) async {
+  Future<void> _sincronizarProductosPendientes(
+    SincronizarProductosPendientesEvent event,
+    Emitter<EscanerState> emit,
+  ) async {
     try {
       bool hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
 
@@ -416,7 +395,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       emit(EscanerLoading());
 
       List<ProductoEscaneado> productosPendientes = [];
-      String? hospitalId;
+      int? hospitalId;
 
       try {
         productosPendientes =
@@ -450,7 +429,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
           List<Producto> productos = [];
           productos = List<Producto>.from(
-            response.data.map((item) => _convertirMapaAProducto(item)),
+            response.data.map((item) => Producto.fromApiMap(item)),
           );
 
           await _guardarProductosEscaneadosLocalmente(productos);
