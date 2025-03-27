@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/ui/list/lista_productos_page.dart';
@@ -23,12 +22,10 @@ class EscanerPage extends StatefulWidget {
 
 class _EscanerPageState extends State<EscanerPage> {
   final TextEditingController _hospitalesController = TextEditingController();
-  MobileScannerController? _scannerController;
   Hospital? selectedHospital;
   List<ProductoEscaneado> productos = [];
   bool isScanning = false;
   bool _isManualInput = false;
-  bool _isProcessingBarcode = false;
   bool _hayConexion = true;
   bool _hayProductosPendientes = false;
   Timer? _conectividadTimer;
@@ -56,16 +53,6 @@ class _EscanerPageState extends State<EscanerPage> {
   void dispose() {
     _hospitalesController.dispose();
     _conectividadTimer?.cancel();
-
-    if (_scannerController != null) {
-      try {
-        _scannerController!.stop();
-      } catch (e) {
-        debugPrint('Error al detener el escáner en dispose: $e');
-      } finally {
-        _scannerController = null;
-      }
-    }
 
     super.dispose();
   }
@@ -106,107 +93,10 @@ class _EscanerPageState extends State<EscanerPage> {
     }
   }
 
-  void _startScanner() {
-    try {
-      if (_scannerController != null && isScanning) {
-        debugPrint(
-          'El escáner ya está iniciado, no es necesario iniciarlo de nuevo',
-        );
-        return;
-      }
-
-      _scannerController ??= MobileScannerController(
-        detectionSpeed: DetectionSpeed.normal,
-        facing: CameraFacing.back,
-        torchEnabled: false,
-        formats: const [
-          BarcodeFormat.ean8,
-          BarcodeFormat.ean13,
-          BarcodeFormat.code39,
-          BarcodeFormat.code93,
-          BarcodeFormat.code128,
-          BarcodeFormat.itf,
-          BarcodeFormat.upcA,
-          BarcodeFormat.upcE,
-          BarcodeFormat.codabar,
-          BarcodeFormat.dataMatrix,
-          BarcodeFormat.qrCode,
-        ],
-      );
-
-      _scannerController!
-          .start()
-          .then((_) {
-            if (mounted) {
-              setState(() => isScanning = true);
-            }
-          })
-          .catchError((error) {
-            if (mounted) {
-              setState(() => isScanning = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Error al iniciar la cámara: ${error.toString()}',
-                  ),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          });
-    } catch (e) {
-      if (mounted) {
-        setState(() => isScanning = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al inicializar el escáner: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  void _stopScanner() {
-    if (_scannerController != null) {
-      try {
-        _scannerController!.stop();
-        _scannerController = null;
-      } catch (e) {
-        debugPrint('Error al detener el escáner: $e');
-        _scannerController = null;
-      }
-      setState(() => isScanning = false);
-    }
-  }
-
   void _toggleManualInput() {
     setState(() {
       _isManualInput = !_isManualInput;
-      if (isScanning) {
-        _stopScanner();
-      }
     });
-  }
-
-  void _onBarcodeDetected(Barcode barcode, BuildContext context) {
-    if (barcode.rawValue != null && !_isProcessingBarcode) {
-      setState(() {
-        _isProcessingBarcode = true;
-      });
-
-      final String qrCode = barcode.rawValue!;
-      _stopScanner();
-      BlocProvider.of<EscanerBloc>(context).add(QrCodeScannedEvent(qrCode));
-
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isProcessingBarcode = false;
-          });
-        }
-      });
-    }
   }
 
   void _onManualCodeSubmitted(String code, BuildContext context) {
@@ -230,25 +120,6 @@ class _EscanerPageState extends State<EscanerPage> {
         foregroundColor: theme.colorScheme.onPrimary,
         elevation: 2,
         actions: [
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          //   child: Tooltip(
-          //     message:
-          //         _hayConexion
-          //             ? 'Conectado a internet'
-          //             : 'Sin conexión a internet',
-          //     child: Icon(
-          //       _hayConexion ? Icons.wifi : Icons.wifi_off,
-          //       color: _hayConexion ? Colors.green : Colors.red,
-          //     ),
-          //   ),
-          // ),
-          IconButton(
-            icon: Icon(_isManualInput ? Icons.qr_code_scanner : Icons.keyboard),
-            onPressed: _toggleManualInput,
-            tooltip:
-                _isManualInput ? 'Usar escáner' : 'Ingresar código manualmente',
-          ),
           if (_hayProductosPendientes)
             IconButton(
               icon: const Icon(Icons.sync),
@@ -405,8 +276,11 @@ class _EscanerPageState extends State<EscanerPage> {
                         children: [
                           ElevatedButton.icon(
                             onPressed: _toggleManualInput,
-                            icon: const Icon(Icons.keyboard,  size: 28,),
-                            label: const Text('Ingresar código', style: TextStyle(fontSize: 16),),
+                            icon: const Icon(Icons.keyboard, size: 28),
+                            label: const Text(
+                              'Ingresar código',
+                              style: TextStyle(fontSize: 16),
+                            ),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 44,
