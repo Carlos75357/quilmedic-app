@@ -5,7 +5,7 @@ class ProductosList extends StatefulWidget {
   final List<ProductoEscaneado> productos;
   final Function(ProductoEscaneado) onRemove;
   final Function(ProductoEscaneado, int) onUndoRemove;
-  
+
   const ProductosList({
     super.key,
     required this.productos,
@@ -21,21 +21,17 @@ class _ProductosListState extends State<ProductosList> {
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 360;
-    
+
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListView.separated(
         shrinkWrap: true,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
         itemCount: widget.productos.length,
-        separatorBuilder: (context, index) => Divider(
-          color: Colors.grey.shade300,
-          height: 1,
-        ),
+        separatorBuilder:
+            (context, index) => Divider(color: Colors.grey.shade300, height: 1),
         itemBuilder: (context, index) {
           final producto = widget.productos[index];
           return Dismissible(
@@ -44,10 +40,7 @@ class _ProductosListState extends State<ProductosList> {
               color: Colors.red.shade100,
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 16),
-              child: const Icon(
-                Icons.delete,
-                color: Colors.red,
-              ),
+              child: const Icon(Icons.delete, color: Colors.red),
             ),
             direction: DismissDirection.endToStart,
             onDismissed: (direction) {
@@ -125,10 +118,7 @@ class _ProductosListState extends State<ProductosList> {
                 ],
               ),
               trailing: IconButton(
-                icon: Icon(
-                  Icons.delete_outline,
-                  size: isSmallScreen ? 20 : 24,
-                ),
+                icon: Icon(Icons.delete_outline, size: isSmallScreen ? 20 : 24),
                 color: Colors.red.shade400,
                 onPressed: () => widget.onRemove(producto),
                 padding: EdgeInsets.zero,

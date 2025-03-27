@@ -50,7 +50,6 @@ class ProductoDetallePage extends StatelessWidget {
             ),
             const Divider(),
             _buildInfoRow('ID Producto:', producto.numerodeproducto),
-            _buildInfoRow('Número de Lote:', producto.numerolote.toString()),
             _buildInfoRow('Serie:', producto.serie),
           ],
         ),

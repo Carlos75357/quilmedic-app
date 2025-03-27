@@ -14,7 +14,7 @@ class ColorAlarm {
     } else if (difference < 180) {
       return const Color.fromARGB(255, 255, 230, 0).withValues(alpha: 0.3); // < 6 meses
     } else if (difference < 365) {
-      return const Color.fromARGB(255, 125, 248, 129).withValues(alpha: 0.3); // > 6 meses
+      return const Color.fromARGB(255, 0, 252, 8).withValues(alpha: 0.3); // > 6 meses
     } else {
       return const Color.fromARGB(255, 18, 143, 24).withValues(alpha: 0.3); // > 1 año
     }

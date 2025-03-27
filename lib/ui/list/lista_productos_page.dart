@@ -5,6 +5,7 @@ import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 import 'package:quilmedic/ui/product/producto_detalle_page.dart';
 import 'package:provider/provider.dart';
+import 'package:quilmedic/utils/theme.dart';
 import 'package:quilmedic/widgets/list/empty_products_message.dart';
 import 'package:quilmedic/widgets/list/product_list_section.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
@@ -54,25 +55,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
       ),
-      floatingActionButton:
-          productos.isNotEmpty
-              ? FloatingActionButton.extended(
-                onPressed: () => _cargarHospitalesYMostrarDialogo(),
-                icon: const Icon(Icons.swap_horiz),
-                label: const Text('Trasladar todos'),
-                backgroundColor: const Color.fromARGB(255, 241, 241, 241),
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                    color: const Color.fromARGB(255, 37, 37, 37),
-                    width: 2,
-                    style: BorderStyle.solid,
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              )
-              : null,
-
       body: SafeArea(
         child:
             widget.productos != null
@@ -182,7 +164,8 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                               headerColor: Colors.blue,
                               rowColor: Colors.grey.shade50,
                               onProductTap:
-                                  (producto) => _navegarADetalle(context, producto),
+                                  (producto) =>
+                                      _navegarADetalle(context, producto),
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -238,6 +221,28 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                 ),
               ),
             ),
+            if (productos.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => _cargarHospitalesYMostrarDialogo(),
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text('Trasladar todos'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 241, 241, 241),
+                  foregroundColor: Colors.black,
+                  elevation: 4,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(
+                      color: Color.fromARGB(255, 37, 37, 37),
+                      width: 2,
+                      style: BorderStyle.solid,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -377,100 +382,109 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: Row(
-              children: [
-                const Icon(Icons.swap_horiz, color: Colors.orange),
-                const SizedBox(width: 8),
-                const Text('Trasladar productos'),
-              ],
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Seleccione el hospital destino para trasladar todos los productos',
-                  style: TextStyle(fontSize: 14),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<int>(
-                  decoration: InputDecoration(
-                    labelText: 'Hospital Destino',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+          (context) => Theme(
+            data: Theme.of(context),
+            child: AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.swap_horiz, color: AppTheme.primaryColor),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Trasladar productos',
+                    style: TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold,
                     ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                    prefixIcon: const Icon(Icons.local_hospital_outlined),
                   ),
-                  items:
-                      hospitales.where((h) => h.id != widget.hospitalId).map((
-                        hospital,
-                      ) {
-                        return DropdownMenuItem<int>(
-                          value: hospital.id,
-                          child: Text(hospital.description),
-                        );
-                      }).toList(),
-                  onChanged: (value) {
-                    selectedHospitalId = value;
-                    if (value != null) {
-                      selectedHospitalName =
-                          hospitales
-                              .firstWhere((h) => h.id == value)
-                              .description;
+                ],
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Seleccione el hospital destino para trasladar todos los productos',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<int>(
+                    decoration: InputDecoration(
+                      labelText: 'Hospital Destino',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      prefixIcon: const Icon(Icons.local_hospital_outlined),
+                    ),
+                    items:
+                        hospitales.where((h) => h.id != widget.hospitalId).map((
+                          hospital,
+                        ) {
+                          return DropdownMenuItem<int>(
+                            value: hospital.id,
+                            child: Text(hospital.description),
+                          );
+                        }).toList(),
+                    onChanged: (value) {
+                      selectedHospitalId = value;
+                      if (value != null) {
+                        selectedHospitalName =
+                            hospitales
+                                .firstWhere((h) => h.id == value)
+                                .description;
+                      }
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    if (selectedHospitalId != null &&
+                        selectedHospitalName != null) {
+                      Navigator.of(context).pop();
+
+                      _enviarSolicitudTrasladoMasivo(
+                        selectedHospitalId!,
+                        selectedHospitalName!,
+                        "",
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            'Debes seleccionar un hospital destino',
+                          ),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
                     }
                   },
+                  icon: const Icon(Icons.send),
+                  label: const Text('Enviar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ],
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  if (selectedHospitalId != null &&
-                      selectedHospitalName != null) {
-                    Navigator.of(context).pop();
-
-                    _enviarSolicitudTrasladoMasivo(
-                      selectedHospitalId!,
-                      selectedHospitalName!,
-                      "",
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                          'Debes seleccionar un hospital destino',
-                        ),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    );
-                  }
-                },
-                icon: const Icon(Icons.send),
-                label: const Text('Enviar'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-            ],
           ),
     );
   }
