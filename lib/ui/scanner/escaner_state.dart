@@ -35,20 +35,6 @@ final class ProductoEscaneadoGuardadoState extends EscanerState {
   ProductoEscaneadoGuardadoState(this.producto);
 }
 
-final class ProductoEnOtroAlmacenState extends EscanerState {
-  final ProductoEscaneado productoEscaneado;
-  final dynamic productoExistente;
-  final int almacenActual;
-  final int almacenCorrecto;
-
-  ProductoEnOtroAlmacenState({
-    required this.productoEscaneado,
-    required this.productoExistente,
-    required this.almacenActual,
-    required this.almacenCorrecto,
-  });
-}
-
 final class ProductosListadosState extends EscanerState {
   final List<ProductoEscaneado> productos;
 
@@ -65,20 +51,6 @@ class ProductosRecibidosState extends EscanerState {
   final List<Producto> productos;
   
   ProductosRecibidosState(this.productos);
-}
-
-final class ProductosEnOtroAlmacenState extends EscanerState {
-  final List<ProductoEscaneado> productosEnAlmacenCorrecto;
-  final List<ProductoEscaneado> productosEnOtroAlmacen;
-  final List<ProductoEscaneado> productosNuevos;
-  final int almacenActual;
-
-  ProductosEnOtroAlmacenState({
-    required this.productosEnAlmacenCorrecto,
-    required this.productosEnOtroAlmacen,
-    required this.productosNuevos,
-    required this.almacenActual,
-  });
 }
 
 class GuardarOfflineSuccess extends EscanerState {

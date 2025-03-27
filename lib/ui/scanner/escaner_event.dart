@@ -15,10 +15,10 @@ class ElegirHospitalEvent extends EscanerEvent {
 
 class LoadHospitales extends EscanerEvent {}
 
-class QrCodeScannedEvent extends EscanerEvent {
-  final String qrCode;
+class SubmitCodeEvent extends EscanerEvent {
+  final String code;
   
-  QrCodeScannedEvent(this.qrCode);
+  SubmitCodeEvent(this.code);
 }
 
 class GuardarProductosEvent extends EscanerEvent {}

@@ -100,7 +100,7 @@ class _EscanerPageState extends State<EscanerPage> {
   }
 
   void _onManualCodeSubmitted(String code, BuildContext context) {
-    BlocProvider.of<EscanerBloc>(context).add(QrCodeScannedEvent(code));
+    BlocProvider.of<EscanerBloc>(context).add(SubmitCodeEvent(code));
     setState(() {
       _isManualInput = false;
     });
@@ -156,16 +156,6 @@ class _EscanerPageState extends State<EscanerPage> {
                 SnackBar(
                   content: Text('Producto ${state.producto.serie} guardado'),
                   backgroundColor: Colors.green,
-                ),
-              );
-            } else if (state is ProductoEnOtroAlmacenState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'El producto ${state.productoEscaneado.serie} está asignado al almacén ${state.almacenCorrecto}',
-                  ),
-                  backgroundColor: Colors.amber,
-                  duration: const Duration(seconds: 5),
                 ),
               );
             } else if (state is ProductosListadosState) {
