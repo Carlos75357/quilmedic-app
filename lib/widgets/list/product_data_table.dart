@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/widgets/list/product_expiry_badge.dart';
 import 'package:quilmedic/widgets/list/product_stock_badge.dart';
-import 'package:quilmedic/utils/color.dart';
+import 'package:quilmedic/utils/alarm_utils.dart';
 
 class ProductDataTable extends StatelessWidget {
   final List<Producto> productos;
@@ -22,6 +22,8 @@ class ProductDataTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final alarmUtils = AlarmUtils();
+    
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
     final isVerySmallScreen = screenWidth < 360;
@@ -34,7 +36,6 @@ class ProductDataTable extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate responsive widths based on available space
         final availableWidth = constraints.maxWidth;
         final descriptionWidth =
             isWideScreen
@@ -51,9 +52,7 @@ class ProductDataTable extends StatelessWidget {
 
         return Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
           child: SingleChildScrollView(
@@ -72,10 +71,12 @@ class ProductDataTable extends StatelessWidget {
                       headingTextStyle: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
+                        fontSize:
+                            isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
                       ),
                       dataTextStyle: TextStyle(
-                        fontSize: isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
+                        fontSize:
+                            isVerySmallScreen ? 12 : (isSmallScreen ? 14 : 16),
                       ),
                     ),
                   ),
@@ -85,7 +86,8 @@ class ProductDataTable extends StatelessWidget {
                     ),
                     dataRowMinHeight: 64,
                     dataRowMaxHeight: 80,
-                    columnSpacing: isVerySmallScreen ? 4 : (isSmallScreen ? 8 : 24),
+                    columnSpacing:
+                        isVerySmallScreen ? 4 : (isSmallScreen ? 8 : 24),
                     horizontalMargin:
                         isVerySmallScreen ? 2 : (isSmallScreen ? 6 : 24),
                     border: TableBorder(
@@ -155,17 +157,16 @@ class ProductDataTable extends StatelessWidget {
                           if (states.contains(WidgetState.hovered)) {
                             return Colors.grey.shade100;
                           }
-                          if (index % 2 == 0) {
-                            return rowColor;
-                          }
-                          return null;
+                          return rowColor;
                         }),
                         cells: [
                           DataCell(
                             SizedBox(
                               width: descriptionWidth,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
                                 child: Text(
                                   productos[index].descripcion ?? '',
                                   overflow: TextOverflow.ellipsis,
@@ -180,24 +181,37 @@ class ProductDataTable extends StatelessWidget {
                             onTap: () => onProductTap(productos[index]),
                           ),
                           DataCell(
-                            SizedBox.expand(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: ColorAlarm.getColorForExpiryDate(
-                                    productos[index].fechacaducidad,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                                width: expiryWidth,
-                                child: ProductExpiryBadge(
-                                  expiryDate: productos[index].fechacaducidad,
-                                  formattedDate: _formatDate(
-                                    productos[index].fechacaducidad,
-                                  ),
-                                  isSmallScreen: isVerySmallScreen,
-                                ),
+                            FutureBuilder<Color>(
+                              future: alarmUtils.setColorExpirationDate(
+                                productos[index].fechacaducidad,
+                                productos[index].numerodeproducto,
                               ),
+                              builder: (context, snapshot) {
+                                final color = snapshot.hasData
+                                    ? snapshot.data!
+                                    : Colors.grey.withValues(alpha: 0.3);
+                                
+                                return SizedBox.expand(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    margin: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 4,
+                                    ),
+                                    width: expiryWidth,
+                                    child: ProductExpiryBadge(
+                                      expiryDate: productos[index].fechacaducidad,
+                                      formattedDate: _formatDate(
+                                        productos[index].fechacaducidad,
+                                      ),
+                                      isSmallScreen: isVerySmallScreen,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                             onTap: () => onProductTap(productos[index]),
                           ),
@@ -205,12 +219,13 @@ class ProductDataTable extends StatelessWidget {
                             SizedBox.expand(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: ColorAlarm.getColorForStock(
-                                    productos[index].cantidad,
-                                  ),
+                                  color: _getStockColor(productos[index].cantidad),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 4,
+                                ),
                                 width: stockWidth,
                                 child: ProductStockBadge(
                                   stock: productos[index].cantidad,
@@ -237,148 +252,142 @@ class ProductDataTable extends StatelessWidget {
     String day = date.day.toString().padLeft(2, '0');
     String month = date.month.toString().padLeft(2, '0');
     String year = date.year.toString();
-
     return '$day/$month/$year';
   }
 
+  Color _getStockColor(int stock) {
+    if (stock <= 0) {
+      return Colors.red[400]!.withOpacity(0.3); // Sin stock
+    } else {
+      return Colors.green[400]!.withOpacity(0.3); // Con stock
+    }
+  }
+
   Widget _buildCompactList(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+    final alarmUtils = AlarmUtils();
+    
+    return ListView.separated(
       itemCount: productos.length,
+      separatorBuilder: (context, index) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final producto = productos[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: index % 2 == 0 ? rowColor : Colors.white,
-          child: InkWell(
-            onTap: () => onProductTap(producto),
-            borderRadius: BorderRadius.circular(10),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.medication_outlined,
-                        size: 18,
-                        color: Colors.blue,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          producto.descripcion ?? '',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+        
+        return InkWell(
+          onTap: () => onProductTap(producto),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  producto.descripcion ?? 'Sin descripción',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: ColorAlarm.getColorForExpiryDate(
-                              producto.fechacaducidad,
-                            ).withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.calendar_today,
-                                size: 14,
-                                color: Colors.black87,
-                              ),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: ProductExpiryBadge(
-                                  expiryDate: producto.fechacaducidad,
-                                  formattedDate: _formatDate(
-                                    producto.fechacaducidad,
-                                  ),
-                                  isSmallScreen: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FutureBuilder<Color>(
+                        future: alarmUtils.setColorExpirationDate(
+                          producto.fechacaducidad,
+                          producto.numerodeproducto
+                        ),
+                        builder: (context, snapshot) {
+                          final color = snapshot.hasData
+                              ? snapshot.data!
+                              : Colors.grey.withOpacity(0.3);
+                          
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: color,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.calendar_today,
+                                  size: 14,
+                                  color: Colors.black87,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: ColorAlarm.getColorForStock(
-                            producto.cantidad,
-                          ).withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.inventory_2_outlined,
-                              size: 14,
-                              color: Colors.black87,
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: ProductExpiryBadge(
+                                    expiryDate: producto.fechacaducidad,
+                                    formattedDate: _formatDate(
+                                      producto.fechacaducidad,
+                                    ),
+                                    isSmallScreen: true,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 4),
-                            ProductStockBadge(
-                              stock: producto.cantidad,
-                              isSmallScreen: true,
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    ],
-                  ),
-                  if (onTransferTap != null) ...[
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton.icon(
-                        onPressed: () => onTransferTap!(producto),
-                        icon: const Icon(Icons.swap_horiz, size: 16),
-                        label: const Text('Trasladar'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: _getStockColor(producto.cantidad),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.inventory_2_outlined,
+                            size: 14,
+                            color: Colors.black87,
                           ),
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
-                          textStyle: const TextStyle(fontSize: 12),
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                          const SizedBox(width: 4),
+                          ProductStockBadge(
+                            stock: producto.cantidad,
+                            isSmallScreen: true,
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
+                ),
+                if (onTransferTap != null) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      onPressed: () => onTransferTap!(producto),
+                      icon: const Icon(Icons.swap_horiz, size: 16),
+                      label: const Text('Trasladar'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        textStyle: const TextStyle(fontSize: 12),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         );

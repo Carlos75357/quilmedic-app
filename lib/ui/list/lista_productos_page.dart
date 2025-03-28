@@ -205,14 +205,38 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: ProductListSection(
-                            title: 'Productos de otros almacenes',
-                            productos: productosOtrosAlmacenes,
-                            headerColor: Colors.orange,
-                            rowColor: Colors.orange.shade50,
-                            onProductTap:
-                                (producto) =>
-                                    _navegarADetalle(context, producto),
+                          child: Column(
+                            children: [
+                              ProductListSection(
+                                title: 'Productos de otros almacenes',
+                                productos: productosOtrosAlmacenes,
+                                headerColor: Colors.orange,
+                                rowColor: Colors.grey.shade50,
+                                onProductTap:
+                                    (producto) =>
+                                        _navegarADetalle(context, producto),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.touch_app,
+                                    size: 16,
+                                    color: Colors.orange,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Toca para detalles',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.orange.shade800,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -452,12 +476,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                     if (selectedHospitalId != null &&
                         selectedHospitalName != null) {
                       Navigator.of(context).pop();
-
-                      _enviarSolicitudTrasladoMasivo(
-                        selectedHospitalId!,
-                        selectedHospitalName!,
-                        "",
-                      );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -476,7 +494,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                   icon: const Icon(Icons.send),
                   label: const Text('Enviar'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Colors.blueAccent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -486,52 +504,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
               ],
             ),
           ),
-    );
-  }
-
-  void _enviarSolicitudTrasladoMasivo(
-    int hospitalDestinoId,
-    String hospitalDestinoNombre,
-    String comentarios,
-  ) {
-    // Aquí enviaríamos los datos al backend
-    // Por ejemplo:
-    // final Map<String, dynamic> data = {
-    //   'productos': productos.map((p) => p.numerodeproducto).toList(),
-    //   'hospital_origen_id': widget.hospitalId,
-    //   'hospital_destino_id': hospitalDestinoId,
-    //   'hospital_destino_nombre': hospitalDestinoNombre,
-    // };
-    // apiClient.post('/solicitudes-traslado-masivo', data);
-
-    // Por ahora, solo mostramos un mensaje de éxito
-    if (productos.isNotEmpty) {
-      BlocProvider.of<ListaProductosBloc>(context).add(
-        EnviarSolicitudTrasladoEvent(
-          producto: productos.first,
-          hospitalDestinoId: hospitalDestinoId,
-          hospitalDestinoNombre: hospitalDestinoNombre,
-          comentarios: "",
-        ),
-      );
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            const Expanded(
-              child: Text('Solicitud de traslado enviada correctamente'),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 3),
-      ),
     );
   }
 }

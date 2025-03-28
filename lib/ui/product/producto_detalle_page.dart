@@ -1,11 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto.dart';
-import 'package:quilmedic/utils/color.dart';
+import 'package:quilmedic/utils/alarm_utils.dart';
 
-class ProductoDetallePage extends StatelessWidget {
+class ProductoDetallePage extends StatefulWidget {
   final Producto producto;
 
   const ProductoDetallePage({super.key, required this.producto});
+
+  @override
+  State<ProductoDetallePage> createState() => _ProductoDetallePageState();
+}
+
+class _ProductoDetallePageState extends State<ProductoDetallePage> {
+  Color? expiryColor;
+  Color? stockColor;
+  bool isLoading = true;
+  final AlarmUtils _alarmUtils = AlarmUtils();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadColors();
+  }
+
+  Future<void> _loadColors() async {
+    try {
+      
+      final expColor = await _alarmUtils.setColorExpirationDate(
+        widget.producto.fechacaducidad, 
+        widget.producto.numerodeproducto
+      );
+      
+      final stColor = _getStockColor(widget.producto.cantidad);
+
+      if (mounted) {
+        setState(() {
+          expiryColor = expColor;
+          stockColor = stColor;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          expiryColor = Colors.grey.withOpacity(0.3);
+          stockColor = widget.producto.cantidad > 0 
+              ? Colors.green.withOpacity(0.3) 
+              : Colors.red.withOpacity(0.3);
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  Color _getStockColor(int stock) {
+    if (stock <= 0) {
+      return Colors.red.withOpacity(0.3); // Sin stock
+    } else {
+      return Colors.green.withOpacity(0.3); // Con stock
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,21 +69,23 @@ class ProductoDetallePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoCard(context),
-            const SizedBox(height: 16),
-            _buildExpiryInfo(context),
-            const SizedBox(height: 16),
-            _buildStockInfo(context),
-            const SizedBox(height: 24),
-            _buildLocationInfo(context),
-          ],
-        ),
-      ),
+      body: isLoading 
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoCard(context),
+                  const SizedBox(height: 16),
+                  _buildExpiryInfo(context),
+                  const SizedBox(height: 16),
+                  _buildStockInfo(context),
+                  const SizedBox(height: 24),
+                  _buildLocationInfo(context),
+                ],
+              ),
+            ),
     );
   }
 
@@ -42,15 +98,15 @@ class ProductoDetallePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              producto.descripcion ?? 'Sin descripción',
+              widget.producto.descripcion ?? 'Sin descripción',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const Divider(),
-            _buildInfoRow('ID Producto:', producto.numerodeproducto),
-            _buildInfoRow('Serie:', producto.serie),
+            _buildInfoRow('ID Producto:', widget.producto.numerodeproducto),
+            _buildInfoRow('Serie:', widget.producto.serie),
           ],
         ),
       ),
@@ -58,8 +114,6 @@ class ProductoDetallePage extends StatelessWidget {
   }
 
   Widget _buildExpiryInfo(BuildContext context) {
-    final expiryColor = ColorAlarm.getColorForExpiryDate(producto.fechacaducidad);
-    
     return Card(
       elevation: 2,
       child: Padding(
@@ -89,7 +143,7 @@ class ProductoDetallePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    _formatDate(producto.fechacaducidad),
+                    _formatDate(widget.producto.fechacaducidad),
                     style: TextStyle(
                       color: expiryColor == Colors.red ? Colors.white : Colors.black,
                       fontWeight: FontWeight.bold,
@@ -105,8 +159,6 @@ class ProductoDetallePage extends StatelessWidget {
   }
 
   Widget _buildStockInfo(BuildContext context) {
-    final stockColor = ColorAlarm.getColorForStock(producto.cantidad);
-    
     return Card(
       elevation: 2,
       child: Padding(
@@ -136,7 +188,7 @@ class ProductoDetallePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    producto.cantidad.toString(),
+                    widget.producto.cantidad.toString(),
                     style: TextStyle(
                       color: stockColor == Colors.red ? Colors.white : Colors.black,
                       fontWeight: FontWeight.bold,
@@ -160,14 +212,15 @@ class ProductoDetallePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Información de Ubicación',
+              'Ubicación',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const Divider(),
-            _buildInfoRow('Código de Almacén:', producto.codigoalmacen.toString()),
+            _buildInfoRow('Almacén:', 'ID: ${widget.producto.codigoalmacen}'),
+            _buildInfoRow('Lote:', widget.producto.numerolote.toString()),
           ],
         ),
       ),
@@ -189,7 +242,7 @@ class ProductoDetallePage extends StatelessWidget {
             child: Text(
               value,
               style: const TextStyle(
-                fontWeight: FontWeight.w400,
+                color: Colors.black87,
               ),
             ),
           ),
@@ -199,10 +252,6 @@ class ProductoDetallePage extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    String day = date.day.toString().padLeft(2, '0');
-    String month = date.month.toString().padLeft(2, '0');
-    String year = date.year.toString();
-    
-    return '$day/$month/$year';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }

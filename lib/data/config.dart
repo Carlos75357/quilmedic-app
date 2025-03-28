@@ -7,6 +7,7 @@ class ApiConfig {
   // Endpoints
   static const String hospitalesEndpoint = '/stores';
   static const String productosEndpoint = '/products';
+  static const String alarmasEndpoint = '/alarms';
   
   // Timeouts
   static const int connectionTimeout = 30000;
