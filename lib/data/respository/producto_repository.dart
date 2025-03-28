@@ -13,25 +13,48 @@ class ProductoRepository {
     List<ProductoEscaneado> productos,
   ) async {
     final List<dynamic> resultados = [];
+    final List<String> noEncontrados = [];
 
     try {
       for (var producto in productos) {
-        final response = await apiClient.getAll(
-          '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serie}',
-          null,
-        );
+        try {
+          final response = await apiClient.getAll(
+            '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serie}',
+            null,
+          );
 
-        if (response['serial_number'] == producto.serie && response['serial_number'] != null) {
-          resultados.add(response);
+          if (response != null &&
+              response['serial_number'] == producto.serie &&
+              response['serial_number'] != null) {
+            resultados.add(response);
+          } else {
+            noEncontrados.add(producto.serie);
+          }
+        } catch (e) {
+          // Si hay un error al buscar este producto, lo agregamos a la lista de no encontrados
+          noEncontrados.add(producto.serie);
         }
       }
 
-      return RepositoryResponse.success(
-        resultados,
-        message: 'Productos enviados correctamente',
-      );
+      // Si no se encontró ningún producto, devolver error
+      if (resultados.isEmpty) {
+        return RepositoryResponse.error(
+          'No se encontraron productos con las series escaneadas: ${noEncontrados.join(", ")}',
+        );
+      }
+
+      // Si se encontraron algunos productos pero otros no, devolver éxito con mensaje de advertencia
+      String message = 'Productos enviados correctamente';
+      if (noEncontrados.isNotEmpty) {
+        message =
+            'ATENCIÓN: Se encontraron ${resultados.length} productos. No se encontraron ${noEncontrados.length} productos con series: ${noEncontrados.join(", ")}';
+      }
+
+      return RepositoryResponse.success(resultados, message: message);
     } catch (e) {
-      throw Exception('Error al enviar productos: ${e.toString()}');
+      return RepositoryResponse.error(
+        'Error al enviar productos: ${e.toString()}',
+      );
     }
   }
 

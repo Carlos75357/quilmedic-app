@@ -17,10 +17,10 @@ class SaveButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: ElevatedButton.icon(
-        icon: Icon(hayConexion ? Icons.save : Icons.save_outlined),
-        label: Text(hayConexion ? 'GUARDAR PRODUCTOS' : 'GUARDAR LOCALMENTE'),
+        icon: Icon(Icons.save),
+        label: const Text('GUARDAR PRODUCTOS'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: hayConexion ? theme.colorScheme.primary : Colors.amber,
+          backgroundColor: theme.colorScheme.primary,
           foregroundColor: theme.colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(
             vertical: 16,
