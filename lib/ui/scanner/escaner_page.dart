@@ -192,6 +192,16 @@ class _EscanerPageState extends State<EscanerPage> {
                 _hayProductosPendientes = false;
               });
             } else if (state is ProductosRecibidosState) {
+              if (state.mensaje != null && state.mensaje!.contains("No se encontraron")) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.mensaje!),
+                    backgroundColor: Colors.orange,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              }
+              
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -336,101 +346,6 @@ class _EscanerPageState extends State<EscanerPage> {
                               ),
                     ),
 
-                    if (_hayProductosPendientes)
-                      Container(
-                        margin: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade100,
-                          borderRadius: BorderRadius.circular(8.0),
-                          border: Border.all(color: Colors.amber.shade300),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(8.0),
-                            onTap: () {
-                              BlocProvider.of<EscanerBloc>(
-                                context,
-                              ).add(SincronizarProductosPendientesEvent());
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 12.0,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.sync_problem,
-                                    color: Colors.amber.shade800,
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 12.0),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Productos pendientes',
-                                          style: TextStyle(
-                                            color: Colors.amber.shade900,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Hay productos guardados localmente pendientes de sincronizar',
-                                          style: TextStyle(
-                                            color: Colors.amber.shade800,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.amber.shade600,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.sync,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        const Text(
-                                          'Sincronizar',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
 
                     if (state is! EscanerLoading) ...[
                       if (selectedHospital != null)

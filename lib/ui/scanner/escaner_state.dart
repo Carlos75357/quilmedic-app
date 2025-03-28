@@ -37,20 +37,23 @@ final class ProductoEscaneadoGuardadoState extends EscanerState {
 
 final class ProductosListadosState extends EscanerState {
   final List<ProductoEscaneado> productos;
+  final bool hayProductosPendientes;
 
-  ProductosListadosState(this.productos);
+  ProductosListadosState(this.productos, {this.hayProductosPendientes = false});
 }
 
 class GuardarSuccess extends EscanerState {
   final List<Producto> productos;
+  final String? mensaje;
   
-  GuardarSuccess({required this.productos});
+  GuardarSuccess({required this.productos, this.mensaje});
 }
 
 class ProductosRecibidosState extends EscanerState {
   final List<Producto> productos;
+  final String? mensaje;
   
-  ProductosRecibidosState(this.productos);
+  ProductosRecibidosState(this.productos, {this.mensaje});
 }
 
 class GuardarOfflineSuccess extends EscanerState {
@@ -61,8 +64,9 @@ class GuardarOfflineSuccess extends EscanerState {
 
 class SincronizacionCompletaState extends EscanerState {
   final List<Producto> productos;
+  final String? mensaje;
   
-  SincronizacionCompletaState(this.productos);
+  SincronizacionCompletaState(this.productos, {this.mensaje});
 }
 
 class SinProductosPendientesState extends EscanerState {

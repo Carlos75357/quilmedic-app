@@ -16,8 +16,8 @@ class ProductExpiryBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isSmallScreen ? 6 : 8, 
-        vertical: isSmallScreen ? 4 : 6
+        horizontal: isSmallScreen ? 6 : 8,
+        vertical: isSmallScreen ? 4 : 6,
       ),
       alignment: Alignment.center,
       child: Text(

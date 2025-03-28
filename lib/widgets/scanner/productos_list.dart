@@ -35,7 +35,7 @@ class _ProductosListState extends State<ProductosList> {
         itemBuilder: (context, index) {
           final producto = widget.productos[index];
           return Dismissible(
-            key: Key(producto.id.toString() + producto.serie.toString()),
+            key: Key(producto.serie.toString()),
             background: Container(
               color: Colors.red.shade100,
               alignment: Alignment.centerRight,
@@ -74,27 +74,6 @@ class _ProductosListState extends State<ProductosList> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.numbers,
-                        size: isSmallScreen ? 14 : 16,
-                        color: Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          'ID: ${producto.id}',
-                          style: TextStyle(
-                            color: Colors.grey.shade700,
-                            fontSize: isSmallScreen ? 12 : 14,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Icon(

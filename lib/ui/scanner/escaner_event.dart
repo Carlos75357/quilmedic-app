@@ -38,3 +38,5 @@ class EliminarProductoEvent extends EscanerEvent {
 }
 
 class SincronizarProductosPendientesEvent extends EscanerEvent {}
+
+class CargarProductosPendientesEvent extends EscanerEvent {}
