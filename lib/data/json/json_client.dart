@@ -20,8 +20,18 @@ class JsonClient {
           throw Exception(response.body);
         }
       } else if (jsonRequest.method.contains('get')) {
+        Map<String, String> formattedParams = jsonRequest.params.map((key, value) {
+          if (value is List) {
+            return MapEntry(key, value.join(','));
+          } else {
+            return MapEntry(key, value.toString());
+          }
+        });
+
+        Uri uri = Uri.parse(ApiConfig.baseUrl + endpoint).replace(queryParameters: formattedParams);
+
         final response = await http.get(
-          Uri.parse(ApiConfig.baseUrl + endpoint),
+          uri,
           headers: ApiConfig.headers,
         );
 

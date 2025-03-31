@@ -16,34 +16,42 @@ class ProductoRepository {
     final List<String> noEncontrados = [];
 
     try {
-      for (var producto in productos) {
-        try {
-          final response = await apiClient.getAll(
-            '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serie}',
-            null,
-          );
+      List<String> serialNumbers = productos.map((producto) => producto.serie).toList();
+      final response = await apiClient.getAll(
+        '${ApiConfig.productosEndpoint}/bySerialNumbers',
+        {'serial_numbers': serialNumbers},
+      );
 
-          if (response != null &&
-              response['serial_number'] == producto.serie &&
-              response['serial_number'] != null) {
-            resultados.add(response);
-          } else {
-            noEncontrados.add(producto.serie);
-          }
-        } catch (e) {
-          // Si hay un error al buscar este producto, lo agregamos a la lista de no encontrados
-          noEncontrados.add(producto.serie);
-        }
+      if (response is Map && response.containsKey('found') && response.containsKey('missing')) {
+        resultados.addAll(response['found']);
+        noEncontrados.addAll((response['missing'] as List).map((item) => item.toString()));
       }
 
-      // Si no se encontró ningún producto, devolver error
+      // for (var producto in productos) {
+      //   try {
+      //     final response = await apiClient.getAll(
+      //       '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serie}',
+      //       null,
+      //     );
+
+      //     if (response != null &&
+      //         response['serial_number'] == producto.serie &&
+      //         response['serial_number'] != null) {
+      //       resultados.add(response);
+      //     } else {
+      //       noEncontrados.add(producto.serie);
+      //     }
+      //   } catch (e) {
+      //     noEncontrados.add(producto.serie);
+      //   }
+      // }
+
       if (resultados.isEmpty) {
         return RepositoryResponse.error(
           'No se encontraron productos con las series escaneadas: ${noEncontrados.join(", ")}',
         );
       }
 
-      // Si se encontraron algunos productos pero otros no, devolver éxito con mensaje de advertencia
       String message = 'Productos enviados correctamente';
       if (noEncontrados.isNotEmpty) {
         message =
