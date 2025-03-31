@@ -16,7 +16,7 @@ class ConnectivityService {
                 ),
                 headers: ApiConfig.headers,
               )
-              .timeout(const Duration(seconds: 5));
+              .timeout(const Duration(seconds: 3));
 
           return response.statusCode >= 200 && response.statusCode < 500;
         } catch (e) {
@@ -31,7 +31,7 @@ class ConnectivityService {
                 ),
                 headers: ApiConfig.headers,
               )
-              .timeout(const Duration(seconds: 5));
+              .timeout(const Duration(seconds: 3));
 
           if (response.statusCode >= 200 && response.statusCode < 500) {
             return true;
@@ -47,7 +47,7 @@ class ConnectivityService {
                   ),
                   headers: ApiConfig.headers,
                 )
-                .timeout(const Duration(seconds: 5));
+                .timeout(const Duration(seconds: 3));
 
             return response.statusCode >= 200;
           } catch (e) {

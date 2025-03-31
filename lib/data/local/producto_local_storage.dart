@@ -10,6 +10,8 @@ class ProductoLocalStorage {
   static const String _hospitalPendienteKey = 'hospital_pendiente';
   static const String _productosCompletos =  'productos_completos';
   static const String _alarmasKey = 'alarmas';
+  static const String _alarmasKeyStock = 'alarmas_stock';
+  static const String _alarmasKeyEspecificas = 'alarmas_especificas';
   
   static Future<bool> guardarProductosEscaneados(List<String> productosIds) async {
     try {
@@ -259,6 +261,56 @@ class ProductoLocalStorage {
       return await prefs.setString(_alarmasKey, jsonEncode(alarms.map((a) => a.toMap()).toList()));
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<bool> agregarAlarmasStock(List<Alarm> alarms) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return await prefs.setString(_alarmasKeyStock, jsonEncode(alarms.map((a) => a.toMap()).toList()));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> agregarAlarmasEspecificas(List<Alarm> alarms) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return await prefs.setString(_alarmasKeyEspecificas, jsonEncode(alarms.map((a) => a.toMap()).toList()));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<List<Alarm>> obtenerAlarmasEspecificas() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonString = prefs.getString(_alarmasKeyEspecificas);
+      
+      if (jsonString == null || jsonString.isEmpty) {
+        return [];
+      }
+      
+      final List<dynamic> decodedList = jsonDecode(jsonString);
+      return decodedList.map((item) => Alarm.fromMap(item)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  static Future<List<Alarm>> obtenerAlarmasStock() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonString = prefs.getString(_alarmasKeyStock);
+      
+      if (jsonString == null || jsonString.isEmpty) {
+        return [];
+      }
+      
+      final List<dynamic> decodedList = jsonDecode(jsonString);
+      return decodedList.map((item) => Alarm.fromMap(item)).toList();
+    } catch (e) {
+      return [];
     }
   }
 

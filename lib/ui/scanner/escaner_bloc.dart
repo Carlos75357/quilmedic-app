@@ -284,8 +284,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         productosEscaneados,
         hospitalSeleccionado!.id,
       );
-      // No limpiamos la lista de productos escaneados para que sigan apareciendo en la interfaz
-      // productosEscaneados.clear();
       emit(GuardarOfflineSuccess());
       emit(
         ProductosListadosState(
@@ -360,6 +358,20 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
             final alarms = await alarmUtils.getGeneralAlarms();
             await ProductoLocalStorage.agregarAlarmas(alarms);
           }
+
+          try {
+            await alarmUtils.loadStockColorsForProducts(productos);
+            
+            await alarmUtils.loadExpiryColorsForProducts(productos);
+          } catch (e) {
+            print('Error al precargar colores de alarmas: $e');
+          }
+
+          // List<Alarm> alarmasEspecificas = await ProductoLocalStorage.obtenerAlarmasEspecificas();
+          // if (alarmasEspecificas.isEmpty) {
+          //   final alarms = await alarmUtils.getAlarmasEspecificas();
+          //   await ProductoLocalStorage.agregarAlarmasEspecificas(alarms);
+          // }
 
           if (response.message?.contains("No se encontraron") ?? false) {
             emit(

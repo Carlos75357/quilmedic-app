@@ -181,69 +181,45 @@ class ProductDataTable extends StatelessWidget {
                             onTap: () => onProductTap(productos[index]),
                           ),
                           DataCell(
-                            FutureBuilder<Color>(
-                              future: alarmUtils.setColorExpirationDate(
-                                productos[index].fechacaducidad,
-                                productos[index].serie,
-                              ),
-                              builder: (context, snapshot) {
-                                final color = snapshot.hasData
-                                    ? snapshot.data!
-                                    : Colors.grey.withValues(alpha: 0.3);
-                                
-                                return SizedBox.expand(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 4,
-                                    ),
-                                    width: expiryWidth,
-                                    child: ProductExpiryBadge(
-                                      expiryDate: productos[index].fechacaducidad,
-                                      formattedDate: _formatDate(
-                                        productos[index].fechacaducidad,
-                                      ),
-                                      isSmallScreen: isVerySmallScreen,
-                                    ),
+                            SizedBox.expand(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: alarmUtils.getColorForExpiryFromCache(productos[index].serie),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 4,
+                                ),
+                                width: expiryWidth,
+                                child: ProductExpiryBadge(
+                                  expiryDate: productos[index].fechacaducidad,
+                                  formattedDate: _formatDate(
+                                    productos[index].fechacaducidad,
                                   ),
-                                );
-                              },
+                                  isSmallScreen: isVerySmallScreen,
+                                ),
+                              ),
                             ),
                             onTap: () => onProductTap(productos[index]),
                           ),
                           DataCell(
-                            FutureBuilder<Color>(
-                              future: alarmUtils.setColorForStock(
-                                productos[index].cantidad,
-                                productos[index].serie,
+                            SizedBox.expand(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: alarmUtils.getColorForStockFromCache(productos[index].cantidad, productos[index].serie),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 4,
+                                ),
+                                width: stockWidth,
+                                child: ProductStockBadge(
+                                  stock: productos[index].cantidad,
+                                  isSmallScreen: isVerySmallScreen,
+                                ),
                               ),
-                              builder: (context, snapshot) {
-                                final color = snapshot.hasData
-                                    ? snapshot.data!
-                                    : Colors.grey.withValues(alpha: 0.3);
-                                
-                                return SizedBox.expand(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    margin: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                      horizontal: 4,
-                                    ),
-                                    width: stockWidth,
-                                    child: ProductStockBadge(
-                                      stock: productos[index].cantidad,
-                                      isSmallScreen: isVerySmallScreen,
-                                    ),
-                                  ),
-                                );
-                              },
                             ),
                             onTap: () => onProductTap(productos[index]),
                           ),
@@ -296,87 +272,63 @@ class ProductDataTable extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: FutureBuilder<Color>(
-                        future: alarmUtils.setColorExpirationDate(
-                          producto.fechacaducidad,
-                          producto.serie
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: alarmUtils.getColorForExpiryFromCache(producto.serie),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        builder: (context, snapshot) {
-                          final color = snapshot.hasData
-                              ? snapshot.data!
-                              : Colors.grey.withValues(alpha: 0.3);
-                          
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: color,
-                              borderRadius: BorderRadius.circular(20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.calendar_today,
+                              size: 14,
+                              color: Colors.black87,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today,
-                                  size: 14,
-                                  color: Colors.black87,
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: ProductExpiryBadge(
+                                expiryDate: producto.fechacaducidad,
+                                formattedDate: _formatDate(
+                                  producto.fechacaducidad,
                                 ),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: ProductExpiryBadge(
-                                    expiryDate: producto.fechacaducidad,
-                                    formattedDate: _formatDate(
-                                      producto.fechacaducidad,
-                                    ),
-                                    isSmallScreen: true,
-                                  ),
-                                ),
-                              ],
+                                isSmallScreen: true,
+                              ),
                             ),
-                          );
-                        },
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: FutureBuilder<Color>(
-                        future: alarmUtils.setColorForStock(
-                          producto.cantidad,
-                          producto.serie,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: alarmUtils.getColorForStockFromCache(producto.cantidad, producto.serie),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        builder: (context, snapshot) {
-                          final color = snapshot.hasData
-                              ? snapshot.data!
-                              : Colors.grey.withValues(alpha: 0.3);
-                          
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: color,
-                              borderRadius: BorderRadius.circular(20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.inventory_2_outlined,
+                              size: 14,
+                              color: Colors.black87,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                            const SizedBox(width: 4),
+                            ProductStockBadge(
+                              stock: producto.cantidad,
+                              isSmallScreen: true,
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.inventory_2_outlined,
-                                  size: 14,
-                                  color: Colors.black87,
-                                ),
-                                const SizedBox(width: 4),
-                                ProductStockBadge(
-                                  stock: producto.cantidad,
-                                  isSmallScreen: true,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                          ],
+                        ),
                       ),
                     ),
                   ],

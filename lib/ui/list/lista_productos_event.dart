@@ -3,7 +3,11 @@ part of 'lista_productos_bloc.dart';
 @immutable
 sealed class ListaProductosEvent {}
 
-class CargarProductosEvent extends ListaProductosEvent {}
+class CargarProductosEvent extends ListaProductosEvent {
+  final List<Producto> productos;
+
+  CargarProductosEvent({this.productos = const []});
+}
 
 class MostrarProductosEvent extends ListaProductosEvent {
   final List<Producto> productos;

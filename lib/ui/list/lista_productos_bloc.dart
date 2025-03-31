@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:quilmedic/data/respository/alarm_repository.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
 import 'package:quilmedic/domain/alarm.dart';
 import 'package:quilmedic/domain/producto.dart';
@@ -21,6 +22,9 @@ class ListaProductosBloc
   late HospitalRepository hospitalRepository = HospitalRepository(
     apiClient: apiClient,
   );
+  late AlarmRepository alarmRepository = AlarmRepository(
+    apiClient: apiClient
+  );
   late ProductoLocalStorage productoLocalStorage = ProductoLocalStorage();
   late AlarmUtils alarmUtils = AlarmUtils();
 
@@ -38,19 +42,19 @@ class ListaProductosBloc
     try {
       emit(ListaProductosLoading());
 
-      final List<String> productosEscaneadosIds =
-          await _obtenerProductosEscaneadosIds();
-      if (productosEscaneadosIds.isEmpty) {
-        emit(ListaProductosError('No hay productos escaneados'));
-        return;
-      }
+      // final List<String> productosEscaneadosIds =
+      //     await _obtenerProductosEscaneadosIds();
+      // if (productosEscaneadosIds.isEmpty) {
+      //   emit(ListaProductosError('No hay productos escaneados'));
+      //   return;
+      // }
 
       try {
-        final productos = await _cargarDetallesProductos(
-          productosEscaneadosIds,
-        );
+        // final productos = await _cargarDetallesProductos(
+        //   productosEscaneadosIds,
+        // );
 
-        if (productos.isEmpty) {
+        if (event.productos.isEmpty) {
           emit(ListaProductosError('No se encontraron productos escaneados'));
         } else {
           List<Alarm> alarmLocal = await ProductoLocalStorage.obtenerAlarmas();
@@ -58,7 +62,8 @@ class ListaProductosBloc
             final alarms = await alarmUtils.getGeneralAlarms();
             await ProductoLocalStorage.agregarAlarmas(alarms);
           }
-          emit(ProductosCargadosState(productos));
+
+          emit(ProductosCargadosState(event.productos));
         }
       } catch (e) {
         _manejarErrorConexion(e, emit);
@@ -68,65 +73,65 @@ class ListaProductosBloc
     }
   }
 
-  Future<List<String>> _obtenerProductosEscaneadosIds() async {
-    return await ProductoLocalStorage.obtenerProductosEscaneados();
-  }
+  // Future<List<String>> _obtenerProductosEscaneadosIds() async {
+  //   return await ProductoLocalStorage.obtenerProductosEscaneados();
+  // }
 
-  Future<List<Producto>> _cargarDetallesProductos(
-    List<String> productosIds,
-  ) async {
-    try {
-      final response = await productoRepository.getProductosByCodigos(
-        productosIds,
-      );
+  // Future<List<Producto>> _cargarDetallesProductos(
+  //   List<String> productosIds,
+  // ) async {
+  //   try {
+  //     final response = await productoRepository.getProductosByCodigos(
+  //       productosIds,
+  //     );
 
-      if (!response.success || response.data is! List) {
-        throw Exception('Error al cargar productos: ${response.message}');
-      }
+  //     if (!response.success || response.data is! List) {
+  //       throw Exception('Error al cargar productos: ${response.message}');
+  //     }
 
-      return _procesarRespuestaProductos(response.data, productosIds);
-    } catch (e) {
-      throw Exception('Error al cargar productos: ${e.toString()}');
-    }
-  }
+  //     return _procesarRespuestaProductos(response.data, productosIds);
+  //   } catch (e) {
+  //     throw Exception('Error al cargar productos: ${e.toString()}');
+  //   }
+  // }
 
-  List<Producto> _procesarRespuestaProductos(
-    List<dynamic> data,
-    List<String> productosIds,
-  ) {
-    final Map<int, Producto> productosMap = {};
+  // List<Producto> _procesarRespuestaProductos(
+  //   List<dynamic> data,
+  //   List<String> productosIds,
+  // ) {
+  //   final Map<int, Producto> productosMap = {};
 
-    for (var item in data) {
-      if (item is Map<String, dynamic>) {
-        try {
-          final int numerodeproducto = item['numerodeproducto'] ?? 0;
+  //   for (var item in data) {
+  //     if (item is Map<String, dynamic>) {
+  //       try {
+  //         final int numerodeproducto = item['numerodeproducto'] ?? 0;
 
-          if (productosIds.contains(numerodeproducto.toString())) {
-            final producto = _crearProductoDesdeJson(item);
-            productosMap[numerodeproducto] = producto;
-          }
-        } catch (e) {
-          throw Exception('Error al cargar productos: ${e.toString()}');
-        }
-      }
-    }
+  //         if (productosIds.contains(numerodeproducto.toString())) {
+  //           final producto = _crearProductoDesdeJson(item);
+  //           productosMap[numerodeproducto] = producto;
+  //         }
+  //       } catch (e) {
+  //         throw Exception('Error al cargar productos: ${e.toString()}');
+  //       }
+  //     }
+  //   }
 
-    return productosMap.values.toList();
-  }
+  //   return productosMap.values.toList();
+  // }
 
-  Producto _crearProductoDesdeJson(Map<String, dynamic> json) {
-    return Producto(
-      json['numerodeproducto'] ?? 0,
-      json['descripcion'] ?? '',
-      json['codigoalmacen'] ?? 0,
-      json['numerolote'] ?? 0,
-      json['serie'] ?? '',
-      json['fechacaducidad'] != null
-          ? DateTime.parse(json['fechacaducidad'])
-          : DateTime.now(),
-      json['cantidad'] ?? 0,
-    );
-  }
+  // Producto _crearProductoDesdeJson(Map<String, dynamic> json) {
+  //   return Producto(
+  //     json['numerodeproducto'] ?? 0,
+  //     json['descripcion'] ?? '',
+  //     json['codigoalmacen'] ?? 0,
+  //     json['numerolote'] ?? 0,
+  //     json['serie'] ?? '',
+  //     json['fechacaducidad'] != null
+  //         ? DateTime.parse(json['fechacaducidad'])
+  //         : DateTime.now(),
+  //     json['cantidad'] ?? 0,
+  //   );
+  // }
 
   void _manejarErrorConexion(Object e, Emitter<ListaProductosState> emit) {
     final String errorMsg = e.toString();

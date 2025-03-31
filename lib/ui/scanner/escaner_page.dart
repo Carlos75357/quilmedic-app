@@ -9,7 +9,7 @@ import 'package:quilmedic/widgets/scanner/productos_list.dart';
 import 'package:quilmedic/widgets/scanner/save_button.dart';
 import 'package:quilmedic/widgets/scanner/selector_hospital.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
-import 'package:quilmedic/utils/connectivity_service.dart';
+// import 'package:quilmedic/utils/connectivity_service.dart';
 import 'dart:async';
 import 'escaner_bloc.dart';
 
@@ -35,18 +35,18 @@ class _EscanerPageState extends State<EscanerPage> {
     super.initState();
     _checkPendingProducts();
     BlocProvider.of<EscanerBloc>(context).add(LoadHospitales());
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        _verificarConectividad();
-        _conectividadTimer = Timer.periodic(const Duration(seconds: 30), (
-          timer,
-        ) {
-          if (mounted) {
-            _verificarConectividad();
-          }
-        });
-      }
-    });
+    // Future.delayed(const Duration(milliseconds: 500), () {
+    //   if (mounted) {
+    //     _verificarConectividad();
+    //     _conectividadTimer = Timer.periodic(const Duration(seconds: 30), (
+    //       timer,
+    //     ) {
+    //       if (mounted) {
+    //         _verificarConectividad();
+    //       }
+    //     });
+    //   }
+    // });
   }
 
   @override
@@ -57,32 +57,32 @@ class _EscanerPageState extends State<EscanerPage> {
     super.dispose();
   }
 
-  Future<void> _verificarConectividad() async {
-    try {
-      final hayConexion = await ConnectivityService.hayConexionInternet();
-      if (mounted) {
-        if (hayConexion && !_hayConexion && _hayProductosPendientes) {
-          Future.delayed(const Duration(milliseconds: 300), () {
-            if (mounted) {
-              BlocProvider.of<EscanerBloc>(
-                context,
-              ).add(SincronizarProductosPendientesEvent());
-            }
-          });
-        }
-        setState(() {
-          _hayConexion = hayConexion;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _hayConexion = false;
-        });
-      }
-      debugPrint('Error al verificar la conectividad: $e');
-    }
-  }
+  // Future<void> _verificarConectividad() async {
+  //   try {
+  //     final hayConexion = await ConnectivityService.hayConexionInternet();
+  //     if (mounted) {
+  //       if (hayConexion && !_hayConexion && _hayProductosPendientes) {
+  //         Future.delayed(const Duration(milliseconds: 300), () {
+  //           if (mounted) {
+  //             BlocProvider.of<EscanerBloc>(
+  //               context,
+  //             ).add(SincronizarProductosPendientesEvent());
+  //           }
+  //         });
+  //       }
+  //       setState(() {
+  //         _hayConexion = hayConexion;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       setState(() {
+  //         _hayConexion = false;
+  //       });
+  //     }
+  //     debugPrint('Error al verificar la conectividad: $e');
+  //   }
+  // }
 
   Future<void> _checkPendingProducts() async {
     final hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
@@ -174,7 +174,7 @@ class _EscanerPageState extends State<EscanerPage> {
                 SnackBar(
                   content: Text(state.message),
                   backgroundColor: Colors.blue,
-                  duration: const Duration(seconds: 5),
+                  duration: const Duration(seconds: 2),
                 ),
               );
               setState(() {
@@ -197,7 +197,7 @@ class _EscanerPageState extends State<EscanerPage> {
                   SnackBar(
                     content: Text(state.mensaje!),
                     backgroundColor: Colors.orange,
-                    duration: const Duration(seconds: 5),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               }
