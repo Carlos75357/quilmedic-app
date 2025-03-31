@@ -36,7 +36,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
         widget.producto.numerodeproducto,
       );
       
-      final stColor = _getStockColor(widget.producto.cantidad);
+      final stColor = await _alarmUtils.setColorForStock(widget.producto.cantidad, widget.producto.numerodeproducto);
 
       if (mounted) {
         setState(() {
@@ -48,30 +48,12 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          expiryColor = _getDefaultExpiryColor(widget.producto.fechacaducidad);
-          stockColor = _getStockColor(widget.producto.cantidad);
+          expiryColor = Colors.grey.withValues(alpha: 0.3);
+          stockColor = Colors.grey.withValues(alpha: 0.3);
           isLoading = false;
         });
       }
     }
-  }
-
-  Color _getStockColor(int stock) {
-    if (stock < 1) {
-      return Colors.grey; // Sin stock
-    } else {
-      return Colors.green; // Con stock
-    }
-  }
-
-  Color _getDefaultExpiryColor(DateTime expiryDate) {
-    final daysUntilExpiry = expiryDate.difference(DateTime.now()).inDays;
-    
-    if (daysUntilExpiry <= 1) return Colors.grey;
-    if (daysUntilExpiry < 30) return Colors.red;
-    if (daysUntilExpiry < 180) return Colors.yellow;
-    if (daysUntilExpiry < 365) return Colors.green;
-    return Colors.lightGreen;
   }
 
   @override

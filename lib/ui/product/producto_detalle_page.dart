@@ -31,7 +31,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         widget.producto.numerodeproducto
       );
       
-      final stColor = _getStockColor(widget.producto.cantidad);
+      final stColor = await _alarmUtils.setColorForStock(widget.producto.cantidad, widget.producto.numerodeproducto);
 
       if (mounted) {
         setState(() {
@@ -43,21 +43,13 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          expiryColor = Colors.grey.withOpacity(0.3);
+          expiryColor = Colors.grey.withValues(alpha: 0.3);
           stockColor = widget.producto.cantidad > 0 
-              ? Colors.green.withOpacity(0.3) 
-              : Colors.red.withOpacity(0.3);
+              ? Colors.green.withValues(alpha: 0.3) 
+              : Colors.red.withValues(alpha: 0.3);
           isLoading = false;
         });
       }
-    }
-  }
-
-  Color _getStockColor(int stock) {
-    if (stock <= 0) {
-      return Colors.red.withOpacity(0.3); // Sin stock
-    } else {
-      return Colors.green.withOpacity(0.3); // Con stock
     }
   }
 

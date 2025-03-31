@@ -1,16 +1,16 @@
 class Alarm {
-  int id;
-  String color;
-  String condition;
-  String type;
+  int? id;
+  String? color;
+  String? condition;
+  String? type;
   int? productId;
 
   Alarm({
-    required this.id,
-    required this.color,
-    required this.condition,
-    required this.type,
-    required this.productId
+    this.id,
+    this.color,
+    this.condition,
+    this.type,
+    this.productId
   });
 
   factory Alarm.fromJson(Map<String, dynamic> json) {
