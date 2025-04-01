@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/widgets/product/product_info_row.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
+import 'package:quilmedic/utils/services.dart';
 
 class ProductInfoCard extends StatefulWidget {
   final Producto producto;
@@ -108,7 +108,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   
                   ProductInfoRow(
                     label: 'Fecha de caducidad:', 
-                    value: _formatDate(widget.producto.fechacaducidad),
+                    value: formatDate(widget.producto.fechacaducidad),
                     icon: Icons.calendar_today,
                     color: expiryColor,
                   ),
@@ -134,8 +134,5 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
       ),
     );
   }
-  
-  String _formatDate(DateTime date) {
-    return DateFormat('dd/MM/yyyy').format(date);
-  }
+
 }

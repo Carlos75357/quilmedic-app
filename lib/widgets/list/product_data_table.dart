@@ -3,6 +3,8 @@ import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/widgets/list/product_expiry_badge.dart';
 import 'package:quilmedic/widgets/list/product_stock_badge.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
+import 'package:quilmedic/widgets/list/compact_list.dart';
+import 'package:quilmedic/utils/services.dart';
 
 class ProductDataTable extends StatelessWidget {
   final List<Producto> productos;
@@ -31,7 +33,7 @@ class ProductDataTable extends StatelessWidget {
     final isWideScreen = screenWidth > 1200;
 
     if (isExtremelySmallScreen) {
-      return _buildCompactList(context);
+      return CompactList(productos: productos, onProductTap: onProductTap, onTransferTap: onTransferTap);
     }
 
     return LayoutBuilder(
@@ -194,7 +196,7 @@ class ProductDataTable extends StatelessWidget {
                                 width: expiryWidth,
                                 child: ProductExpiryBadge(
                                   expiryDate: productos[index].fechacaducidad,
-                                  formattedDate: _formatDate(
+                                  formattedDate: formatDate(
                                     productos[index].fechacaducidad,
                                   ),
                                   isSmallScreen: isVerySmallScreen,
@@ -229,135 +231,6 @@ class ProductDataTable extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    String day = date.day.toString().padLeft(2, '0');
-    String month = date.month.toString().padLeft(2, '0');
-    String year = date.year.toString();
-    return '$day/$month/$year';
-  }
-
-  Widget _buildCompactList(BuildContext context) {
-    final alarmUtils = AlarmUtils();
-    
-    return ListView.separated(
-      itemCount: productos.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final producto = productos[index];
-        
-        return InkWell(
-          onTap: () => onProductTap(producto),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  producto.descripcion ?? 'Sin descripción',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: alarmUtils.getColorForExpiryFromCache(producto.serie),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.calendar_today,
-                              size: 14,
-                              color: Colors.black87,
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: ProductExpiryBadge(
-                                expiryDate: producto.fechacaducidad,
-                                formattedDate: _formatDate(
-                                  producto.fechacaducidad,
-                                ),
-                                isSmallScreen: true,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: alarmUtils.getColorForStockFromCache(producto.cantidad, producto.serie),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.inventory_2_outlined,
-                              size: 14,
-                              color: Colors.black87,
-                            ),
-                            const SizedBox(width: 4),
-                            ProductStockBadge(
-                              stock: producto.cantidad,
-                              isSmallScreen: true,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                if (onTransferTap != null) ...[
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      onPressed: () => onTransferTap!(producto),
-                      icon: const Icon(Icons.swap_horiz, size: 16),
-                      label: const Text('Trasladar'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        textStyle: const TextStyle(fontSize: 12),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
             ),
           ),
         );

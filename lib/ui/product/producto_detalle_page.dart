@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
+import 'package:quilmedic/utils/services.dart';
 
 class ProductoDetallePage extends StatefulWidget {
   final Producto producto;
@@ -135,7 +136,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    _formatDate(widget.producto.fechacaducidad),
+                    formatDate(widget.producto.fechacaducidad),
                     style: TextStyle(
                       color: expiryColor == Colors.red ? Colors.white : Colors.black,
                       fontWeight: FontWeight.bold,
@@ -241,9 +242,5 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }
