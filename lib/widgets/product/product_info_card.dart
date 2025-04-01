@@ -6,10 +6,12 @@ import 'package:quilmedic/utils/services.dart';
 
 class ProductInfoCard extends StatefulWidget {
   final Producto producto;
+  final int totalStock;
 
   const ProductInfoCard({
     super.key,
     required this.producto,
+    required this.totalStock,
   });
 
   @override
@@ -31,12 +33,9 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
   Future<void> _loadColors() async {
     try {
       
-      final expColor = await _alarmUtils.setColorExpirationDate(
-        widget.producto.fechacaducidad,
-        widget.producto.numerodeproducto,
-      );
+      final expColor = _alarmUtils.getColorForExpiryFromCache(widget.producto.numerodeproducto);
       
-      final stColor = await _alarmUtils.setColorForStock(widget.producto.cantidad, widget.producto.numerodeproducto);
+      final stColor = _alarmUtils.getColorForStockFromCache(widget.totalStock, widget.producto.numerodeproducto);
 
       if (mounted) {
         setState(() {

@@ -25,7 +25,12 @@ class ProductDataTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final alarmUtils = AlarmUtils();
-    
+
+    final Map<String, Map<int, List<Producto>>> groupedProducts = {};
+    for (final producto in productos) {
+      groupedProducts.putIfAbsent(producto.numerodeproducto, () => {}).putIfAbsent(producto.codigoalmacen, () => []).add(producto);
+    }
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
     final isVerySmallScreen = screenWidth < 360;
@@ -152,81 +157,82 @@ class ProductDataTable extends StatelessWidget {
                     ],
                     rows: List<DataRow>.generate(
                       productos.length,
-                      (index) => DataRow(
-                        color: WidgetStateProperty.resolveWith<Color?>((
-                          Set<WidgetState> states,
-                        ) {
-                          if (states.contains(WidgetState.hovered)) {
-                            return Colors.grey.shade100;
-                          }
-                          return rowColor;
-                        }),
-                        cells: [
-                          DataCell(
-                            SizedBox(
-                              width: descriptionWidth,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
+                      (index) {
+                        final producto = productos[index];
+                        final totalStock = groupedProducts[producto.numerodeproducto]?[producto.codigoalmacen]?.fold<int>(0, (sum, p) => sum + p.cantidad) ?? 0;
+
+                        return DataRow(
+                          color: WidgetStateProperty.resolveWith<Color?>((
+                            Set<WidgetState> states,
+                          ) {
+                            if (states.contains(WidgetState.hovered)) {
+                              return Colors.grey.shade100;
+                            }
+                            return rowColor;
+                          }),
+                          cells: [
+                            DataCell(
+                              SizedBox(
+                                width: descriptionWidth,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4.0,
+                                  ),
+                                  child: Text(
+                                    producto.descripcion ?? '',
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                      fontSize: isVerySmallScreen ? 11 : null,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
-                                child: Text(
-                                  productos[index].descripcion ?? '',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    fontSize: isVerySmallScreen ? 11 : null,
-                                    fontWeight: FontWeight.w500,
+                              ),
+                              onTap: () => onProductTap(producto),
+                            ),
+                            DataCell(
+                              SizedBox.expand(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: alarmUtils.getColorForExpiryFromCache(producto.serie),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 4,
+                                  ),
+                                  width: expiryWidth,
+                                  child: ProductExpiryBadge(
+                                    expiryDate: producto.fechacaducidad,
+                                    formattedDate: formatDate(
+                                      producto.fechacaducidad,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                            onTap: () => onProductTap(productos[index]),
-                          ),
-                          DataCell(
-                            SizedBox.expand(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: alarmUtils.getColorForExpiryFromCache(productos[index].serie),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 4,
-                                ),
-                                width: expiryWidth,
-                                child: ProductExpiryBadge(
-                                  expiryDate: productos[index].fechacaducidad,
-                                  formattedDate: formatDate(
-                                    productos[index].fechacaducidad,
+                            DataCell(
+                              SizedBox.expand(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: alarmUtils.getColorForStockFromCache(totalStock, producto.numerodeproducto),
+                                    borderRadius: BorderRadius.circular(4),
                                   ),
-                                  isSmallScreen: isVerySmallScreen,
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 4,
+                                  ),
+                                  width: stockWidth,
+                                  child: ProductStockBadge(
+                                    stock: totalStock,
+                                  ),
                                 ),
                               ),
                             ),
-                            onTap: () => onProductTap(productos[index]),
-                          ),
-                          DataCell(
-                            SizedBox.expand(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: alarmUtils.getColorForStockFromCache(productos[index].cantidad, productos[index].serie),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 4,
-                                ),
-                                width: stockWidth,
-                                child: ProductStockBadge(
-                                  stock: productos[index].cantidad,
-                                  isSmallScreen: isVerySmallScreen,
-                                ),
-                              ),
-                            ),
-                            onTap: () => onProductTap(productos[index]),
-                          ),
-                        ],
-                      ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),

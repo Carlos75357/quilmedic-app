@@ -27,12 +27,9 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
   Future<void> _loadColors() async {
     try {
       
-      final expColor = await _alarmUtils.setColorExpirationDate(
-        widget.producto.fechacaducidad, 
-        widget.producto.numerodeproducto
-      );
+      final expColor = _alarmUtils.getColorForExpiryFromCache(widget.producto.numerodeproducto);
       
-      final stColor = await _alarmUtils.setColorForStock(widget.producto.cantidad, widget.producto.numerodeproducto);
+      final stColor = _alarmUtils.getColorForStockFromCache(widget.producto.cantidad, widget.producto.numerodeproducto);
 
       if (mounted) {
         setState(() {

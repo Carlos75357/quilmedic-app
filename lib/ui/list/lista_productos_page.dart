@@ -25,7 +25,9 @@ class ListaProductosPage extends StatefulWidget {
 
 class _ListaProductosPageState extends State<ListaProductosPage> {
   late List<Producto> productos;
-  // List<Hospital> _hospitales = [];
+  final Map<String, Map<int, List<Producto>>> groupedProducts = {};
+
+  // late List<Hospital> _hospitales = [];
   // String? _errorCargaHospitales;
 
   @override
@@ -41,6 +43,10 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   @override
   Widget build(BuildContext context) {
     // final isVerySmallScreen = MediaQuery.of(context).size.width < 320;
+    for (final producto in productos) {
+    groupedProducts.putIfAbsent(producto.numerodeproducto, () => {}).putIfAbsent(producto.codigoalmacen, () => []).add(producto);
+    }
+    
     final theme = Theme.of(context);
 
     return Scaffold(

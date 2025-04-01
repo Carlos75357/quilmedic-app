@@ -182,48 +182,7 @@ class AlarmUtils {
     
     return colorsMap;
   }
-
-  Future<Color> setColorForStock(int stock, String? productId) async {
-    if (productId != null && _stockColorCache.containsKey(productId)) {
-      return _stockColorCache[productId]!;
-    }
-    
-    try {
-      Alarm alarm = await getStockAlarmByProduct(productId ?? '');
-      if (alarm.id != null) {
-        final color = _parseColor(alarm.color!);
-        if (color != null) {
-          if (productId != null) {
-            _stockColorCache[productId] = color;
-          }
-          return color;
-        }
-      }
-
-      List<Alarm> alarmasLocal = await getGeneralStockAlarms();
-
-      for (var alarma in alarmasLocal) {
-        if (alarma.type!.toLowerCase() == 'stock') {
-          if (_evaluateStockAlarm(alarma, stock)) {
-            final color = _parseColor(alarma.color!);
-            if (color != null) {
-              if (productId != null) {
-                _stockColorCache[productId] = color;
-              }
-              return color;
-            }
-          }
-        }
-      }
-      
-      // Si no se encontró ninguna alarma que coincida, devolver un color predeterminado
-      return Colors.grey;
-    } catch (e) {
-      print('Error al obtener color para stock: $e');
-      return Colors.grey;
-    }
-  }
-
+  
   Color getColorForStockFromCache(int stock, String? productId) {
     if (productId != null && _stockColorCache.containsKey(productId)) {
       return _stockColorCache[productId]!;
@@ -236,49 +195,6 @@ class AlarmUtils {
       return _expiryColorCache[productId]!;
     }
     return Colors.grey;
-  }
-
-  Future<Color> setColorExpirationDate(DateTime expiryDate, String? productId) async {
-    // Verificar si ya tenemos el color en caché
-    if (productId != null && _expiryColorCache.containsKey(productId)) {
-      return _expiryColorCache[productId]!;
-    }
-    
-    try {
-      List<Alarm> alarms = await getExpirationDateAlarmByProduct(productId ?? '');
-      if (alarms.isNotEmpty && alarms[0].id != null) {
-        final color = _parseColor(alarms[0].color!);
-        if (color != null) {
-          if (productId != null) {
-            _expiryColorCache[productId] = color;
-          }
-          return color;
-        }
-      }
-
-      List<Alarm> alarmasLocal = await getGeneralExpirationDateAlarms();
-      final days = expiryDate.difference(DateTime.now()).inDays;
-
-      for (var alarma in alarmasLocal) {
-        if (alarma.type!.toLowerCase() == 'date') {
-          if (_evaluateExpiryAlarm(alarma, days)) {
-            final color = _parseColor(alarma.color!);
-            if (color != null) {
-              if (productId != null) {
-                _expiryColorCache[productId] = color;
-              }
-              return color;
-            }
-          }
-        }
-      }
-      
-      // Si no se encontró ninguna alarma que coincida, devolver un color predeterminado
-      return Colors.grey;
-    } catch (e) {
-      print('Error al obtener color para fecha de caducidad: $e');
-      return Colors.grey;
-    }
   }
 
   static bool _evaluateExpiryAlarm(Alarm alarm, int days) {
@@ -342,7 +258,6 @@ class AlarmUtils {
         int.parse(color.split(',')[3]),
       ).withValues(alpha: 0.3);
     } catch (e) {
-      print('Error parsing color: $e');
       return null;
     }
   }
