@@ -44,6 +44,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Archivos de configuración sensible
+.env
+.env.local
+secrets.dart
+/lib/data/secrets.dart
+
 /json-server
 /node_modules
 /errores
