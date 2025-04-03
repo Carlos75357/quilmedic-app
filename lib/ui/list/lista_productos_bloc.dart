@@ -22,9 +22,7 @@ class ListaProductosBloc
   late HospitalRepository hospitalRepository = HospitalRepository(
     apiClient: apiClient,
   );
-  late AlarmRepository alarmRepository = AlarmRepository(
-    apiClient: apiClient
-  );
+  late AlarmRepository alarmRepository = AlarmRepository(apiClient: apiClient);
   late ProductoLocalStorage productoLocalStorage = ProductoLocalStorage();
   late AlarmUtils alarmUtils = AlarmUtils();
 

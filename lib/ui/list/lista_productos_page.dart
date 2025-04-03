@@ -12,11 +12,13 @@ import 'package:quilmedic/widgets/list/product_list_section.dart';
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
   final int hospitalId;
+  final String almacenName;
 
   const ListaProductosPage({
     super.key,
     this.productos,
     required this.hospitalId,
+    required this.almacenName,
   });
 
   @override
@@ -160,7 +162,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ProductListSection(
-                              title: 'Productos del almacén $hospitalId',
+                              title: 'Productos del almacén ${widget.almacenName}',
                               productos: productosAlmacenActual,
                               headerColor: Colors.blue,
                               rowColor: Colors.grey.shade50,
@@ -297,6 +299,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                 (context) => ListaProductosPage(
                   productos: widget.productos,
                   hospitalId: widget.hospitalId,
+                  almacenName: widget.almacenName,
                 ),
           ),
         );

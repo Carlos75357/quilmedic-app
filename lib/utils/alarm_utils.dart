@@ -1,8 +1,6 @@
-import 'dart:ui';
 import 'dart:core';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
 import 'package:quilmedic/data/respository/alarm_repository.dart';
@@ -19,6 +17,30 @@ class AlarmUtils {
   static final List<Alarm> _generalAlarmCache = [];
   static final Map<String, Color> _stockColorCache = {};
   static final Map<String, Color> _expiryColorCache = {};
+
+  Future<void> initGeneralAlarms() async {
+    if (_generalAlarmCache.isEmpty) {
+      final stockResponse = await getGeneralStockAlarms();
+      final dateResponse = await getGeneralExpirationDateAlarms();
+      
+      _generalAlarmCache.clear();
+      _generalAlarmCache.addAll([...stockResponse, ...dateResponse]);
+      
+      await ProductoLocalStorage.agregarAlarmas(_generalAlarmCache);
+    }
+  }
+
+  Future<void> loadAlarmsFromCache() async {
+    if (_generalAlarmCache.isEmpty) {
+      final alarms = await ProductoLocalStorage.obtenerAlarmas();
+      if (alarms.isNotEmpty) {
+        _generalAlarmCache.clear();
+        _generalAlarmCache.addAll(alarms);
+      } else {
+        await initGeneralAlarms();
+      }
+    }
+  }
 
   Future<List<Alarm>> getGeneralExpirationDateAlarms() async {
     final response = await alarmRepository.getGeneralAlarms();
@@ -46,14 +68,6 @@ class AlarmUtils {
     return [...stockResponse, ...dateResponse];
   }
 
-  // Future<List<Alarm>> getAlarmasEspecificas() async {
-  //   final response = await alarmRepository.getAlarmsByProducts();
-  //   if (response.success) {
-  //     return response.data as List<Alarm>;
-  //   }
-  //   return [];
-  // }
-
   Future<List<Alarm>> getExpirationDateAlarmByProduct(String productId) async {
     final response = await alarmRepository.getAlarmByProductId(productId);
     if (response.success && (response.data as List).isNotEmpty) {
@@ -76,21 +90,27 @@ class AlarmUtils {
     return Alarm();
   }
 
-  Future<Map<String, Color>> loadStockColorsForProducts(List<Producto> productos) async {
+  Future<Map<String, Color>> loadStockColorsForProducts(
+    List<Producto> productos,
+  ) async {
     Map<String, Color> colorsMap = {};
-    
-    List<String> seriesList = productos.map((p) => p.serie).toList();
-    
+
+    await loadAlarmsFromCache();
+
+    List<String> productIds = productos.map((p) => p.numerodeproducto.toString()).toList();
+
     try {
-      final response = await alarmRepository.getAlarmsByProducts(seriesList);
+      final response = await alarmRepository.getAlarmsByProducts(
+        productIds,
+      );
       if (response.success && response.data is List<Alarm>) {
         List<Alarm> alarms = response.data;
-        
-        await ProductoLocalStorage.agregarAlarmasStock(alarms);
-        
+
+        await ProductoLocalStorage.agregarAlarmasEspecificas(alarms);
+
         for (var alarm in alarms) {
-          if (alarm.type?.toLowerCase() == 'stock' && 
-              alarm.productId != null && 
+          if (alarm.type?.toLowerCase() == 'stock' &&
+              alarm.productId != null &&
               alarm.color != null) {
             final color = _parseColor(alarm.color!);
             if (color != null) {
@@ -102,48 +122,51 @@ class AlarmUtils {
     } catch (e) {
       print('Error al cargar alarmas específicas: $e');
     }
-    
-    List<Alarm> generalStockAlarms = await ProductoLocalStorage.obtenerAlarmas();
-    if (generalStockAlarms.isEmpty) {
-      generalStockAlarms = await getGeneralStockAlarms();
-      await ProductoLocalStorage.agregarAlarmas(generalStockAlarms);
-    }
-    
+
     for (var producto in productos) {
-      if (!colorsMap.containsKey(producto.serie)) {
-        for (var alarm in generalStockAlarms) {
-          if (alarm.type?.toLowerCase() == 'stock' && 
-              _evaluateStockAlarm(alarm, producto.cantidad)) {
+      final productId = producto.numerodeproducto.toString();
+      if (!colorsMap.containsKey(productId)) {
+        final stockAlarms = _generalAlarmCache
+            .where((a) => a.type?.toLowerCase() == 'stock')
+            .toList();
+            
+        for (var alarm in stockAlarms) {
+          if (_evaluateStockAlarm(alarm, producto.cantidad)) {
             final color = _parseColor(alarm.color!);
             if (color != null) {
-              colorsMap[producto.serie] = color;
+              colorsMap[productId] = color;
               break;
             }
           }
         }
       }
     }
-    
+
+    print(colorsMap);
     _stockColorCache.addAll(colorsMap);
-    
+
     return colorsMap;
   }
   
-  Future<Map<String, Color>> loadExpiryColorsForProducts(List<Producto> productos) async {
+  Future<Map<String, Color>> loadExpiryColorsForProducts(
+    List<Producto> productos,
+  ) async {
     Map<String, Color> colorsMap = {};
-    
+
+    await loadAlarmsFromCache();
+
     List<String> seriesList = productos.map((p) => p.serie).toList();
-    
+
     try {
       final response = await alarmRepository.getAlarmsByProducts(seriesList);
       if (response.success && response.data is List<Alarm>) {
         List<Alarm> alarms = response.data;
-        
-        await ProductoLocalStorage.agregarAlarmasStock(alarms);
-        
+
+        await ProductoLocalStorage.agregarAlarmasEspecificas(alarms);
+
         for (var alarm in alarms) {
-          if (alarm.type?.toLowerCase() == 'date' && 
-              alarm.productId != null && 
+          if (alarm.type?.toLowerCase() == 'date' &&
+              alarm.productId != null &&
               alarm.color != null) {
             final color = _parseColor(alarm.color!);
             if (color != null) {
@@ -155,19 +178,17 @@ class AlarmUtils {
     } catch (e) {
       print('Error al cargar alarmas específicas: $e');
     }
-    
-    List<Alarm> generalExpiryAlarms = await ProductoLocalStorage.obtenerAlarmas();
-    if (generalExpiryAlarms.isEmpty) {
-      generalExpiryAlarms = await getGeneralExpirationDateAlarms();
-      await ProductoLocalStorage.agregarAlarmas(generalExpiryAlarms);
-    }
-    
+
     for (var producto in productos) {
       if (!colorsMap.containsKey(producto.serie)) {
         final days = producto.fechacaducidad.difference(DateTime.now()).inDays;
-        for (var alarm in generalExpiryAlarms) {
-          if (alarm.type?.toLowerCase() == 'date' && 
-              _evaluateExpiryAlarm(alarm, days)) {
+        
+        final dateAlarms = _generalAlarmCache
+            .where((a) => a.type?.toLowerCase() == 'date')
+            .toList();
+            
+        for (var alarm in dateAlarms) {
+          if (_evaluateExpiryAlarm(alarm, days)) {
             final color = _parseColor(alarm.color!);
             if (color != null) {
               colorsMap[producto.serie] = color;
@@ -177,24 +198,57 @@ class AlarmUtils {
         }
       }
     }
-    
+
+    print(colorsMap);
     _expiryColorCache.addAll(colorsMap);
-    
+
     return colorsMap;
   }
-  
+
   Color getColorForStockFromCache(int stock, String? productId) {
     if (productId != null && _stockColorCache.containsKey(productId)) {
       return _stockColorCache[productId]!;
     }
-    return Colors.grey;
+    
+    final stockAlarms = _generalAlarmCache
+        .where((a) => a.type?.toLowerCase() == 'stock')
+        .toList();
+        
+    for (var alarm in stockAlarms) {
+      if (_evaluateStockAlarm(alarm, stock)) {
+        final color = _parseColor(alarm.color!);
+        if (color != null) {
+          return color;
+        }
+      }
+    }
+    
+    return Colors.grey.withValues(alpha: 0.3);
   }
 
-  Color getColorForExpiryFromCache(String? productId) {
+  Color getColorForExpiryFromCache(String? productId, [DateTime? expiryDate]) {
     if (productId != null && _expiryColorCache.containsKey(productId)) {
       return _expiryColorCache[productId]!;
     }
-    return Colors.grey;
+    
+    if (expiryDate != null) {
+      final days = expiryDate.difference(DateTime.now()).inDays;
+      
+      final dateAlarms = _generalAlarmCache
+          .where((a) => a.type?.toLowerCase() == 'date')
+          .toList();
+          
+      for (var alarm in dateAlarms) {
+        if (_evaluateExpiryAlarm(alarm, days)) {
+          final color = _parseColor(alarm.color!);
+          if (color != null) {
+            return color;
+          }
+        }
+      }
+    }
+    
+    return Colors.grey.withValues(alpha: 0.3);
   }
 
   static bool _evaluateExpiryAlarm(Alarm alarm, int days) {

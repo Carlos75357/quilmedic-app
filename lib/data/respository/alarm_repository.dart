@@ -124,7 +124,6 @@ class AlarmRepository {
 
   Future<RepositoryResponse> getAlarmsByProducts(List<String> serialNumbers) async {
     try {
-      // Construct query parameters
       final Map<String, dynamic> queryParams = {};
       for (int i = 0; i < serialNumbers.length; i++) {
         queryParams['serial_numbers[$i]'] = serialNumbers[i];

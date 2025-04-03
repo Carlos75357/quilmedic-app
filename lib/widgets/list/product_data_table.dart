@@ -28,7 +28,10 @@ class ProductDataTable extends StatelessWidget {
 
     final Map<String, Map<int, List<Producto>>> groupedProducts = {};
     for (final producto in productos) {
-      groupedProducts.putIfAbsent(producto.numerodeproducto, () => {}).putIfAbsent(producto.codigoalmacen, () => []).add(producto);
+      groupedProducts
+          .putIfAbsent(producto.numerodeproducto, () => {})
+          .putIfAbsent(producto.codigoalmacen, () => [])
+          .add(producto);
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -38,7 +41,11 @@ class ProductDataTable extends StatelessWidget {
     final isWideScreen = screenWidth > 1200;
 
     if (isExtremelySmallScreen) {
-      return CompactList(productos: productos, onProductTap: onProductTap, onTransferTap: onTransferTap);
+      return CompactList(
+        productos: productos,
+        onProductTap: onProductTap,
+        onTransferTap: onTransferTap,
+      );
     }
 
     return LayoutBuilder(
@@ -155,85 +162,87 @@ class ProductDataTable extends StatelessWidget {
                         ),
                       ),
                     ],
-                    rows: List<DataRow>.generate(
-                      productos.length,
-                      (index) {
-                        final producto = productos[index];
-                        final totalStock = groupedProducts[producto.numerodeproducto]?[producto.codigoalmacen]?.fold<int>(0, (sum, p) => sum + p.cantidad) ?? 0;
+                    rows: List<DataRow>.generate(productos.length, (index) {
+                      final producto = productos[index];
+                      final totalStock =
+                          groupedProducts[producto.numerodeproducto]?[producto
+                                  .codigoalmacen]
+                              ?.fold<int>(0, (sum, p) => sum + p.cantidad) ??
+                          0;
 
-                        return DataRow(
-                          color: WidgetStateProperty.resolveWith<Color?>((
-                            Set<WidgetState> states,
-                          ) {
-                            if (states.contains(WidgetState.hovered)) {
-                              return Colors.grey.shade100;
-                            }
-                            return rowColor;
-                          }),
-                          cells: [
-                            DataCell(
-                              SizedBox(
-                                width: descriptionWidth,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 4.0,
-                                  ),
-                                  child: Text(
-                                    producto.descripcion ?? '',
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: TextStyle(
-                                      fontSize: isVerySmallScreen ? 11 : null,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
+                      return DataRow(
+                        color: WidgetStateProperty.resolveWith<Color?>((
+                          Set<WidgetState> states,
+                        ) {
+                          if (states.contains(WidgetState.hovered)) {
+                            return Colors.grey.shade100;
+                          }
+                          return rowColor;
+                        }),
+                        cells: [
+                          DataCell(
+                            SizedBox(
+                              width: descriptionWidth,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
                                 ),
-                              ),
-                              onTap: () => onProductTap(producto),
-                            ),
-                            DataCell(
-                              SizedBox.expand(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: alarmUtils.getColorForExpiryFromCache(producto.serie),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 4,
-                                  ),
-                                  width: expiryWidth,
-                                  child: ProductExpiryBadge(
-                                    expiryDate: producto.fechacaducidad,
-                                    formattedDate: formatDate(
-                                      producto.fechacaducidad,
-                                    ),
+                                child: Text(
+                                  producto.descripcion ?? '',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  style: TextStyle(
+                                    fontSize: isVerySmallScreen ? 11 : null,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
                             ),
-                            DataCell(
-                              SizedBox.expand(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: alarmUtils.getColorForStockFromCache(totalStock, producto.numerodeproducto),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 4,
-                                  ),
-                                  width: stockWidth,
-                                  child: ProductStockBadge(
-                                    stock: totalStock,
+                            onTap: () => onProductTap(producto),
+                          ),
+                          DataCell(
+                            SizedBox.expand(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: getExpiryColor(producto),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 4,
+                                ),
+                                width: expiryWidth,
+                                child: ProductExpiryBadge(
+                                  expiryDate: producto.fechacaducidad,
+                                  formattedDate: formatDate(
+                                    producto.fechacaducidad,
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                        );
-                      },
-                    ),
+                          ),
+                          DataCell(
+                            SizedBox.expand(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: alarmUtils.getColorForStockFromCache(
+                                    totalStock,
+                                    producto.numerodeproducto,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 4,
+                                ),
+                                width: stockWidth,
+                                child: ProductStockBadge(stock: totalStock),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
                   ),
                 ),
               ),
@@ -242,5 +251,10 @@ class ProductDataTable extends StatelessWidget {
         );
       },
     );
+  }
+
+  Color getExpiryColor(Producto producto) {
+    final alarmUtils = AlarmUtils();
+    return alarmUtils.getColorForExpiryFromCache(producto.serie, producto.fechacaducidad);
   }
 }
