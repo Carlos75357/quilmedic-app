@@ -26,10 +26,15 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
 
   Future<void> _loadColors() async {
     try {
-      
-      final expColor = _alarmUtils.getColorForExpiryFromCache(widget.producto.numerodeproducto);
-      
-      final stColor = _alarmUtils.getColorForStockFromCache(widget.producto.cantidad, widget.producto.numerodeproducto);
+      final expColor = _alarmUtils.getColorForExpiryFromCache(
+        widget.producto.serie,
+        widget.producto.fechacaducidad,
+      );
+
+      final stColor = _alarmUtils.getColorForStockFromCache(
+        widget.producto.cantidad,
+        widget.producto.numerodeproducto,
+      );
 
       if (mounted) {
         setState(() {
@@ -42,9 +47,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
       if (mounted) {
         setState(() {
           expiryColor = Colors.grey.withValues(alpha: 0.3);
-          stockColor = widget.producto.cantidad > 0 
-              ? Colors.green.withValues(alpha: 0.3) 
-              : Colors.red.withValues(alpha: 0.3);
+          stockColor =
+              widget.producto.cantidad > 0
+                  ? Colors.green.withValues(alpha: 0.3)
+                  : Colors.red.withValues(alpha: 0.3);
           isLoading = false;
         });
       }
@@ -59,23 +65,24 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      body: isLoading 
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildInfoCard(context),
-                  const SizedBox(height: 16),
-                  _buildExpiryInfo(context),
-                  const SizedBox(height: 16),
-                  _buildStockInfo(context),
-                  const SizedBox(height: 24),
-                  _buildLocationInfo(context),
-                ],
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoCard(context),
+                    const SizedBox(height: 16),
+                    _buildExpiryInfo(context),
+                    const SizedBox(height: 16),
+                    _buildStockInfo(context),
+                    const SizedBox(height: 24),
+                    _buildLocationInfo(context),
+                  ],
+                ),
               ),
-            ),
     );
   }
 
@@ -89,10 +96,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
           children: [
             Text(
               widget.producto.descripcion ?? 'Sin descripción',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             _buildInfoRow('ID Producto:', widget.producto.numerodeproducto),
@@ -113,10 +117,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
           children: [
             const Text(
               'Información de Caducidad',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             Row(
@@ -127,7 +128,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: expiryColor,
                     borderRadius: BorderRadius.circular(4),
@@ -135,7 +139,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                   child: Text(
                     formatDate(widget.producto.fechacaducidad),
                     style: TextStyle(
-                      color: expiryColor == Colors.red ? Colors.white : Colors.black,
+                      color:
+                          expiryColor == Colors.red
+                              ? Colors.white
+                              : Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -158,10 +165,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
           children: [
             const Text(
               'Información de Stock',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             Row(
@@ -172,7 +176,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: stockColor,
                     borderRadius: BorderRadius.circular(4),
@@ -180,7 +187,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                   child: Text(
                     widget.producto.cantidad.toString(),
                     style: TextStyle(
-                      color: stockColor == Colors.red ? Colors.white : Colors.black,
+                      color:
+                          stockColor == Colors.red
+                              ? Colors.white
+                              : Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -203,14 +213,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
           children: [
             const Text(
               'Ubicación',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             _buildInfoRow('Almacén:', 'ID: ${widget.producto.codigoalmacen}'),
-            _buildInfoRow('Lote:', widget.producto.numerolote.toString()),
           ],
         ),
       ),
@@ -223,18 +229,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.black87,
-              ),
-            ),
+            child: Text(value, style: const TextStyle(color: Colors.black87)),
           ),
         ],
       ),

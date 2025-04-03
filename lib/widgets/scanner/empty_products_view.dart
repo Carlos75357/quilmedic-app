@@ -31,7 +31,7 @@ class EmptyProductsView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Escanea un código QR para comenzar',
+                'Escanea un código de barras para comenzar',
                 style: TextStyle(
                   color: Colors.grey.shade500,
                 ),
