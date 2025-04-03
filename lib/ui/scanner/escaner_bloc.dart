@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
 import 'package:quilmedic/data/respository/producto_repository.dart';
-import 'package:quilmedic/domain/alarm.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
@@ -50,6 +49,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanerLoading());
 
     try {
+      hospitalSeleccionado = null;
+      
       List<Hospital> hospitales = await hospitalRepository
           .getAllHospitals()
           .then((value) => value.data);
@@ -65,12 +66,9 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     Emitter<EscanerState> emit,
   ) async {
     try {
-      if (_validarHospitalSeleccionado(emit) == false) return;
-
-      final String code = event.code;
-
+      final code = event.code.trim();
       if (code.isEmpty) {
-        emit(EscanerError("Código inválido: No puede estar vacío"));
+        emit(EscanerError("El código de barras no puede estar vacío"));
         return;
       }
 
@@ -353,11 +351,11 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
           await _guardarProductosEscaneadosLocalmente(productos);
 
-          List<Alarm> alarmLocal = await ProductoLocalStorage.obtenerAlarmas();
-          if (alarmLocal.isEmpty) {
-            final alarms = await alarmUtils.getGeneralAlarms();
-            await ProductoLocalStorage.agregarAlarmas(alarms);
-          }
+          // List<Alarm> alarmLocal = await ProductoLocalStorage.obtenerAlarmas();
+          // if (alarmLocal.isEmpty) {
+          //   final alarms = await alarmUtils.getGeneralAlarms();
+          //   await ProductoLocalStorage.agregarAlarmas(alarms);
+          // }
 
           try {
             await alarmUtils.loadStockColorsForProducts(productos);
@@ -569,6 +567,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
             (context) => ListaProductosPage(
               productos: productos,
               hospitalId: hospitalSeleccionado?.id ?? 0,
+              almacenName: hospitalSeleccionado?.description ?? '',
             ),
       ),
     );
