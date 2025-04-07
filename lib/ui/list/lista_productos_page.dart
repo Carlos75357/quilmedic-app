@@ -46,7 +46,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   Widget build(BuildContext context) {
     // final isVerySmallScreen = MediaQuery.of(context).size.width < 320;
     for (final producto in productos) {
-    groupedProducts.putIfAbsent(producto.numerodeproducto, () => {}).putIfAbsent(producto.codigoalmacen, () => []).add(producto);
+    groupedProducts.putIfAbsent(producto.productcode, () => {}).putIfAbsent(producto.storeid, () => []).add(producto);
     }
     
     final theme = Theme.of(context);
@@ -124,7 +124,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     final int hospitalId = widget.hospitalId;
 
     for (var producto in productos) {
-      if (producto.codigoalmacen == hospitalId) {
+      if (producto.storeid == hospitalId) {
         productosAlmacenActual.add(producto);
       } else {
         productosOtrosAlmacenes.add(producto);

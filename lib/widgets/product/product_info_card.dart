@@ -33,9 +33,9 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
   Future<void> _loadColors() async {
     try {
       
-      final expColor = _alarmUtils.getColorForExpiryFromCache(widget.producto.numerodeproducto);
+      final expColor = _alarmUtils.getColorForExpiryFromCache(widget.producto.productcode);
       
-      final stColor = _alarmUtils.getColorForStockFromCache(widget.totalStock, widget.producto.numerodeproducto);
+      final stColor = _alarmUtils.getColorForStockFromCache(widget.totalStock, widget.producto.productcode);
 
       if (mounted) {
         setState(() {
@@ -72,7 +72,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.producto.descripcion ?? 'Sin descripción',
+                    widget.producto.description ?? 'Sin descripción',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 24,
@@ -82,8 +82,8 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   const Divider(height: 32),
                   
                   ProductInfoRow(
-                    label: 'Serie:', 
-                    value: widget.producto.serie,
+                    label: 'serialnumber:', 
+                    value: widget.producto.serialnumber,
                     icon: Icons.qr_code,
                   ),
                   
@@ -91,7 +91,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   
                   ProductInfoRow(
                     label: 'ID Producto:', 
-                    value: widget.producto.numerodeproducto.toString(),
+                    value: widget.producto.productcode.toString(),
                     icon: Icons.tag,
                   ),
                   
@@ -107,7 +107,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   
                   ProductInfoRow(
                     label: 'Fecha de caducidad:', 
-                    value: formatDate(widget.producto.fechacaducidad),
+                    value: formatDate(widget.producto.expirationdate),
                     icon: Icons.calendar_today,
                     color: expiryColor,
                   ),
@@ -115,8 +115,8 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   const SizedBox(height: 16),
 
                   ProductInfoRow(
-                    label: 'Cantidad:', 
-                    value: widget.producto.cantidad.toString(),
+                    label: 'stock:', 
+                    value: widget.producto.stock.toString(),
                     icon: Icons.inventory,
                     color: stockColor,
                   ),
@@ -125,7 +125,7 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   
                   ProductInfoRow(
                     label: 'Código de almacén:', 
-                    value: widget.producto.codigoalmacen.toString(),
+                    value: widget.producto.storeid.toString(),
                     icon: Icons.warehouse,
                   ),
                 ],

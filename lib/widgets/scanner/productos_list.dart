@@ -35,7 +35,7 @@ class _ProductosListState extends State<ProductosList> {
         itemBuilder: (context, index) {
           final producto = widget.productos[index];
           return Dismissible(
-            key: Key(producto.serie.toString()),
+            key: Key(producto.serialnumber.toString()),
             background: Container(
               color: Colors.red.shade100,
               alignment: Alignment.centerRight,
@@ -47,7 +47,7 @@ class _ProductosListState extends State<ProductosList> {
               widget.onRemove(producto);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Producto "${producto.serie}" eliminado'),
+                  content: Text('Producto "${producto.serialnumber}" eliminado'),
                   action: SnackBarAction(
                     label: 'Deshacer',
                     onPressed: () {
@@ -63,7 +63,7 @@ class _ProductosListState extends State<ProductosList> {
                 vertical: isSmallScreen ? 6 : 8,
               ),
               title: Text(
-                producto.serie.toString(),
+                producto.serialnumber.toString(),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: isSmallScreen ? 14 : 16,
@@ -84,7 +84,7 @@ class _ProductosListState extends State<ProductosList> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'Serie: ${producto.serie}',
+                          'serialnumber: ${producto.serialnumber}',
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: isSmallScreen ? 12 : 14,

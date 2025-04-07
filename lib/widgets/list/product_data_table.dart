@@ -29,8 +29,8 @@ class ProductDataTable extends StatelessWidget {
     final Map<String, Map<int, List<Producto>>> groupedProducts = {};
     for (final producto in productos) {
       groupedProducts
-          .putIfAbsent(producto.numerodeproducto, () => {})
-          .putIfAbsent(producto.codigoalmacen, () => [])
+          .putIfAbsent(producto.productcode, () => {})
+          .putIfAbsent(producto.storeid, () => [])
           .add(producto);
     }
 
@@ -165,9 +165,9 @@ class ProductDataTable extends StatelessWidget {
                     rows: List<DataRow>.generate(productos.length, (index) {
                       final producto = productos[index];
                       final totalStock =
-                          groupedProducts[producto.numerodeproducto]?[producto
-                                  .codigoalmacen]
-                              ?.fold<int>(0, (sum, p) => sum + p.cantidad) ??
+                          groupedProducts[producto.productcode]?[producto
+                                  .storeid]
+                              ?.fold<int>(0, (sum, p) => sum + p.stock) ??
                           0;
 
                       return DataRow(
@@ -188,7 +188,7 @@ class ProductDataTable extends StatelessWidget {
                                   vertical: 4.0,
                                 ),
                                 child: Text(
-                                  producto.descripcion ?? '',
+                                  producto.description ?? '',
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,
                                   style: TextStyle(
@@ -213,9 +213,9 @@ class ProductDataTable extends StatelessWidget {
                                 ),
                                 width: expiryWidth,
                                 child: ProductExpiryBadge(
-                                  expiryDate: producto.fechacaducidad,
+                                  expiryDate: producto.expirationdate,
                                   formattedDate: formatDate(
-                                    producto.fechacaducidad,
+                                    producto.expirationdate,
                                   ),
                                 ),
                               ),
@@ -227,7 +227,7 @@ class ProductDataTable extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: alarmUtils.getColorForStockFromCache(
                                     totalStock,
-                                    producto.numerodeproducto,
+                                    producto.productcode,
                                   ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -255,6 +255,6 @@ class ProductDataTable extends StatelessWidget {
 
   Color getExpiryColor(Producto producto) {
     final alarmUtils = AlarmUtils();
-    return alarmUtils.getColorForExpiryFromCache(producto.serie, producto.fechacaducidad);
+    return alarmUtils.getColorForExpiryFromCache(producto.serialnumber, producto.expirationdate);
   }
 }

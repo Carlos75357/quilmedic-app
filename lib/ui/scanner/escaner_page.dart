@@ -102,9 +102,6 @@ class _EscanerPageState extends State<EscanerPage> {
 
   void _onManualCodeSubmitted(String code, BuildContext context) {
     BlocProvider.of<EscanerBloc>(context).add(SubmitCodeEvent(code));
-    setState(() {
-      _isManualInput = false;
-    });
     
     if (selectedHospital == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -113,10 +110,16 @@ class _EscanerPageState extends State<EscanerPage> {
           backgroundColor: Colors.orange,
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+          margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
         ),
       );
     }
+  }
+  
+  void _closeManualInput() {
+    setState(() {
+      _isManualInput = false;
+    });
   }
 
   @override
@@ -160,31 +163,31 @@ class _EscanerPageState extends State<EscanerPage> {
                 SnackBar(
                   content: Text(state.message),
                   backgroundColor: Colors.red,
-                  duration: const Duration(milliseconds: 1000),
+                  duration: const Duration(milliseconds: 5000),
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                  margin: const EdgeInsets.only(bottom: 180, right: 20, left: 20),
                 ),
               );
             } else if (state is ProductoEscaneadoExistenteState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'El producto ${state.producto.serie} ya existe',
+                    'El producto ${state.producto.serialnumber} ya existe',
                   ),
                   backgroundColor: Colors.orange,
                   duration: const Duration(milliseconds: 1000),
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                  margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                 ),
               );
             } else if (state is ProductoEscaneadoGuardadoState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Producto ${state.producto.serie} guardado'),
+                  content: Text('Producto ${state.producto.serialnumber} guardado'),
                   backgroundColor: Colors.green,
                   duration: const Duration(milliseconds: 1000),
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                  margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                 ),
               );
             } else if (state is ProductosListadosState) {
@@ -198,7 +201,7 @@ class _EscanerPageState extends State<EscanerPage> {
                   backgroundColor: Colors.green,
                   duration: const Duration(milliseconds: 1000),
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                  margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                 ),
               );
             } else if (state is GuardarOfflineSuccess) {
@@ -208,7 +211,7 @@ class _EscanerPageState extends State<EscanerPage> {
                   backgroundColor: Colors.blue,
                   duration: const Duration(seconds: 5),
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                  margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                 ),
               );
               setState(() {
@@ -222,7 +225,7 @@ class _EscanerPageState extends State<EscanerPage> {
                   backgroundColor: Colors.green,
                   duration: const Duration(milliseconds: 1000),
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                  margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                 ),
               );
               setState(() {
@@ -236,7 +239,7 @@ class _EscanerPageState extends State<EscanerPage> {
                     backgroundColor: Colors.orange,
                     duration: const Duration(seconds: 5),
                     behavior: SnackBarBehavior.floating,
-                    margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                    margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                   ),
                 );
               }
@@ -267,7 +270,7 @@ class _EscanerPageState extends State<EscanerPage> {
                   backgroundColor: Colors.blue,
                   duration: const Duration(seconds: 5),
                   behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                  margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                 ),
               );
               setState(() {
@@ -292,7 +295,7 @@ class _EscanerPageState extends State<EscanerPage> {
                         backgroundColor: Colors.orange,
                         duration: const Duration(seconds: 2),
                         behavior: SnackBarBehavior.floating,
-                        margin: EdgeInsets.only(bottom: MediaQuery.of(context).size.height - 100, right: 20, left: 20),
+                        margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
                       ),
                     );
                   }
@@ -335,9 +338,15 @@ class _EscanerPageState extends State<EscanerPage> {
           const SizedBox(height: 12),
 
           if (_isManualInput)
-            ManualCodeInput(
-              onCodeSubmitted:
-                  (code) => _onManualCodeSubmitted(code, context),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 180),
+                child: ManualCodeInput(
+                  onCodeSubmitted: (code) => _onManualCodeSubmitted(code, context),
+                  onClose: _closeManualInput,
+                ),
+              ),
             )
           else
             Wrap(

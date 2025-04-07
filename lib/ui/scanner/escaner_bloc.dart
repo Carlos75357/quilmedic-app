@@ -74,14 +74,14 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       final ProductoEscaneado nuevoProducto = ProductoEscaneado(code);
 
-      if (productosEscaneados.any((p) => p.serie == nuevoProducto.serie)) {
+      if (productosEscaneados.any((p) => p.serialnumber == nuevoProducto.serialnumber)) {
         emit(ProductoEscaneadoExistenteState(nuevoProducto));
         return;
       }
 
       final productosPendientes =
           await ProductoLocalStorage.obtenerProductosPendientes();
-      if (productosPendientes.any((p) => p.serie == nuevoProducto.serie)) {
+      if (productosPendientes.any((p) => p.serialnumber == nuevoProducto.serialnumber)) {
         emit(ProductoEscaneadoExistenteState(nuevoProducto));
         return;
       }
@@ -158,10 +158,10 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     EliminarProductoEvent event,
     Emitter<EscanerState> emit,
   ) {
-    productosEscaneados.removeWhere((p) => p.serie == event.producto.serie);
-    _eliminarProductoPorSerie(event.producto.serie);
+    productosEscaneados.removeWhere((p) => p.serialnumber == event.producto.serialnumber);
+    _eliminarProductoPorserialnumber(event.producto.serialnumber);
 
-    ProductoLocalStorage.eliminarProductoPendiente(event.producto.serie);
+    ProductoLocalStorage.eliminarProductoPendiente(event.producto.serialnumber);
 
     emit(
       ProductosListadosState(
@@ -222,7 +222,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         final productosPendientes = await _obtenerProductosPendientes(emit);
         if (productosPendientes != null && productosPendientes.isNotEmpty) {
           for (var producto in productosPendientes) {
-            if (!productosEscaneados.any((p) => p.serie == producto.serie)) {
+            if (!productosEscaneados.any((p) => p.serialnumber == producto.serialnumber)) {
               productosEscaneados.add(producto);
             }
           }
@@ -309,7 +309,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           hospitalIdPendiente == hospitalSeleccionado!.id) {
         for (var productoPendiente in productosPendientes) {
           if (!productosEscaneados.any(
-            (p) => p.serie == productoPendiente.serie,
+            (p) => p.serialnumber == productoPendiente.serialnumber,
           )) {
             productosEscaneados.add(productoPendiente);
           }
@@ -436,15 +436,15 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  Future<void> _eliminarProductoPorSerie(String serie) async {
+  Future<void> _eliminarProductoPorserialnumber(String serialnumber) async {
     try {
       final response = await apiClient.getAll('/productos', null);
 
       if (response is List) {
         for (var item in response) {
           if (item is Map<String, dynamic> &&
-              item['serie'] != null &&
-              item['serie'] == serie &&
+              item['serialnumber'] != null &&
+              item['serialnumber'] == serialnumber &&
               item['numproducto'] != null) {
             final String numProducto = item['numproducto'];
             await ProductoLocalStorage.eliminarProductoEscaneado(numProducto);
@@ -453,7 +453,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         }
       }
     } catch (e) {
-      throw Exception('Error al eliminar producto por serie: ${e.toString()}');
+      throw Exception('Error al eliminar producto por serialnumber: ${e.toString()}');
     }
   }
 
@@ -547,7 +547,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   ) async {
     try {
       final List<String> productosIds =
-          productos.map((p) => p.numerodeproducto).toList();
+          productos.map((p) => p.productcode).toList();
 
       for (final id in productosIds) {
         await ProductoLocalStorage.agregarProductoEscaneado(id);

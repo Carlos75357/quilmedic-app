@@ -29,7 +29,7 @@ class CompactList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  producto.descripcion ?? 'Sin descripción',
+                  producto.description ?? 'Sin descripción',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -43,7 +43,7 @@ class CompactList extends StatelessWidget {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: alarmUtils.getColorForExpiryFromCache(producto.serie),
+                          color: alarmUtils.getColorForExpiryFromCache(producto.serialnumber),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding: const EdgeInsets.symmetric(
@@ -61,9 +61,9 @@ class CompactList extends StatelessWidget {
                             const SizedBox(width: 4),
                             Flexible(
                               child: ProductExpiryBadge(
-                                expiryDate: producto.fechacaducidad,
+                                expiryDate: producto.expirationdate,
                                 formattedDate: formatDate(
-                                  producto.fechacaducidad,
+                                  producto.expirationdate,
                                 ),
                                 isSmallScreen: true,
                               ),
@@ -76,7 +76,7 @@ class CompactList extends StatelessWidget {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: alarmUtils.getColorForStockFromCache(producto.cantidad, producto.serie),
+                          color: alarmUtils.getColorForStockFromCache(producto.stock, producto.serialnumber),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding: const EdgeInsets.symmetric(
@@ -93,7 +93,7 @@ class CompactList extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             ProductStockBadge(
-                              stock: producto.cantidad,
+                              stock: producto.stock,
                               isSmallScreen: true,
                             ),
                           ],

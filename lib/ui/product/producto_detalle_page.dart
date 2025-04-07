@@ -27,13 +27,13 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
   Future<void> _loadColors() async {
     try {
       final expColor = _alarmUtils.getColorForExpiryFromCache(
-        widget.producto.serie,
-        widget.producto.fechacaducidad,
+        widget.producto.serialnumber,
+        widget.producto.expirationdate,
       );
 
       final stColor = _alarmUtils.getColorForStockFromCache(
-        widget.producto.cantidad,
-        widget.producto.numerodeproducto,
+        widget.producto.stock,
+        widget.producto.productcode,
       );
 
       if (mounted) {
@@ -48,7 +48,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         setState(() {
           expiryColor = Colors.grey.withValues(alpha: 0.3);
           stockColor =
-              widget.producto.cantidad > 0
+              widget.producto.stock > 0
                   ? Colors.green.withValues(alpha: 0.3)
                   : Colors.red.withValues(alpha: 0.3);
           isLoading = false;
@@ -95,12 +95,12 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.producto.descripcion ?? 'Sin descripción',
+              widget.producto.description ?? 'Sin descripción',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const Divider(),
-            _buildInfoRow('ID Producto:', widget.producto.numerodeproducto),
-            _buildInfoRow('Serie:', widget.producto.serie),
+            _buildInfoRow('ID Producto:', widget.producto.productcode),
+            _buildInfoRow('serialnumber:', widget.producto.serialnumber),
           ],
         ),
       ),
@@ -137,7 +137,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    formatDate(widget.producto.fechacaducidad),
+                    formatDate(widget.producto.expirationdate),
                     style: TextStyle(
                       color:
                           expiryColor == Colors.red
@@ -171,7 +171,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
             Row(
               children: [
                 const Text(
-                  'Cantidad Disponible:',
+                  'stock Disponible:',
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(width: 8),
@@ -185,7 +185,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    widget.producto.cantidad.toString(),
+                    widget.producto.stock.toString(),
                     style: TextStyle(
                       color:
                           stockColor == Colors.red
@@ -216,7 +216,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
-            _buildInfoRow('Almacén:', 'ID: ${widget.producto.codigoalmacen}'),
+            _buildInfoRow('Almacén:', 'ID: ${widget.producto.storeid}'),
           ],
         ),
       ),

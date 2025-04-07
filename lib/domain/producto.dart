@@ -1,43 +1,43 @@
 class Producto {
-  String numerodeproducto; // el id
-  String? descripcion;
-  int codigoalmacen;
+  String productcode; // el id
+  String? description;
+  int storeid;
   int numerolote;
-  String serie;
-  DateTime fechacaducidad;
-  int cantidad;
+  String serialnumber;
+  DateTime expirationdate;
+  int stock;
 
   Producto(
-    this.numerodeproducto,
-    this.descripcion,
-    this.codigoalmacen,
+    this.productcode,
+    this.description,
+    this.storeid,
     this.numerolote,
-    this.serie,
-    this.fechacaducidad,
-    this.cantidad,
+    this.serialnumber,
+    this.expirationdate,
+    this.stock,
   );
 
   Map<String, dynamic> toMap() {
     return {
-      'numerodeproducto': numerodeproducto,
-      'descripcion': descripcion,
-      'codigoalmacen': codigoalmacen,
+      'productcode': productcode,
+      'description': description,
+      'storeid': storeid,
       'numerolote': numerolote,
-      'serie': serie,
-      'fechacaducidad': fechacaducidad,
-      'cantidad': cantidad,
+      'serialnumber': serialnumber,
+      'expirationdate': expirationdate,
+      'stock': stock,
     };
   }
 
   factory Producto.fromMap(Map<String, dynamic> map) {
     return Producto(
-      map['numerodeproducto'] ?? 0,
-      map['descripcion'],
-      map['codigoalmacen'] ?? 0,
+      map['productcode'] ?? 0,
+      map['description'],
+      map['storeid'] ?? 0,
       map['numerolote'] ?? 0,
-      map['serie'] ?? 0,
-      DateTime.parse(map['fechacaducidad']),
-      map['cantidad'] ?? 1,
+      map['serialnumber'] ?? 0,
+      DateTime.parse(map['expirationdate']),
+      map['stock'] ?? 1,
     );
   }
 

@@ -103,7 +103,7 @@ class ProductTransferDialogs {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Producto: ${producto.descripcion ?? producto.numerodeproducto}',
+                'Producto: ${producto.description ?? producto.productcode}',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),

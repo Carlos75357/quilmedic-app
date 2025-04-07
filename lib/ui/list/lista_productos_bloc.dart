@@ -102,11 +102,11 @@ class ListaProductosBloc
   //   for (var item in data) {
   //     if (item is Map<String, dynamic>) {
   //       try {
-  //         final int numerodeproducto = item['numerodeproducto'] ?? 0;
+  //         final int productcode = item['productcode'] ?? 0;
 
-  //         if (productosIds.contains(numerodeproducto.toString())) {
+  //         if (productosIds.contains(productcode.toString())) {
   //           final producto = _crearProductoDesdeJson(item);
-  //           productosMap[numerodeproducto] = producto;
+  //           productosMap[productcode] = producto;
   //         }
   //       } catch (e) {
   //         throw Exception('Error al cargar productos: ${e.toString()}');
@@ -119,15 +119,15 @@ class ListaProductosBloc
 
   // Producto _crearProductoDesdeJson(Map<String, dynamic> json) {
   //   return Producto(
-  //     json['numerodeproducto'] ?? 0,
-  //     json['descripcion'] ?? '',
-  //     json['codigoalmacen'] ?? 0,
+  //     json['productcode'] ?? 0,
+  //     json['description'] ?? '',
+  //     json['storeid'] ?? 0,
   //     json['numerolote'] ?? 0,
-  //     json['serie'] ?? '',
-  //     json['fechacaducidad'] != null
-  //         ? DateTime.parse(json['fechacaducidad'])
+  //     json['serialnumber'] ?? '',
+  //     json['expirationdate'] != null
+  //         ? DateTime.parse(json['expirationdate'])
   //         : DateTime.now(),
-  //     json['cantidad'] ?? 0,
+  //     json['stock'] ?? 0,
   //   );
   // }
 
@@ -192,8 +192,8 @@ class ListaProductosBloc
       emit(EnviandoSolicitudTrasladoState());
 
       // final Map<String, dynamic> data = {
-      //   'producto_id': event.producto.numerodeproducto,
-      //   'hospital_origen_id': event.producto.codigoalmacen,
+      //   'producto_id': event.producto.productcode,
+      //   'hospital_origen_id': event.producto.storeid,
       //   'hospital_destino_id': event.hospitalDestinoId,
       //   'hospital_destino_nombre': event.hospitalDestinoNombre,
       //   'comentarios': event.comentarios,

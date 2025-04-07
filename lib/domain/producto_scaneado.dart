@@ -1,17 +1,17 @@
 class ProductoEscaneado {
-  final String serie;
+  final String serialnumber;
 
-  ProductoEscaneado(this.serie);
+  ProductoEscaneado(this.serialnumber);
 
   Map<String, dynamic> toMap() {
     return {
-      'serie': serie,
+      'serialnumber': serialnumber,
     };
   }
 
   factory ProductoEscaneado.fromMap(Map<String, dynamic> map) {
     return ProductoEscaneado(
-      map['serie'] ?? '',
+      map['serialnumber'] ?? '',
     );
   }
 }
