@@ -139,7 +139,7 @@ class _DatalogicScannerState extends State<DatalogicScanner> {
                                     duration: const Duration(milliseconds: 1000),
                                     behavior: SnackBarBehavior.floating,
                                     margin: const EdgeInsets.only(
-                                      bottom: 100,
+                                      bottom: 80,
                                       right: 20,
                                       left: 20,
                                     ),

@@ -97,7 +97,7 @@ class AlarmUtils {
 
     await loadAlarmsFromCache();
 
-    List<String> productIds = productos.map((p) => p.numerodeproducto.toString()).toList();
+    List<String> productIds = productos.map((p) => p.productcode.toString()).toList();
 
     try {
       final response = await alarmRepository.getAlarmsByProducts(
@@ -124,14 +124,14 @@ class AlarmUtils {
     }
 
     for (var producto in productos) {
-      final productId = producto.numerodeproducto.toString();
+      final productId = producto.productcode.toString();
       if (!colorsMap.containsKey(productId)) {
         final stockAlarms = _generalAlarmCache
             .where((a) => a.type?.toLowerCase() == 'stock')
             .toList();
             
         for (var alarm in stockAlarms) {
-          if (_evaluateStockAlarm(alarm, producto.cantidad)) {
+          if (_evaluateStockAlarm(alarm, producto.stock)) {
             final color = _parseColor(alarm.color!);
             if (color != null) {
               colorsMap[productId] = color;
@@ -155,10 +155,10 @@ class AlarmUtils {
 
     await loadAlarmsFromCache();
 
-    List<String> seriesList = productos.map((p) => p.serie).toList();
+    List<String> serialnumbersList = productos.map((p) => p.serialnumber).toList();
 
     try {
-      final response = await alarmRepository.getAlarmsByProducts(seriesList);
+      final response = await alarmRepository.getAlarmsByProducts(serialnumbersList);
       if (response.success && response.data is List<Alarm>) {
         List<Alarm> alarms = response.data;
 
@@ -180,8 +180,8 @@ class AlarmUtils {
     }
 
     for (var producto in productos) {
-      if (!colorsMap.containsKey(producto.serie)) {
-        final days = producto.fechacaducidad.difference(DateTime.now()).inDays;
+      if (!colorsMap.containsKey(producto.serialnumber)) {
+        final days = producto.expirationdate.difference(DateTime.now()).inDays;
         
         final dateAlarms = _generalAlarmCache
             .where((a) => a.type?.toLowerCase() == 'date')
@@ -191,7 +191,7 @@ class AlarmUtils {
           if (_evaluateExpiryAlarm(alarm, days)) {
             final color = _parseColor(alarm.color!);
             if (color != null) {
-              colorsMap[producto.serie] = color;
+              colorsMap[producto.serialnumber] = color;
               break;
             }
           }
