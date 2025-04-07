@@ -138,7 +138,7 @@ class ProductoLocalStorage {
     return jsonString != null && jsonString.isNotEmpty;
   }
   
-  static Future<bool> eliminarProductoPendiente(String serie) async {
+  static Future<bool> eliminarProductoPendiente(String serialnumber) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? jsonString = prefs.getString(_productosPendientesKey);
@@ -152,7 +152,7 @@ class ProductoLocalStorage {
           .map<ProductoEscaneado>((item) => ProductoEscaneado.fromMap(item))
           .toList();
       
-      productos.removeWhere((p) => p.serie == serie);
+      productos.removeWhere((p) => p.serialnumber == serialnumber);
       
       if (productos.isEmpty) {
         return await limpiarProductosPendientes();
@@ -211,7 +211,7 @@ class ProductoLocalStorage {
     }
   }
 
-  static Future<Producto?> obtenerProductoPorSerie(String serie) async {
+  static Future<Producto?> obtenerProductoPorserialnumber(String serialnumber) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? jsonString = prefs.getString(_productosCompletos);
@@ -224,7 +224,7 @@ class ProductoLocalStorage {
       final productos = decodedList.map((item) => Producto.fromMap(item as Map<String, dynamic>)).toList();
       
       for (var producto in productos) {
-        if (producto.serie == serie) {
+        if (producto.serialnumber == serialnumber) {
           return producto;
         }
       }

@@ -21,7 +21,7 @@ class ApiClient {
         'params': params ?? {},
       });
 
-      var response = await client.call(endpoint, jsonRequest);
+      var response = await call(endpoint, jsonRequest);
 
       if (response is Map && response.containsKey('data')) {
         return response['data'];

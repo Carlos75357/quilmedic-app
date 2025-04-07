@@ -12,7 +12,7 @@ class ConnectivityService {
           final response = await http
               .get(
                 Uri.parse(
-                  '${ApiConfig.baseUrl}${ApiConfig.hospitalesEndpoint}',
+                  '${ApiConfig.getBaseUrl()}${ApiConfig.hospitalesEndpoint}',
                 ),
                 headers: ApiConfig.headers,
               )
@@ -27,7 +27,7 @@ class ConnectivityService {
           final response = await http
               .get(
                 Uri.parse(
-                  '${ApiConfig.baseUrl}${ApiConfig.hospitalesEndpoint}',
+                  '${ApiConfig.getBaseUrl()}${ApiConfig.hospitalesEndpoint}',
                 ),
                 headers: ApiConfig.headers,
               )
@@ -43,7 +43,7 @@ class ConnectivityService {
             final response = await http
                 .get(
                   Uri.parse(
-                    '${ApiConfig.baseUrl}${ApiConfig.productosEndpoint}',
+                    '${ApiConfig.getBaseUrl()}${ApiConfig.productosEndpoint}',
                   ),
                   headers: ApiConfig.headers,
                 )

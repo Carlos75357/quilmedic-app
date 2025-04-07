@@ -145,7 +145,7 @@ class AlarmRepository {
         );
       }
 
-      return RepositoryResponse.error('Error al obtener alarmas por números de serie');
+      return RepositoryResponse.error('Error al obtener alarmas por números de serialnumber');
     } catch (e) {
       return RepositoryResponse.error('Error al obtener alarmas: ${e.toString()}');
     }

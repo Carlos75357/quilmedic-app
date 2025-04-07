@@ -16,10 +16,10 @@ class ProductoRepository {
     final List<String> noEncontrados = [];
 
     try {
-      List<String> serialNumbers = productos.map((producto) => producto.serie).toList();
+      List<String> serialNumbers = productos.map((producto) => producto.serialnumber).toList();
       final response = await apiClient.getAll(
         '${ApiConfig.productosEndpoint}/bySerialNumbers',
-        {'serial_numbers': serialNumbers},
+        {'serial_numbers': serialNumbers, 'store_id': hospitalId},
       );
 
       if (response is Map && response.containsKey('found') && response.containsKey('missing')) {
@@ -30,32 +30,32 @@ class ProductoRepository {
       // for (var producto in productos) {
       //   try {
       //     final response = await apiClient.getAll(
-      //       '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serie}',
+      //       '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serialnumber}',
       //       null,
       //     );
 
       //     if (response != null &&
-      //         response['serial_number'] == producto.serie &&
+      //         response['serial_number'] == producto.serialnumber &&
       //         response['serial_number'] != null) {
       //       resultados.add(response);
       //     } else {
-      //       noEncontrados.add(producto.serie);
+      //       noEncontrados.add(producto.serialnumber);
       //     }
       //   } catch (e) {
-      //     noEncontrados.add(producto.serie);
+      //     noEncontrados.add(producto.serialnumber);
       //   }
       // }
 
       if (resultados.isEmpty) {
         return RepositoryResponse.error(
-          'No se encontraron productos con las series escaneadas: ${noEncontrados.join(", ")}',
+          'No se encontraron productos con las serialnumbers escaneadas: ${noEncontrados.join(", ")}',
         );
       }
 
       String message = 'Productos enviados correctamente';
       if (noEncontrados.isNotEmpty) {
         message =
-            'ATENCIÓN: Se encontraron ${resultados.length} productos. No se encontraron ${noEncontrados.length} productos con series: ${noEncontrados.join(", ")}';
+            'ATENCIÓN: Se encontraron ${resultados.length} productos. No se encontraron ${noEncontrados.length} productos con serialnumbers: ${noEncontrados.join(", ")}';
       }
 
       return RepositoryResponse.success(resultados, message: message);
@@ -89,7 +89,7 @@ class ProductoRepository {
         }
 
         if (producto != null) {
-          final currentAlmacenId = producto['codigoalmacen'];
+          final currentAlmacenId = producto['storeid'];
 
           if (currentAlmacenId == almacenId) {
             return RepositoryResponse.success(
@@ -119,8 +119,8 @@ class ProductoRepository {
     }
   }
 
-  Future<RepositoryResponse> getProductoBySerieAndAlmacen(
-    String serie,
+  Future<RepositoryResponse> getProductoByserialnumberAndAlmacen(
+    String serialnumber,
     int almacenId,
   ) async {
     try {
@@ -132,28 +132,28 @@ class ProductoRepository {
       if (getAllResponse != null && getAllResponse is List) {
         dynamic producto;
         try {
-          producto = getAllResponse.firstWhere((p) => p['serie'] == serie);
+          producto = getAllResponse.firstWhere((p) => p['serialnumber'] == serialnumber);
         } catch (e) {
           return RepositoryResponse.error(
-            'No se encontró el producto con serie: $serie',
+            'No se encontró el producto con serialnumber: $serialnumber',
           );
         }
 
         if (producto != null) {
-          if (producto['codigoalmacen'] == almacenId) {
+          if (producto['storeid'] == almacenId) {
             return RepositoryResponse.success(
               producto,
               message: 'Producto encontrado en el almacén especificado',
             );
           } else {
             return RepositoryResponse.error(
-              'El producto existe pero está asignado al almacén ${producto['codigoalmacen']}',
+              'El producto existe pero está asignado al almacén ${producto['storeid']}',
               data: producto,
             );
           }
         } else {
           return RepositoryResponse.error(
-            'No se encontró el producto con serie: $serie',
+            'No se encontró el producto con serialnumber: $serialnumber',
           );
         }
       } else {
