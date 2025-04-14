@@ -2,11 +2,12 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
+import 'package:quilmedic/data/respository/location_repository.dart';
 import 'package:quilmedic/data/respository/producto_repository.dart';
 import 'package:quilmedic/domain/hospital.dart';
+import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
-import 'package:quilmedic/ui/list/lista_productos_page.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
 import 'package:quilmedic/utils/connectivity_service.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
@@ -17,6 +18,7 @@ part 'escaner_state.dart';
 class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   List<ProductoEscaneado> productosEscaneados = [];
   Hospital? hospitalSeleccionado;
+  Location? locationSeleccionada;
   bool hayProductosPendientes = false;
 
   final ApiClient apiClient = ApiClient();
@@ -26,18 +28,24 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   late ProductoRepository productoRepository = ProductoRepository(
     apiClient: apiClient,
   );
+  late LocationRepository locationRepository = LocationRepository(
+    apiClient: apiClient,
+  );
   late ProductoLocalStorage productoLocalStorage = ProductoLocalStorage();
   late AlarmUtils alarmUtils = AlarmUtils();
 
   EscanerBloc() : super(EscanerInitial()) {
     on<LoadHospitales>(cargarHospitales);
+    on<LoadLocations>(loadLocationsForAStore);
     on<SubmitCodeEvent>(_procesarCodigoDeBarras);
-    on<ElegirHospitalEvent>(elegirHospitales);
+    on<ChooseStoreEvent>(elegirHospitales);
+    on<ChooseLocationEvent>(chooseLocation);
     on<GuardarProductosEvent>(guardarProductos);
     on<GuardarProductosForzadoEvent>(_guardarProductosForzado);
     on<EliminarProductoEvent>(_eliminarProducto);
     on<SincronizarProductosPendientesEvent>(_sincronizarProductosPendientes);
     on<CargarProductosPendientesEvent>(_cargarProductosPendientes);
+    on<ResetSelectionsEvent>(resetSelections);
 
     add(CargarProductosPendientesEvent());
   }
@@ -49,13 +57,34 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanerLoading());
 
     try {
+      // Reset both hospital and location selections
       hospitalSeleccionado = null;
+      locationSeleccionada = null;
       
       List<Hospital> hospitales = await hospitalRepository
           .getAllHospitals()
           .then((value) => value.data);
 
       emit(HospitalesCargados(hospitales));
+    } catch (e) {
+      emit(EscanerError(e.toString()));
+    }
+  }
+
+  Future<void> loadLocationsForAStore(
+    LoadLocations event,
+    Emitter<EscanerState> emit,
+  ) async {
+    emit(EscanerLoading());
+
+    try {
+      locationSeleccionada = null;
+      
+      List<Location> locations = await locationRepository
+          .getLocationsForAStore(hospitalSeleccionado!.id)
+          .then((value) => value.data);
+        
+      emit(LocationsCargadas(locations));
     } catch (e) {
       emit(EscanerError(e.toString()));
     }
@@ -101,8 +130,19 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     }
   }
 
-  void elegirHospitales(ElegirHospitalEvent event, Emitter<EscanerState> emit) {
+  void elegirHospitales(ChooseStoreEvent event, Emitter<EscanerState> emit) {
     hospitalSeleccionado = event.hospital;
+    emit(EscanerSuccess());
+    emit(
+      ProductosListadosState(
+        productosEscaneados,
+        hayProductosPendientes: hayProductosPendientes,
+      ),
+    );
+  }
+
+  void chooseLocation(ChooseLocationEvent event, Emitter<EscanerState> emit) {
+    locationSeleccionada = event.location;
     emit(EscanerSuccess());
     emit(
       ProductosListadosState(
@@ -200,7 +240,14 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         return;
       }
 
-      await _sincronizarConServidor(emit, hospitalId, productosPendientes);
+      final locationId = await ProductoLocalStorage.obtenerLocationPendiente();
+      if (locationId == null) {
+        await ProductoLocalStorage.limpiarProductosPendientes();
+        emit(SinProductosPendientesState());
+        return;
+      }
+
+      await _sincronizarConServidor(emit, hospitalId, locationId, productosPendientes);
     } catch (e) {
       emit(
         EscanerError(
@@ -281,6 +328,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       await ProductoLocalStorage.guardarProductosPendientes(
         productosEscaneados,
         hospitalSeleccionado!.id,
+        locationSeleccionada!.id,
       );
       emit(GuardarOfflineSuccess());
       emit(
@@ -339,6 +387,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       try {
         var response = await productoRepository.enviarProductosEscaneados(
           hospitalSeleccionado!.id,
+          locationSeleccionada!.id,
           productosEscaneados,
         );
 
@@ -351,25 +400,13 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
           await _guardarProductosEscaneadosLocalmente(productos);
 
-          // List<Alarm> alarmLocal = await ProductoLocalStorage.obtenerAlarmas();
-          // if (alarmLocal.isEmpty) {
-          //   final alarms = await alarmUtils.getGeneralAlarms();
-          //   await ProductoLocalStorage.agregarAlarmas(alarms);
-          // }
-
           try {
             await alarmUtils.loadStockColorsForProducts(productos);
             
             await alarmUtils.loadExpiryColorsForProducts(productos);
           } catch (e) {
-            print('Error al precargar colores de alarmas: $e');
+            emit(EscanerError("Error al cargar colores de alarmas: ${e.toString()}"));
           }
-
-          // List<Alarm> alarmasEspecificas = await ProductoLocalStorage.obtenerAlarmasEspecificas();
-          // if (alarmasEspecificas.isEmpty) {
-          //   final alarms = await alarmUtils.getAlarmasEspecificas();
-          //   await ProductoLocalStorage.agregarAlarmasEspecificas(alarms);
-          // }
 
           if (response.message?.contains("No se encontraron") ?? false) {
             emit(
@@ -391,6 +428,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         await ProductoLocalStorage.guardarProductosPendientes(
           productosCopia,
           hospitalSeleccionado!.id,
+          locationSeleccionada!.id,
         );
 
         productosEscaneados.clear();
@@ -405,6 +443,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     try {
       var response = await productoRepository.enviarProductosEscaneados(
         hospitalSeleccionado!.id,
+        locationSeleccionada!.id,
         productosEscaneados,
       );
 
@@ -473,6 +512,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   Future<void> _sincronizarConServidor(
     Emitter<EscanerState> emit,
     int hospitalId,
+    int locationId,
     List<ProductoEscaneado> productosPendientes,
   ) async {
     try {
@@ -480,6 +520,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       var response = await productoRepository.enviarProductosEscaneados(
         hospitalId,
+        locationId,
         productosPendientes,
       );
 
@@ -558,18 +599,11 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       );
     }
   }
-
-  void navegarAListaProductos(BuildContext context, List<Producto> productos) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ListaProductosPage(
-              productos: productos,
-              hospitalId: hospitalSeleccionado?.id ?? 0,
-              almacenName: hospitalSeleccionado?.description ?? '',
-            ),
-      ),
-    );
+  
+  // Método para resetear las selecciones cuando se vuelve a la página del escáner
+  void resetSelections(ResetSelectionsEvent event, Emitter<EscanerState> emit) {
+    hospitalSeleccionado = null;
+    locationSeleccionada = null;
+    emit(SelectionsResetState());
   }
 }

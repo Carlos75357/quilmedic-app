@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// A widget that listens for hardware barcode scanner input
-/// and passes it to a callback function when a complete scan is detected.
 class HardwareScannerListener extends StatefulWidget {
-  /// The child widget to render
   final Widget child;
   
-  /// Callback function that is called when a barcode is scanned
   final Function(String) onBarcodeScanned;
   
-  /// The character that marks the end of a barcode scan (usually a return/enter key)
   final String scannerEndChar;
   
-  /// Maximum time between keystrokes to be considered part of the same scan (milliseconds)
   final int scanTimeout;
 
   const HardwareScannerListener({
@@ -50,42 +44,35 @@ class _HardwareScannerListenerState extends State<HardwareScannerListener> {
     _lastScanTime = null;
   }
 
-  void _processKeyEvent(RawKeyEvent event) {
-    // Only process key down events
-    if (event is! RawKeyDownEvent) {
+  void _processKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent) {
       return;
     }
 
-    // Check if this is part of a scan based on timing
     final now = DateTime.now();
     if (_lastScanTime != null) {
       final timeDiff = now.difference(_lastScanTime!).inMilliseconds;
       if (timeDiff > widget.scanTimeout) {
-        // Too much time has passed, reset the scanner
         _resetScanner();
       }
     }
     _lastScanTime = now;
 
-    // Get the character from the key event
     String? char;
     if (event.logicalKey == LogicalKeyboardKey.enter || 
         event.logicalKey == LogicalKeyboardKey.numpadEnter) {
       char = widget.scannerEndChar;
     } else {
-      // Try to get the character from the event
       char = event.character;
     }
 
     if (char != null) {
       if (char == widget.scannerEndChar) {
-        // End of scan detected, process the barcode
         if (_scannedChars.isNotEmpty) {
           widget.onBarcodeScanned(_scannedChars);
         }
         _resetScanner();
       } else {
-        // Add character to the current scan
         _scannedChars += char;
       }
     }
@@ -93,9 +80,9 @@ class _HardwareScannerListenerState extends State<HardwareScannerListener> {
 
   @override
   Widget build(BuildContext context) {
-    return RawKeyboardListener(
+    return KeyboardListener(
       focusNode: _focusNode,
-      onKey: _processKeyEvent,
+      onKeyEvent: _processKeyEvent,
       autofocus: true,
       child: widget.child,
     );

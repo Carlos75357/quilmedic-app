@@ -72,7 +72,7 @@ class _DatalogicScannerState extends State<DatalogicScanner> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
               height: MediaQuery.of(context).size.height * 0.8,
               child: Column(

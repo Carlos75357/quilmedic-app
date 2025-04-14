@@ -62,14 +62,6 @@ class _ProductosListState extends State<ProductosList> {
                 horizontal: isSmallScreen ? 10 : 16,
                 vertical: isSmallScreen ? 6 : 8,
               ),
-              title: Text(
-                producto.serialnumber.toString(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: isSmallScreen ? 14 : 16,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -84,7 +76,7 @@ class _ProductosListState extends State<ProductosList> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          'serialnumber: ${producto.serialnumber}',
+                          'Serie: ${producto.serialnumber}',
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: isSmallScreen ? 12 : 14,

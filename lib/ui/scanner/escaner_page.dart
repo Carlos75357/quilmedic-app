@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/ui/list/lista_productos_page.dart';
@@ -7,10 +8,9 @@ import 'package:quilmedic/widgets/scanner/empty_products_view.dart';
 import 'package:quilmedic/widgets/scanner/manual_code_input.dart';
 import 'package:quilmedic/widgets/scanner/productos_list.dart';
 import 'package:quilmedic/widgets/scanner/save_button.dart';
-import 'package:quilmedic/widgets/scanner/selector_hospital.dart';
+import 'package:quilmedic/widgets/scanner/selector.dart';
 import 'package:quilmedic/widgets/scanner/datalogic_scanner.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
-// import 'package:quilmedic/utils/connectivity_service.dart';
 import 'dart:async';
 import 'escaner_bloc.dart';
 
@@ -24,66 +24,35 @@ class EscanerPage extends StatefulWidget {
 class _EscanerPageState extends State<EscanerPage> {
   final TextEditingController _hospitalesController = TextEditingController();
   Hospital? selectedHospital;
+  Location? selectedLocation;
   List<ProductoEscaneado> productos = [];
+  List<Hospital> hospitales = [];
+  List<Location> locations = [];
   bool isScanning = false;
   bool _isManualInput = false;
-  bool _hayConexion = true;
+  final bool _hayConexion = true;
   bool _hayProductosPendientes = false;
-  Timer? _conectividadTimer;
 
   @override
   void initState() {
     super.initState();
     _checkPendingProducts();
     BlocProvider.of<EscanerBloc>(context).add(LoadHospitales());
-    // Future.delayed(const Duration(milliseconds: 500), () {
-    //   if (mounted) {
-    //     _verificarConectividad();
-    //     _conectividadTimer = Timer.periodic(const Duration(seconds: 30), (
-    //       timer,
-    //     ) {
-    //       if (mounted) {
-    //         _verificarConectividad();
-    //       }
-    //     });
-    //   }
-    // });
   }
 
   @override
   void dispose() {
     _hospitalesController.dispose();
-    _conectividadTimer?.cancel();
-
     super.dispose();
   }
-
-  // Future<void> _verificarConectividad() async {
-  //   try {
-  //     final hayConexion = await ConnectivityService.hayConexionInternet();
-  //     if (mounted) {
-  //       if (hayConexion && !_hayConexion && _hayProductosPendientes) {
-  //         Future.delayed(const Duration(milliseconds: 300), () {
-  //           if (mounted) {
-  //             BlocProvider.of<EscanerBloc>(
-  //               context,
-  //             ).add(SincronizarProductosPendientesEvent());
-  //           }
-  //         });
-  //       }
-  //       setState(() {
-  //         _hayConexion = hayConexion;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       setState(() {
-  //         _hayConexion = false;
-  //       });
-  //     }
-  //     debugPrint('Error al verificar la conectividad: $e');
-  //   }
-  // }
+  
+  void _resetSelections() {
+    setState(() {
+      selectedHospital = null;
+      selectedLocation = null;
+    });
+    BlocProvider.of<EscanerBloc>(context).add(ResetSelectionsEvent());
+  }
 
   Future<void> _checkPendingProducts() async {
     final hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
@@ -262,7 +231,10 @@ class _EscanerPageState extends State<EscanerPage> {
                             ?.description ?? '',
                       ),
                 ),
-              );
+              ).then((_) {
+                // Resetear completamente las selecciones cuando volvemos
+                _resetSelections();
+              });
             } else if (state is SinProductosPendientesState) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -314,21 +286,25 @@ class _EscanerPageState extends State<EscanerPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           BlocBuilder<EscanerBloc, EscanerState>(
-            buildWhen:
-                (previous, current) =>
-                    current is HospitalesCargados ||
-                    previous is EscanerInitial,
             builder: (context, state) {
-              List<Hospital> hospitales = [];
               if (state is HospitalesCargados) {
                 hospitales = state.hospitales;
               }
-              return SelectorHospital(
+              if (state is LocationsCargadas) {
+                locations = state.locations;
+              }
+              return Selector(
                 hospitales: hospitales,
                 selectedHospital: selectedHospital,
-                onHospitalSelected: (hospital) {
+                onOptionsSelected: (hospital) {
                   setState(() {
                     selectedHospital = hospital;
+                  });
+                },
+                locations: locations,
+                onLocationSelected: (location) {
+                  setState(() {
+                    selectedLocation = location;
                   });
                 },
               );

@@ -21,6 +21,12 @@ final class HospitalesCargados extends EscanerState {
   HospitalesCargados(this.hospitales);
 }
 
+final class LocationsCargadas extends EscanerState {
+  final List<Location> locations;
+
+  LocationsCargadas(this.locations);
+}
+
 final class EscanearCodigosState extends EscanerState {}
 
 final class ProductoEscaneadoExistenteState extends EscanerState {
@@ -74,3 +80,5 @@ class SinProductosPendientesState extends EscanerState {
   
   SinProductosPendientesState({this.message = "No hay productos pendientes para sincronizar."});
 }
+
+class SelectionsResetState extends EscanerState {}

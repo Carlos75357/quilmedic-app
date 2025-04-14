@@ -1,55 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quilmedic/domain/hospital.dart';
+import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/ui/scanner/escaner_bloc.dart';
 
-class SelectorHospital extends StatefulWidget {
-  final List<Hospital> hospitales;
-  final Hospital? selectedHospital;
-  final Function(Hospital) onHospitalSelected;
-
-  const SelectorHospital({
+class SelectorLocations extends StatefulWidget {
+  final List<Location> locations;
+  final Location? selectedLocation;
+  final Function(Location) onOptionsSelected;
+  const SelectorLocations({
     super.key,
-    required this.hospitales,
-    this.selectedHospital,
-    required this.onHospitalSelected,
+    required this.locations,
+    this.selectedLocation,
+    required this.onOptionsSelected,
   });
-
   @override
-  State<SelectorHospital> createState() => _SelectorHospitalState();
+  State<SelectorLocations> createState() => _SelectorLocationsState();
 }
 
-class _SelectorHospitalState extends State<SelectorHospital> {
-  late TextEditingController _hospitalesController;
-  Hospital? _selectedHospital;
+class _SelectorLocationsState extends State<SelectorLocations> {
+  late TextEditingController _locationsController;
+  Location? _selectedLocation;
 
   @override
   void initState() {
     super.initState();
-    _hospitalesController = TextEditingController();
-    _selectedHospital = widget.selectedHospital;
-    
-    if (_selectedHospital != null) {
-      _hospitalesController.text = _selectedHospital!.description;
+    _locationsController = TextEditingController();
+    _selectedLocation = widget.selectedLocation;
+
+    if (_selectedLocation != null) {
+      _locationsController.text = _selectedLocation!.name;
     }
   }
 
   @override
-  void didUpdateWidget(SelectorHospital oldWidget) {
+  void didUpdateWidget(SelectorLocations oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedHospital != oldWidget.selectedHospital) {
-      _selectedHospital = widget.selectedHospital;
-      if (_selectedHospital != null) {
-        _hospitalesController.text = _selectedHospital!.description;
-      } else {
-        _hospitalesController.clear();
-      }
+    // Always update the selected location when widget updates
+    _selectedLocation = widget.selectedLocation;
+    if (_selectedLocation != null) {
+      _locationsController.text = _selectedLocation!.name;
+    } else {
+      _locationsController.clear();
     }
   }
 
   @override
   void dispose() {
-    _hospitalesController.dispose();
+    _locationsController.dispose();
     super.dispose();
   }
 
@@ -57,7 +54,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isSmallScreen = MediaQuery.of(context).size.width < 360;
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -78,7 +75,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
-                    'Seleccionar Almacén',
+                    'Seleccionar Ubicación',
                     style: TextStyle(
                       fontSize: isSmallScreen ? 14 : 16,
                       fontWeight: FontWeight.bold,
@@ -90,7 +87,7 @@ class _SelectorHospitalState extends State<SelectorHospital> {
               ],
             ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<Hospital>(
+            DropdownButtonFormField<Location>(
               isExpanded: true,
               decoration: InputDecoration(
                 filled: true,
@@ -103,20 +100,20 @@ class _SelectorHospitalState extends State<SelectorHospital> {
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
                 ),
-                hintText: 'Seleccionar Hospital',
+                hintText: 'Seleccionar Ubicación',
                 prefixIcon: Icon(
                   Icons.search,
                   color: Colors.grey.shade600,
                   size: isSmallScreen ? 18 : 24,
                 ),
               ),
-              value: _selectedHospital,
-              items: widget.hospitales.map<DropdownMenuItem<Hospital>>(
-                (Hospital value) {
+              value: _selectedLocation,
+              items: widget.locations.map<DropdownMenuItem<Location>>(
+                (Location value) {
                   return DropdownMenuItem(
                     value: value,
                     child: Text(
-                      value.description,
+                      value.name,
                       style: TextStyle(
                         fontSize: isSmallScreen ? 13 : 14,
                       ),
@@ -128,21 +125,22 @@ class _SelectorHospitalState extends State<SelectorHospital> {
               onChanged: (value) {
                 if (value != null) {
                   setState(() {
-                    _selectedHospital = value;
-                    _hospitalesController.text = value.description;
+                    _selectedLocation = value;
+                    _locationsController.text = value.name;
                   });
-                  widget.onHospitalSelected(value);
+                  widget.onOptionsSelected(value);
                   BlocProvider.of<EscanerBloc>(
                     context,
-                  ).add(ElegirHospitalEvent(value));
+                  ).add(ChooseLocationEvent(value));
                 }
               },
             ),
-            if (widget.hospitales.isEmpty)
+            const SizedBox(height: 8),
+            if (widget.locations.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Text(
-                  'No hay hospitales disponibles',
+                  'No hay ubicaciones disponibles',
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: isSmallScreen ? 12 : 14,
