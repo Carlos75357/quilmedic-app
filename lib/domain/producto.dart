@@ -55,7 +55,6 @@ class Producto {
         int.tryParse(mapa['stock']?.toString() ?? '0') ?? 0,
       );
     } catch (e) {
-      print('Error al convertir mapa a Producto: $e');
       return Producto(
         '0',
         'Error al procesar producto',
