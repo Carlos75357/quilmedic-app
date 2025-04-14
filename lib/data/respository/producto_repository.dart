@@ -10,41 +10,32 @@ class ProductoRepository {
 
   Future<RepositoryResponse> enviarProductosEscaneados(
     int hospitalId,
+    int locationId,
     List<ProductoEscaneado> productos,
   ) async {
     final List<dynamic> resultados = [];
     final List<String> noEncontrados = [];
 
     try {
-      List<String> serialNumbers = productos.map((producto) => producto.serialnumber).toList();
-      final response = await apiClient.getAll(
+      List<String> serialNumbers =
+          productos.map((producto) => producto.serialnumber).toList();
+      final response = await apiClient.post(
         '${ApiConfig.productosEndpoint}/bySerialNumbers',
-        {'serial_numbers': serialNumbers, 'store_id': hospitalId},
+        {
+          'serial_numbers': serialNumbers,
+          'store_id': hospitalId,
+          'location_id': locationId,
+        },
       );
 
-      if (response is Map && response.containsKey('found') && response.containsKey('missing')) {
+      if (response is Map &&
+          response.containsKey('found') &&
+          response.containsKey('missing')) {
         resultados.addAll(response['found']);
-        noEncontrados.addAll((response['missing'] as List).map((item) => item.toString()));
+        noEncontrados.addAll(
+          (response['missing'] as List).map((item) => item.toString()),
+        );
       }
-
-      // for (var producto in productos) {
-      //   try {
-      //     final response = await apiClient.getAll(
-      //       '${ApiConfig.productosEndpoint}/bySerialNumber/${producto.serialnumber}',
-      //       null,
-      //     );
-
-      //     if (response != null &&
-      //         response['serial_number'] == producto.serialnumber &&
-      //         response['serial_number'] != null) {
-      //       resultados.add(response);
-      //     } else {
-      //       noEncontrados.add(producto.serialnumber);
-      //     }
-      //   } catch (e) {
-      //     noEncontrados.add(producto.serialnumber);
-      //   }
-      // }
 
       if (resultados.isEmpty) {
         return RepositoryResponse.error(
@@ -132,7 +123,9 @@ class ProductoRepository {
       if (getAllResponse != null && getAllResponse is List) {
         dynamic producto;
         try {
-          producto = getAllResponse.firstWhere((p) => p['serialnumber'] == serialnumber);
+          producto = getAllResponse.firstWhere(
+            (p) => p['serialnumber'] == serialnumber,
+          );
         } catch (e) {
           return RepositoryResponse.error(
             'No se encontró el producto con serialnumber: $serialnumber',

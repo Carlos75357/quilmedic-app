@@ -33,6 +33,26 @@ class ApiClient {
     }
   }
 
+  Future<dynamic> post(String endpoint, dynamic values) async {
+    try {
+      var jsonRequest = JsonRequest({
+        'jsonrpc': '2.0',
+        'method': 'post',
+        'params': values,
+      });
+
+      var response = await client.call(endpoint, jsonRequest);
+
+      if (response is Map && response.containsKey('data')) {
+        return response['data'];
+      }
+
+      return response;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   Future<dynamic> update(String endpoint, dynamic values) async {
     try {
       var jsonRequest = JsonRequest({

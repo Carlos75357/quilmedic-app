@@ -6,13 +6,10 @@ import 'package:quilmedic/data/config.dart';
 class JsonClient {
   Future<dynamic> call(String endpoint, JsonRequest jsonRequest) async {
     try {
-      final baseUrl = ApiConfig.getBaseUrl();
-      final headers = ApiConfig.headers;
-
       if (jsonRequest.method == 'create') {
         final response = await http.post(
-          Uri.parse(baseUrl + endpoint),
-          headers: headers,
+          Uri.parse(ApiConfig.baseUrl + endpoint),
+          headers: ApiConfig.headers,
           body: jsonEncode(jsonRequest.toJson()),
         );
         if (response.statusCode == 200) {
@@ -31,11 +28,11 @@ class JsonClient {
           }
         });
 
-        Uri uri = Uri.parse(baseUrl + endpoint).replace(queryParameters: formattedParams);
-
+        Uri uri = Uri.parse(ApiConfig.baseUrl + endpoint).replace(queryParameters: formattedParams);
+        
         final response = await http.get(
           uri,
-          headers: headers,
+          headers: ApiConfig.headers,
         );
 
         if (response.statusCode == 200) {
@@ -47,8 +44,8 @@ class JsonClient {
         }
       } else if (jsonRequest.method == 'update') {
         final response = await http.put(
-          Uri.parse(baseUrl + endpoint),
-          headers: headers,
+          Uri.parse(ApiConfig.baseUrl + endpoint),
+          headers: ApiConfig.headers,
           body: jsonEncode(jsonRequest.params),
         );
         if (response.statusCode == 200) {
@@ -60,8 +57,8 @@ class JsonClient {
         }
       } else if (jsonRequest.method == 'patch') {
         final response = await http.patch(
-          Uri.parse(baseUrl + endpoint),
-          headers: headers,
+          Uri.parse(ApiConfig.baseUrl + endpoint),
+          headers: ApiConfig.headers,
           body: jsonEncode(jsonRequest.params),
         );
         if (response.statusCode == 200) {
@@ -73,9 +70,9 @@ class JsonClient {
         }
       } else {
         final response = await http.post(
-          Uri.parse(baseUrl + endpoint),
-          headers: headers,
-          body: jsonEncode(jsonRequest.toJson()),
+          Uri.parse(ApiConfig.baseUrl + endpoint),
+          headers: ApiConfig.headers,
+          body: jsonEncode(jsonRequest.params),
         );
         if (response.statusCode == 200) {
           final String decodedBody = utf8.decode(response.bodyBytes);

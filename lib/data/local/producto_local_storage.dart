@@ -8,6 +8,7 @@ class ProductoLocalStorage {
   static const String _productosEscaneadosKey = 'productos_escaneados';
   static const String _productosPendientesKey = 'productos_pendientes';
   static const String _hospitalPendienteKey = 'hospital_pendiente';
+  static const String _locationPendienteKey = 'location_pendiente';
   static const String _productosCompletos =  'productos_completos';
   static const String _alarmasKey = 'alarmas';
   static const String _alarmasKeyStock = 'alarmas_stock';
@@ -78,7 +79,7 @@ class ProductoLocalStorage {
     }
   }
   
-  static Future<bool> guardarProductosPendientes(List<ProductoEscaneado> productos, int hospitalId) async {
+  static Future<bool> guardarProductosPendientes(List<ProductoEscaneado> productos, int hospitalId, int locationId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       
@@ -88,6 +89,7 @@ class ProductoLocalStorage {
       final String jsonString = jsonEncode(productosMap);
       
       await prefs.setInt(_hospitalPendienteKey, hospitalId);
+      await prefs.setInt(_locationPendienteKey, locationId);
       
       return await prefs.setString(_productosPendientesKey, jsonString);
     } catch (e) {
@@ -122,10 +124,20 @@ class ProductoLocalStorage {
     }
   }
   
+  static Future<int?> obtenerLocationPendiente() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getInt(_locationPendienteKey);
+    } catch (e) {
+      return null;
+    }
+  }
+  
   static Future<bool> limpiarProductosPendientes() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_hospitalPendienteKey);
+      await prefs.remove(_locationPendienteKey);
       return await prefs.remove(_productosPendientesKey);
     } catch (e) {
       return false;
@@ -159,11 +171,12 @@ class ProductoLocalStorage {
       }
       
       final int? hospitalId = await obtenerHospitalPendiente();
-      if (hospitalId == null) {
+      final int? locationId = await obtenerLocationPendiente();
+      if (hospitalId == null || locationId == null) {
         return false;
       }
       
-      return await guardarProductosPendientes(productos, hospitalId);
+      return await guardarProductosPendientes(productos, hospitalId, locationId);
     } catch (e) {
       return false;
     }
