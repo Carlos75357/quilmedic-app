@@ -120,7 +120,8 @@ class AlarmUtils {
         }
       }
     } catch (e) {
-      print('Error al cargar alarmas específicas: $e');
+      throw Exception('Error al cargar alarmas específicas: $e');
+
     }
 
     for (var producto in productos) {
@@ -142,7 +143,6 @@ class AlarmUtils {
       }
     }
 
-    print(colorsMap);
     _stockColorCache.addAll(colorsMap);
 
     return colorsMap;
@@ -176,7 +176,7 @@ class AlarmUtils {
         }
       }
     } catch (e) {
-      print('Error al cargar alarmas específicas: $e');
+      throw Exception('Error al cargar alarmas específicas: $e');
     }
 
     for (var producto in productos) {
@@ -199,7 +199,6 @@ class AlarmUtils {
       }
     }
 
-    print(colorsMap);
     _expiryColorCache.addAll(colorsMap);
 
     return colorsMap;
