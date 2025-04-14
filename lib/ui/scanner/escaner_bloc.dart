@@ -57,7 +57,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanerLoading());
 
     try {
-      // Reset both hospital and location selections
       hospitalSeleccionado = null;
       locationSeleccionada = null;
       
@@ -394,8 +393,12 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         productosEscaneados.clear();
 
         if (response.success) {
+          final responseData = response.data as Map<String, dynamic>;
+          final foundProducts = responseData['found'] as List<dynamic>;
+          final missingSerials = responseData['missing'] as List<String>;
+          
           List<Producto> productos = List<Producto>.from(
-            response.data.map((item) => Producto.fromApiMap(item)),
+            foundProducts.map((item) => Producto.fromApiMap(item)),
           );
 
           await _guardarProductosEscaneadosLocalmente(productos);
@@ -408,15 +411,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
             emit(EscanerError("Error al cargar colores de alarmas: ${e.toString()}"));
           }
 
-          if (response.message?.contains("No se encontraron") ?? false) {
-            emit(
-              GuardarSuccess(productos: productos, mensaje: response.message),
-            );
-            emit(ProductosRecibidosState(productos, mensaje: response.message));
-          } else {
-            emit(GuardarSuccess(productos: productos));
-            emit(ProductosRecibidosState(productos));
-          }
+          emit(GuardarSuccess(productos: productos, mensaje: response.message));
+          emit(ProductosRecibidosState(productos, missingSerials, mensaje: response.message));
         } else {
           emit(
             EscanerError(
@@ -450,18 +446,22 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       productosEscaneados.clear();
 
       if (response.success) {
-        List<Producto> productos = List<Producto>.from(
-          response.data.map((item) => Producto.fromApiMap(item)),
-        );
+          final responseData = response.data as Map<String, dynamic>;
+          final foundProducts = responseData['found'] as List<dynamic>;
+          final missingSerials = responseData['missing'] as List<String>;
+          
+          List<Producto> productos = List<Producto>.from(
+            foundProducts.map((item) => Producto.fromApiMap(item)),
+          );
 
         await _guardarProductosEscaneadosLocalmente(productos);
 
         if (response.message?.contains("No se encontraron") ?? false) {
           emit(GuardarSuccess(productos: productos, mensaje: response.message));
-          emit(ProductosRecibidosState(productos, mensaje: response.message));
+          emit(ProductosRecibidosState(productos, missingSerials, mensaje: response.message));
         } else {
           emit(GuardarSuccess(productos: productos));
-          emit(ProductosRecibidosState(productos));
+          emit(ProductosRecibidosState(productos, missingSerials));
         }
       } else {
         emit(
@@ -527,8 +527,12 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       if (response.success) {
         await ProductoLocalStorage.limpiarProductosPendientes();
 
+        final responseData = response.data as Map<String, dynamic>;
+        final foundProducts = responseData['found'] as List<dynamic>;
+        final missingSerials = responseData['missing'] as List<String>;
+        
         List<Producto> productos = List<Producto>.from(
-          response.data.map((item) => Producto.fromApiMap(item)),
+          foundProducts.map((item) => Producto.fromApiMap(item)),
         );
 
         await _guardarProductosEscaneadosLocalmente(productos);
@@ -542,11 +546,11 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
             SincronizacionCompletaState(productos, mensaje: response.message),
           );
           emit(GuardarSuccess(productos: productos, mensaje: response.message));
-          emit(ProductosRecibidosState(productos, mensaje: response.message));
+          emit(ProductosRecibidosState(productos, missingSerials, mensaje: response.message));
         } else {
           emit(SincronizacionCompletaState(productos));
           emit(GuardarSuccess(productos: productos));
-          emit(ProductosRecibidosState(productos));
+          emit(ProductosRecibidosState(productos, missingSerials));
         }
       } else {
         emit(

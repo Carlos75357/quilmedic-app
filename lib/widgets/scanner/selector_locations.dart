@@ -35,10 +35,29 @@ class _SelectorLocationsState extends State<SelectorLocations> {
   @override
   void didUpdateWidget(SelectorLocations oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Always update the selected location when widget updates
+    
+    bool locationsChanged = oldWidget.locations != widget.locations;
+    
+    if (locationsChanged) {
+      setState(() {
+        _selectedLocation = null;
+        _locationsController.clear();
+      });
+      return;
+    }
+    
     _selectedLocation = widget.selectedLocation;
+    
     if (_selectedLocation != null) {
-      _locationsController.text = _selectedLocation!.name;
+      bool locationExistsInList = widget.locations.any((location) => 
+        location.id == _selectedLocation!.id);
+      
+      if (locationExistsInList) {
+        _locationsController.text = _selectedLocation!.name;
+      } else {
+        _selectedLocation = null;
+        _locationsController.clear();
+      }
     } else {
       _locationsController.clear();
     }
@@ -107,21 +126,26 @@ class _SelectorLocationsState extends State<SelectorLocations> {
                   size: isSmallScreen ? 18 : 24,
                 ),
               ),
-              value: _selectedLocation,
-              items: widget.locations.map<DropdownMenuItem<Location>>(
-                (Location value) {
-                  return DropdownMenuItem(
-                    value: value,
-                    child: Text(
-                      value.name,
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 13 : 14,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                },
-              ).toList(),
+              value: (_selectedLocation != null && 
+                     widget.locations.any((loc) => loc.id == _selectedLocation!.id)) 
+                     ? _selectedLocation 
+                     : null,
+              items: widget.locations.isEmpty 
+                  ? [] 
+                  : widget.locations.map<DropdownMenuItem<Location>>(
+                      (Location value) {
+                        return DropdownMenuItem(
+                          value: value,
+                          child: Text(
+                            value.name,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 13 : 14,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      },
+                    ).toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() {

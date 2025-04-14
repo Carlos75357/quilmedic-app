@@ -32,6 +32,9 @@ class _SelectorState extends State<Selector> {
   Hospital? _selectedHospital;
   Location? _selectedLocation;
   final TextEditingController _locationsController = TextEditingController();
+  
+  // Clave para forzar la reconstrucción del widget SelectorLocations
+  Key _locationSelectorKey = UniqueKey();
 
   @override
   void initState() {
@@ -47,18 +50,15 @@ class _SelectorState extends State<Selector> {
   @override
   void didUpdateWidget(Selector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Always update both selections when widget updates, regardless of whether they've changed
     _selectedHospital = widget.selectedHospital;
     _selectedLocation = widget.selectedLocation;
     
-    // Update hospital controller text
     if (_selectedHospital != null) {
       _hospitalesController.text = _selectedHospital!.description;
     } else {
       _hospitalesController.clear();
     }
     
-    // Update location controller text
     if (_selectedLocation != null) {
       _locationsController.text = _selectedLocation!.name;
     } else {
@@ -149,8 +149,19 @@ class _SelectorState extends State<Selector> {
                   setState(() {
                     _selectedHospital = value;
                     _hospitalesController.text = value.description;
+                    
+                    // Siempre limpiar la localización seleccionada y regenerar el widget
+                    // incluso cuando se selecciona el mismo hospital
+                    _selectedLocation = null;
+                    _locationsController.clear();
+                    
+                    // Generar una nueva clave para forzar la reconstrucción del widget
+                    _locationSelectorKey = UniqueKey();
                   });
+                  
                   widget.onOptionsSelected(value);
+                  
+                  // Cargar las nuevas localizaciones para el hospital seleccionado
                   BlocProvider.of<EscanerBloc>(
                     context,
                   ).add(ChooseStoreEvent(value));
@@ -180,6 +191,7 @@ class _SelectorState extends State<Selector> {
             const SizedBox(height: 8),
             if (_selectedHospital != null)
               SelectorLocations(
+                key: _locationSelectorKey, // Usar la clave única para forzar la reconstrucción
                 locations: widget.locations,
                 selectedLocation: _selectedLocation,
                 onOptionsSelected: (location) {

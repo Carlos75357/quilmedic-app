@@ -57,9 +57,10 @@ class GuardarSuccess extends EscanerState {
 
 class ProductosRecibidosState extends EscanerState {
   final List<Producto> productos;
+  final List<String> productosNotFound;
   final String? mensaje;
   
-  ProductosRecibidosState(this.productos, {this.mensaje});
+  ProductosRecibidosState(this.productos, this.productosNotFound, {this.mensaje});
 }
 
 class GuardarOfflineSuccess extends EscanerState {

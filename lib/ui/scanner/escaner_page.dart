@@ -219,6 +219,7 @@ class _EscanerPageState extends State<EscanerPage> {
                   builder:
                       (context) => ListaProductosPage(
                         productos: state.productos,
+                        notFounds: state.productosNotFound,
                         hospitalId:
                             context
                                 .read<EscanerBloc>()

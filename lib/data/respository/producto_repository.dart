@@ -49,7 +49,10 @@ class ProductoRepository {
             'ATENCIÓN: Se encontraron ${resultados.length} productos. No se encontraron ${noEncontrados.length} productos con serialnumbers: ${noEncontrados.join(", ")}';
       }
 
-      return RepositoryResponse.success(resultados, message: message);
+      return RepositoryResponse.success({
+        'found': resultados,
+        'missing': noEncontrados
+      }, message: message);
     } catch (e) {
       return RepositoryResponse.error(
         'Error al enviar productos: ${e.toString()}',

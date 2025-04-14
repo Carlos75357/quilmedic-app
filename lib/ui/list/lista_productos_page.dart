@@ -11,12 +11,14 @@ import 'package:quilmedic/widgets/list/product_list_section.dart';
 
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
+  final List<String>? notFounds;
   final int hospitalId;
   final String almacenName;
 
   const ListaProductosPage({
     super.key,
     this.productos,
+    this.notFounds,
     required this.hospitalId,
     required this.almacenName,
   });
@@ -42,13 +44,86 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     }
   }
 
+  void _mostrarDialogoNumerosSerie(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.qr_code, color: Colors.blue),
+              const SizedBox(width: 8),
+              Text(
+                'Productos no encontrados (${widget.notFounds?.length ?? 0})',
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.close, size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: widget.notFounds?.length ?? 0,
+              itemBuilder: (context, index) {
+                final serialNumber = widget.notFounds?[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.qr_code, size: 18, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          serialNumber!,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'No encontrado',
+                          style: TextStyle(
+                            fontSize: 13,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.red.shade700,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // final isVerySmallScreen = MediaQuery.of(context).size.width < 320;
     for (final producto in productos) {
-    groupedProducts.putIfAbsent(producto.productcode, () => {}).putIfAbsent(producto.storeid, () => []).add(producto);
+      groupedProducts
+          .putIfAbsent(producto.productcode, () => {})
+          .putIfAbsent(producto.storeid, () => [])
+          .add(producto);
     }
-    
+
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -57,54 +132,112 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
         elevation: 2,
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
+        actions: [
+          if (productos.isNotEmpty)
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.qr_code_scanner),
+                  tooltip: 'Ver números de serie',
+                  onPressed: () {
+                    _mostrarDialogoNumerosSerie(context);
+                  },
+                ),
+                if (productos.any(
+                  (p) => p.description == null || p.description!.isEmpty,
+                ))
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                      child: Text(
+                        productos
+                            .where(
+                              (p) =>
+                                  p.description == null ||
+                                  p.description!.isEmpty,
+                            )
+                            .length
+                            .toString(),
+                        style: const TextStyle(
+                          fontSize: 8,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+        ],
       ),
       body: SafeArea(
-        child:
-            widget.productos != null
-                ? _buildProductosContent()
-                : BlocListener<ListaProductosBloc, ListaProductosState>(
-                  listener: (context, state) {
-                    if (state is ListaProductosError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(state.message),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      );
-                    } else if (state is ProductosCargadosState) {
-                      setState(() {
-                        productos = state.productos;
-                      });
-                    }
-                  },
-                  child: BlocBuilder<ListaProductosBloc, ListaProductosState>(
-                    builder: (context, state) {
-                      if (state is ListaProductosLoading) {
-                        return Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const CircularProgressIndicator(),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Cargando productos...',
-                                style: TextStyle(
-                                  color: theme.colorScheme.secondary,
-                                  fontWeight: FontWeight.w500,
+        child: Column(
+          children: [
+            Expanded(
+              child:
+                  widget.productos != null
+                      ? _buildProductosContent()
+                      : BlocListener<ListaProductosBloc, ListaProductosState>(
+                        listener: (context, state) {
+                          if (state is ListaProductosError) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.message),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                            ],
-                          ),
-                        );
-                      }
-                      return _buildProductosContent();
-                    },
-                  ),
-                ),
+                            );
+                          } else if (state is ProductosCargadosState) {
+                            setState(() {
+                              productos = state.productos;
+                            });
+                          }
+                        },
+                        child: BlocBuilder<
+                          ListaProductosBloc,
+                          ListaProductosState
+                        >(
+                          builder: (context, state) {
+                            if (state is ListaProductosLoading) {
+                              return Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const CircularProgressIndicator(),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Cargando productos...',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.secondary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return _buildProductosContent();
+                          },
+                        ),
+                      ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -162,7 +295,8 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ProductListSection(
-                              title: 'Productos del almacén ${widget.almacenName}',
+                              title:
+                                  'Productos del almacén ${widget.almacenName}',
                               productos: productosAlmacenActual,
                               headerColor: Colors.blue,
                               rowColor: Colors.grey.shade50,
