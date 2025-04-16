@@ -1,8 +1,8 @@
 class Producto {
   String productcode; // el id
   String? description;
-  int storeid;
   int numerolote;
+  int locationid;
   String serialnumber;
   DateTime expirationdate;
   int stock;
@@ -10,8 +10,8 @@ class Producto {
   Producto(
     this.productcode,
     this.description,
-    this.storeid,
     this.numerolote,
+    this.locationid,
     this.serialnumber,
     this.expirationdate,
     this.stock,
@@ -21,8 +21,8 @@ class Producto {
     return {
       'productcode': productcode,
       'description': description,
-      'storeid': storeid,
       'numerolote': numerolote,
+      'locationid': locationid,
       'serialnumber': serialnumber,
       'expirationdate': expirationdate,
       'stock': stock,
@@ -33,8 +33,8 @@ class Producto {
     return Producto(
       map['productcode'] ?? 0,
       map['description'],
-      map['storeid'] ?? 0,
       map['numerolote'] ?? 0,
+      map['locationid'] ?? 0,
       map['serialnumber'] ?? 0,
       DateTime.parse(map['expirationdate']),
       map['stock'] ?? 1,
@@ -46,8 +46,8 @@ class Producto {
       return Producto(
         mapa['product_code'] ?? '0',
         mapa['description'],
-        mapa['store_id'] ?? 0,
         mapa['numerolote'] ?? 0,
+        mapa['location_id'] ?? 0,
         mapa['serial_number'] ?? '',
         mapa['expiration_date'] != null
             ? DateTime.parse(mapa['expiration_date'])

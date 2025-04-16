@@ -7,11 +7,14 @@ class SelectorLocations extends StatefulWidget {
   final List<Location> locations;
   final Location? selectedLocation;
   final Function(Location) onOptionsSelected;
+  final bool enabled;
+  
   const SelectorLocations({
     super.key,
     required this.locations,
     this.selectedLocation,
     required this.onOptionsSelected,
+    this.enabled = true,
   });
   @override
   State<SelectorLocations> createState() => _SelectorLocationsState();
@@ -46,21 +49,23 @@ class _SelectorLocationsState extends State<SelectorLocations> {
       return;
     }
     
-    _selectedLocation = widget.selectedLocation;
+    setState(() {
+      _selectedLocation = widget.selectedLocation;
     
-    if (_selectedLocation != null) {
-      bool locationExistsInList = widget.locations.any((location) => 
-        location.id == _selectedLocation!.id);
-      
-      if (locationExistsInList) {
-        _locationsController.text = _selectedLocation!.name;
+      if (_selectedLocation != null) {
+        bool locationExistsInList = widget.locations.any((location) => 
+          location.id == _selectedLocation!.id);
+        
+        if (locationExistsInList) {
+          _locationsController.text = _selectedLocation!.name;
+        } else {
+          _selectedLocation = null;
+          _locationsController.clear();
+        }
       } else {
-        _selectedLocation = null;
         _locationsController.clear();
       }
-    } else {
-      _locationsController.clear();
-    }
+    });
   }
 
   @override
@@ -71,109 +76,85 @@ class _SelectorLocationsState extends State<SelectorLocations> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isSmallScreen = MediaQuery.of(context).size.width < 360;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    final List<Location> uniqueLocations = [];
+    final Set<int> addedIds = {};
+    
+    for (var location in widget.locations) {
+      if (!addedIds.contains(location.id)) {
+        uniqueLocations.add(location);
+        addedIds.add(location.id);
+      }
+    }
+    
+    return DropdownButtonFormField<int>(
+      isExpanded: true,
+      icon: Icon(
+        Icons.arrow_drop_down, 
+        size: 20,
+        color: widget.enabled ? null : Colors.grey.shade400,
       ),
-      child: Padding(
-        padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.local_hospital,
-                  color: theme.colorScheme.primary,
-                  size: 18,
-                ),
-                const SizedBox(width: 6),
-                Flexible(
+      decoration: InputDecoration(
+        isDense: true,
+        filled: true,
+        fillColor: widget.enabled ? Colors.grey.shade50 : Colors.grey.shade100,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 8,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+        ),
+        hintText: 'Seleccionar ubicación',
+        hintStyle: TextStyle(
+          fontSize: 13, 
+          color: widget.enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+        ),
+      ),
+      value: null,
+      items: uniqueLocations.isEmpty 
+          ? [] 
+          : uniqueLocations.map<DropdownMenuItem<int>>(
+              (Location location) {
+                print('Location: ${location}');
+                return DropdownMenuItem(
+                  value: location.id,
                   child: Text(
-                    'Seleccionar Ubicación',
-                    style: TextStyle(
-                      fontSize: isSmallScreen ? 14 : 16,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+                    location.name,
+                    style: const TextStyle(
+                      fontSize: 13,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<Location>(
-              isExpanded: true,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? 12 : 16,
-                  vertical: isSmallScreen ? 6 : 8,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                hintText: 'Seleccionar Ubicación',
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.grey.shade600,
-                  size: isSmallScreen ? 18 : 24,
-                ),
-              ),
-              value: (_selectedLocation != null && 
-                     widget.locations.any((loc) => loc.id == _selectedLocation!.id)) 
-                     ? _selectedLocation 
-                     : null,
-              items: widget.locations.isEmpty 
-                  ? [] 
-                  : widget.locations.map<DropdownMenuItem<Location>>(
-                      (Location value) {
-                        return DropdownMenuItem(
-                          value: value,
-                          child: Text(
-                            value.name,
-                            style: TextStyle(
-                              fontSize: isSmallScreen ? 13 : 14,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        );
-                      },
-                    ).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedLocation = value;
-                    _locationsController.text = value.name;
-                  });
-                  widget.onOptionsSelected(value);
-                  BlocProvider.of<EscanerBloc>(
-                    context,
-                  ).add(ChooseLocationEvent(value));
-                }
+                );
               },
-            ),
-            const SizedBox(height: 8),
-            if (widget.locations.isEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'No hay ubicaciones disponibles',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: isSmallScreen ? 12 : 14,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
+            ).toList(),
+      onChanged: widget.enabled ? (locationId) {
+        if (locationId != null) {
+          final selectedLocation = uniqueLocations.firstWhere(
+            (location) => location.id == locationId,
+            orElse: () => uniqueLocations.first,
+          );
+          
+          setState(() {
+            _selectedLocation = selectedLocation;
+            _locationsController.text = selectedLocation.name;
+          });
+          
+          widget.onOptionsSelected(selectedLocation);
+          BlocProvider.of<EscanerBloc>(
+            context,
+          ).add(ChooseLocationEvent(selectedLocation));
+        }
+      } : null,
     );
   }
 }

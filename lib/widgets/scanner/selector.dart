@@ -32,9 +32,6 @@ class _SelectorState extends State<Selector> {
   Hospital? _selectedHospital;
   Location? _selectedLocation;
   final TextEditingController _locationsController = TextEditingController();
-  
-  // Clave para forzar la reconstrucción del widget SelectorLocations
-  Key _locationSelectorKey = UniqueKey();
 
   @override
   void initState() {
@@ -52,13 +49,13 @@ class _SelectorState extends State<Selector> {
     super.didUpdateWidget(oldWidget);
     _selectedHospital = widget.selectedHospital;
     _selectedLocation = widget.selectedLocation;
-    
+
     if (_selectedHospital != null) {
       _hospitalesController.text = _selectedHospital!.description;
     } else {
       _hospitalesController.clear();
     }
-    
+
     if (_selectedLocation != null) {
       _locationsController.text = _selectedLocation!.name;
     } else {
@@ -75,60 +72,73 @@ class _SelectorState extends State<Selector> {
     super.dispose();
   }
 
+  // Widget para construir el encabezado de cada selector
+  Widget _buildSelectorHeader({
+    required IconData icon,
+    required String title,
+    required ThemeData theme,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: theme.colorScheme.primary),
+          const SizedBox(width: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isSmallScreen = MediaQuery.of(context).size.width < 360;
 
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.local_hospital,
-                  color: theme.colorScheme.primary,
-                  size: 18,
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    'Seleccionar Almacén',
-                    style: TextStyle(
-                      fontSize: isSmallScreen ? 14 : 16,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<Hospital>(
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSelectorHeader(
+            icon: Icons.store,
+            title: 'Almacén',
+            theme: theme,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+            child: DropdownButtonFormField<Hospital>(
               isExpanded: true,
+              icon: const Icon(Icons.arrow_drop_down, size: 20),
               decoration: InputDecoration(
+                isDense: true,
                 filled: true,
-                fillColor: Colors.grey.shade100,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: isSmallScreen ? 12 : 16,
-                  vertical: isSmallScreen ? 6 : 8,
+                fillColor: Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 8,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
                 ),
-                hintText: 'Seleccionar Hospital',
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.grey.shade600,
-                  size: isSmallScreen ? 18 : 24,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
                 ),
+                hintText: 'Seleccionar hospital',
+                hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
               value: _selectedHospital,
               items:
@@ -139,7 +149,7 @@ class _SelectorState extends State<Selector> {
                       value: value,
                       child: Text(
                         value.description,
-                        style: TextStyle(fontSize: isSmallScreen ? 13 : 14),
+                        style: const TextStyle(fontSize: 13),
                         overflow: TextOverflow.ellipsis,
                       ),
                     );
@@ -150,18 +160,12 @@ class _SelectorState extends State<Selector> {
                     _selectedHospital = value;
                     _hospitalesController.text = value.description;
                     
-                    // Siempre limpiar la localización seleccionada y regenerar el widget
-                    // incluso cuando se selecciona el mismo hospital
                     _selectedLocation = null;
                     _locationsController.clear();
-                    
-                    // Generar una nueva clave para forzar la reconstrucción del widget
-                    _locationSelectorKey = UniqueKey();
                   });
-                  
+
                   widget.onOptionsSelected(value);
-                  
-                  // Cargar las nuevas localizaciones para el hospital seleccionado
+
                   BlocProvider.of<EscanerBloc>(
                     context,
                   ).add(ChooseStoreEvent(value));
@@ -176,34 +180,101 @@ class _SelectorState extends State<Selector> {
                 }
               },
             ),
-            const SizedBox(height: 8),
-            if (widget.hospitales.isEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  'No hay hospitales disponibles',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: isSmallScreen ? 12 : 14,
-                  ),
-                ),
+          ),
+          if (widget.hospitales.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+              child: Text(
+                'No hay hospitales disponibles',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
-            const SizedBox(height: 8),
-            if (_selectedHospital != null)
-              SelectorLocations(
-                key: _locationSelectorKey, // Usar la clave única para forzar la reconstrucción
-                locations: widget.locations,
-                selectedLocation: _selectedLocation,
-                onOptionsSelected: (location) {
-                  setState(() {
-                    _selectedLocation = location;
-                    _locationsController.text = location.name;
-                  });
-                  widget.onLocationSelected(location);
+            ),
+
+          if (_selectedHospital != null) ...[
+            _buildSelectorHeader(
+              icon: Icons.location_on,
+              title: 'Ubicación',
+              theme: theme,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+              child: BlocConsumer<EscanerBloc, EscanerState>(
+                listener: (context, state) {
+                  if (state is LocationsCargadas) {
+                    setState(() {
+                      if (_selectedLocation != null) {
+                        final bool exists = state.locations.any((loc) => loc.id == _selectedLocation!.id);
+                        if (!exists) {
+                          _selectedLocation = null;
+                          _locationsController.clear();
+                        }
+                      }
+                    });
+                  }
+                },
+                builder: (context, state) {
+                  final bool isLoading = state is EscanerLoading;
+                  final bool hasLocations = widget.locations.isNotEmpty;
+                  
+                  if (isLoading || !hasLocations) {
+                    return DropdownButtonFormField<int>(
+                      isExpanded: true,
+                      icon: Icon(
+                        Icons.arrow_drop_down,
+                        size: 20,
+                        color: Colors.grey.shade400,
+                      ),
+                      decoration: InputDecoration(
+                        isDense: true,
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        hintText: isLoading ? 'Cargando ubicaciones...' : 'No hay ubicaciones disponibles',
+                        hintStyle: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                      items: [],
+                      onChanged: null,
+                    );
+                  }
+
+                  return SelectorLocations(
+                    locations: widget.locations,
+                    selectedLocation: _selectedLocation,
+                    enabled: true,
+                    onOptionsSelected: (location) {
+                      setState(() {
+                        _selectedLocation = location;
+                        _locationsController.text = location.name;
+                      });
+                      
+                      widget.onLocationSelected(location);
+                    },
+                  );
                 },
               ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
