@@ -79,11 +79,14 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     try {
       locationSeleccionada = null;
       
-      List<Location> locations = await locationRepository
+      await locationRepository
           .getLocationsForAStore(hospitalSeleccionado!.id)
-          .then((value) => value.data);
-        
-      emit(LocationsCargadas(locations));
+          .then((value) => value.data)
+          .then((locations) {
+        if (!emit.isDone) {
+          emit(LocationsCargadas(locations));
+        }
+      });
     } catch (e) {
       emit(EscanerError(e.toString()));
     }
@@ -276,7 +279,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           emit(
             ProductosListadosState(
               productosEscaneados,
-              hayProductosPendientes: false,
+              hayProductosPendientes: true,
             ),
           );
         }
@@ -292,7 +295,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       emit(
         ProductosListadosState(
           productosEscaneados,
-          hayProductosPendientes: false,
+          hayProductosPendientes: hayProductosPendientes,
         ),
       );
     }

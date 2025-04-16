@@ -26,11 +26,10 @@ class ProductDataTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final alarmUtils = AlarmUtils();
 
-    final Map<String, Map<int, List<Producto>>> groupedProducts = {};
+    final Map<String, List<Producto>> groupedProducts = {};
     for (final producto in productos) {
       groupedProducts
-          .putIfAbsent(producto.productcode, () => {})
-          .putIfAbsent(producto.storeid, () => [])
+          .putIfAbsent(producto.productcode, () => [])
           .add(producto);
     }
 
@@ -165,8 +164,7 @@ class ProductDataTable extends StatelessWidget {
                     rows: List<DataRow>.generate(productos.length, (index) {
                       final producto = productos[index];
                       final totalStock =
-                          groupedProducts[producto.productcode]?[producto
-                                  .storeid]
+                          groupedProducts[producto.productcode]
                               ?.fold<int>(0, (sum, p) => sum + p.stock) ??
                           0;
 

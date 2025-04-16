@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto.dart';
+import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/widgets/product/product_info_row.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
 import 'package:quilmedic/utils/services.dart';
@@ -7,11 +8,13 @@ import 'package:quilmedic/utils/services.dart';
 class ProductInfoCard extends StatefulWidget {
   final Producto producto;
   final int totalStock;
+  final Location? location;
 
   const ProductInfoCard({
     super.key,
     required this.producto,
     required this.totalStock,
+    this.location,
   });
 
   @override
@@ -123,11 +126,19 @@ class _ProductInfoCardState extends State<ProductInfoCard> {
                   
                   const SizedBox(height: 16),
                   
-                  ProductInfoRow(
-                    label: 'Código de almacén:', 
-                    value: widget.producto.storeid.toString(),
-                    icon: Icons.warehouse,
-                  ),
+                  if (widget.location != null) 
+                    ProductInfoRow(
+                      label: 'Código de almacén:', 
+                      value: widget.location!.storeId.toString(),
+                      icon: Icons.warehouse,
+                    )
+                  else
+                    ProductInfoRow(
+                      label: 'Código de almacén:', 
+                      value: 'No disponible',
+                      icon: Icons.warehouse,
+                      color: Colors.grey,
+                    ),
                 ],
               ),
       ),

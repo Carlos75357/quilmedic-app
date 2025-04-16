@@ -18,7 +18,6 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
   final TextEditingController _controller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FocusNode _textFieldFocusNode = FocusNode();
-  final FocusNode _keyListenerFocusNode = FocusNode();
   
   @override
   void initState() {
@@ -30,7 +29,6 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
   void dispose() {
     _controller.dispose();
     _textFieldFocusNode.dispose();
-    _keyListenerFocusNode.dispose();
     super.dispose();
   }
   
@@ -45,108 +43,96 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
   
   @override
   Widget build(BuildContext context) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 360;
-    
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Padding(
-        padding: EdgeInsets.all(isSmallScreen ? 8.0 : 12.0),
-        child: Form(
-          key: _formKey,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
+              ),
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Ingresar código manualmente',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontSize: isSmallScreen ? 14 : null,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: widget.onClose,
-                        tooltip: 'Cerrar',
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        iconSize: isSmallScreen ? 18 : 24,
-                      ),
-                    ],
+                  const Icon(Icons.keyboard, size: 16, color: Colors.grey),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Código de barras',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
-                  SizedBox(height: isSmallScreen ? 8 : 12),
-                  SizedBox(
-                    height: 40.0,
-                    child: TextFormField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        labelText: 'Código de barras',
-                        hintText: 'Ingrese o escanee el código',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: Icon(
-                          Icons.qr_code,
-                          size: isSmallScreen ? 18 : 24,
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 16),
+                    onPressed: widget.onClose,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    tooltip: 'Cerrar',
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 36,
+                      child: TextFormField(
+                        controller: _controller,
+                        decoration: const InputDecoration(
+                          hintText: 'Ingrese o escanee el código',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          isDense: true,
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: isSmallScreen ? 12 : 16,
-                          vertical: isSmallScreen ? 8 : 12,
-                        ),
-                        isDense: true,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Ingrese un código';
+                          }
+                          return null;
+                        },
+                        autofocus: true,
+                        focusNode: _textFieldFocusNode,
+                        style: const TextStyle(fontSize: 14),
+                        onFieldSubmitted: (_) => _submitCode(),
+                        onChanged: (value) {
+                          if (value.isNotEmpty && value.endsWith('\n')) {
+                            _controller.text = value.replaceAll('\n', '');
+                            _submitCode();
+                          }
+                        },
                       ),
-                      keyboardType: TextInputType.text,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Por favor ingrese un código';
-                        }
-                        return null;
-                      },
-                      autofocus: true,
-                      focusNode: _textFieldFocusNode,
-                      style: TextStyle(
-                        fontSize: isSmallScreen ? 14 : 16,
-                      ),
-                      onFieldSubmitted: (_) => _submitCode(),
-                      onChanged: (value) {
-                        if (value.isNotEmpty && value.endsWith('\n')) {
-                          _controller.text = value.replaceAll('\n', '');
-                          _submitCode();
-                        }
-                      },
                     ),
                   ),
-                  SizedBox(height: isSmallScreen ? 6 : 8),
+                  const SizedBox(width: 8),
                   SizedBox(
-                    height: isSmallScreen ? 36 : 40,
+                    height: 36,
                     child: ElevatedButton(
                       onPressed: _submitCode,
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          vertical: isSmallScreen ? 4 : 8,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
-                      child: Text(
-                        'Añadir producto',
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 13 : 14,
-                        ),
-                      ),
+                      child: const Text('Añadir', style: TextStyle(fontSize: 13)),
                     ),
                   ),
                 ],
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );

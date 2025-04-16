@@ -40,18 +40,7 @@ class ListaProductosBloc
     try {
       emit(ListaProductosLoading());
 
-      // final List<String> productosEscaneadosIds =
-      //     await _obtenerProductosEscaneadosIds();
-      // if (productosEscaneadosIds.isEmpty) {
-      //   emit(ListaProductosError('No hay productos escaneados'));
-      //   return;
-      // }
-
       try {
-        // final productos = await _cargarDetallesProductos(
-        //   productosEscaneadosIds,
-        // );
-
         if (event.productos.isEmpty) {
           emit(ListaProductosError('No se encontraron productos escaneados'));
         } else {
@@ -70,66 +59,6 @@ class ListaProductosBloc
       emit(ListaProductosError('Error inesperado: ${e.toString()}'));
     }
   }
-
-  // Future<List<String>> _obtenerProductosEscaneadosIds() async {
-  //   return await ProductoLocalStorage.obtenerProductosEscaneados();
-  // }
-
-  // Future<List<Producto>> _cargarDetallesProductos(
-  //   List<String> productosIds,
-  // ) async {
-  //   try {
-  //     final response = await productoRepository.getProductosByCodigos(
-  //       productosIds,
-  //     );
-
-  //     if (!response.success || response.data is! List) {
-  //       throw Exception('Error al cargar productos: ${response.message}');
-  //     }
-
-  //     return _procesarRespuestaProductos(response.data, productosIds);
-  //   } catch (e) {
-  //     throw Exception('Error al cargar productos: ${e.toString()}');
-  //   }
-  // }
-
-  // List<Producto> _procesarRespuestaProductos(
-  //   List<dynamic> data,
-  //   List<String> productosIds,
-  // ) {
-  //   final Map<int, Producto> productosMap = {};
-
-  //   for (var item in data) {
-  //     if (item is Map<String, dynamic>) {
-  //       try {
-  //         final int productcode = item['productcode'] ?? 0;
-
-  //         if (productosIds.contains(productcode.toString())) {
-  //           final producto = _crearProductoDesdeJson(item);
-  //           productosMap[productcode] = producto;
-  //         }
-  //       } catch (e) {
-  //         throw Exception('Error al cargar productos: ${e.toString()}');
-  //       }
-  //     }
-  //   }
-
-  //   return productosMap.values.toList();
-  // }
-
-  // Producto _crearProductoDesdeJson(Map<String, dynamic> json) {
-  //   return Producto(
-  //     json['productcode'] ?? 0,
-  //     json['description'] ?? '',
-  //     json['storeid'] ?? 0,
-  //     json['numerolote'] ?? 0,
-  //     json['serialnumber'] ?? '',
-  //     json['expirationdate'] != null
-  //         ? DateTime.parse(json['expirationdate'])
-  //         : DateTime.now(),
-  //     json['stock'] ?? 0,
-  //   );
-  // }
 
   void _manejarErrorConexion(Object e, Emitter<ListaProductosState> emit) {
     final String errorMsg = e.toString();

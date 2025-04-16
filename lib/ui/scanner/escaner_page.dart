@@ -4,6 +4,7 @@ import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/ui/list/lista_productos_page.dart';
+import 'package:quilmedic/utils/alarm_utils.dart';
 import 'package:quilmedic/widgets/scanner/empty_products_view.dart';
 import 'package:quilmedic/widgets/scanner/manual_code_input.dart';
 import 'package:quilmedic/widgets/scanner/productos_list.dart';
@@ -37,7 +38,14 @@ class _EscanerPageState extends State<EscanerPage> {
   void initState() {
     super.initState();
     _checkPendingProducts();
+    _updateAlarmsIfNeeded();
     BlocProvider.of<EscanerBloc>(context).add(LoadHospitales());
+  }
+  
+  Future<void> _updateAlarmsIfNeeded() async {
+    final alarmUtils = AlarmUtils();
+    
+    await alarmUtils.loadAlarmsFromCache();
   }
 
   @override
@@ -117,10 +125,23 @@ class _EscanerPageState extends State<EscanerPage> {
             ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => BlocProvider.of<EscanerBloc>(
-              context,
-            ).add(LoadHospitales()),
-            tooltip: 'Recargar hospitales',
+            onPressed: () {
+              // Recargar hospitales
+              BlocProvider.of<EscanerBloc>(context).add(LoadHospitales());
+              
+              // Forzar actualización de alarmas
+              final alarmUtils = AlarmUtils();
+              alarmUtils.forceRefresh().then((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Alarmas actualizadas correctamente'),
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              });
+            },
+            tooltip: 'Recargar datos',
           ),
         ],
       ),
@@ -219,6 +240,9 @@ class _EscanerPageState extends State<EscanerPage> {
                   builder:
                       (context) => ListaProductosPage(
                         productos: state.productos,
+                        location: context
+                            .read<EscanerBloc>()
+                            .locationSeleccionada,
                         notFounds: state.productosNotFound,
                         hospitalId:
                             context
@@ -226,6 +250,10 @@ class _EscanerPageState extends State<EscanerPage> {
                                 .hospitalSeleccionado
                                 ?.id ??
                             0,
+                        locationId: context
+                            .read<EscanerBloc>()
+                            .locationSeleccionada
+                            ?.id,
                         almacenName: context
                             .read<EscanerBloc>()
                             .hospitalSeleccionado
@@ -233,7 +261,6 @@ class _EscanerPageState extends State<EscanerPage> {
                       ),
                 ),
               ).then((_) {
-                // Resetear completamente las selecciones cuando volvemos
                 _resetSelections();
               });
             } else if (state is SinProductosPendientesState) {
@@ -315,40 +342,28 @@ class _EscanerPageState extends State<EscanerPage> {
           const SizedBox(height: 12),
 
           if (_isManualInput)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4.0),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 180),
-                child: ManualCodeInput(
-                  onCodeSubmitted: (code) => _onManualCodeSubmitted(code, context),
-                  onClose: _closeManualInput,
-                ),
-              ),
+            ManualCodeInput(
+              onCodeSubmitted: (code) => _onManualCodeSubmitted(code, context),
+              onClose: _closeManualInput,
             )
           else
-            Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              spacing: 8.0,
-              runSpacing: 8.0,
-              children: [
-                ElevatedButton.icon(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+              child: SizedBox(
+                height: 40,
+                child: OutlinedButton.icon(
                   onPressed: _toggleManualInput,
-                  icon: const Icon(Icons.keyboard, size: 28),
-                  label: const Text(
-                    'Ingresar código',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 44,
-                      vertical: 24,
-                    ),
+                  icon: const Icon(Icons.keyboard, size: 18),
+                  label: const Text('Ingresar código manualmente'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.5)),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
 
           const SizedBox(height: 12),

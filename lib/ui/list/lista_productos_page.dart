@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/domain/producto.dart';
 // import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
@@ -11,15 +12,19 @@ import 'package:quilmedic/widgets/list/product_list_section.dart';
 
 class ListaProductosPage extends StatefulWidget {
   final List<Producto>? productos;
+  final Location? location;
   final List<String>? notFounds;
   final int hospitalId;
+  final int? locationId;
   final String almacenName;
 
   const ListaProductosPage({
     super.key,
     this.productos,
+    this.location,
     this.notFounds,
     required this.hospitalId,
+    required this.locationId,
     required this.almacenName,
   });
 
@@ -29,7 +34,7 @@ class ListaProductosPage extends StatefulWidget {
 
 class _ListaProductosPageState extends State<ListaProductosPage> {
   late List<Producto> productos;
-  final Map<String, Map<int, List<Producto>>> groupedProducts = {};
+  final Map<String, List<Producto>> groupedProducts = {};
 
   // late List<Hospital> _hospitales = [];
   // String? _errorCargaHospitales;
@@ -92,11 +97,11 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                           'No encontrado',
                           style: TextStyle(
                             fontSize: 13,
-                              fontStyle: FontStyle.italic,
-                              color: Colors.red.shade700,
-                            ),
+                            fontStyle: FontStyle.italic,
+                            color: Colors.red.shade700,
                           ),
                         ),
+                      ),
                     ],
                   ),
                 );
@@ -117,10 +122,11 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   @override
   Widget build(BuildContext context) {
     // final isVerySmallScreen = MediaQuery.of(context).size.width < 320;
+    groupedProducts.clear(); // Limpiar el mapa antes de reconstruirlo
+    
     for (final producto in productos) {
       groupedProducts
-          .putIfAbsent(producto.productcode, () => {})
-          .putIfAbsent(producto.storeid, () => [])
+          .putIfAbsent(producto.productcode, () => [])
           .add(producto);
     }
 
@@ -255,9 +261,16 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     final List<Producto> productosOtrosAlmacenes = [];
 
     final int hospitalId = widget.hospitalId;
-
+    final int? locationId = widget.locationId;
+    
     for (var producto in productos) {
-      if (producto.storeid == hospitalId) {
+      if (locationId != null) {
+        if (producto.locationid == locationId) {
+          productosAlmacenActual.add(producto);
+        } else {
+          productosOtrosAlmacenes.add(producto);
+        }
+      } else if (widget.location?.storeId == hospitalId) {
         productosAlmacenActual.add(producto);
       } else {
         productosOtrosAlmacenes.add(producto);
@@ -414,7 +427,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductoDetallePage(producto: producto),
+        builder: (context) => ProductoDetallePage(producto: producto, almacenName: widget.almacenName, location: widget.location),
       ),
     );
 
@@ -432,7 +445,9 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
             builder:
                 (context) => ListaProductosPage(
                   productos: widget.productos,
+                  location: widget.location,
                   hospitalId: widget.hospitalId,
+                  locationId: widget.locationId,
                   almacenName: widget.almacenName,
                 ),
           ),

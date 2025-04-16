@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
 import 'package:quilmedic/utils/services.dart';
 
 class ProductoDetallePage extends StatefulWidget {
   final Producto producto;
+  final Location? location;
+  final String? almacenName;
 
-  const ProductoDetallePage({super.key, required this.producto});
+  const ProductoDetallePage({
+    super.key,
+    required this.producto,
+    this.location,
+    required this.almacenName,
+  });
 
   @override
   State<ProductoDetallePage> createState() => _ProductoDetallePageState();
@@ -212,11 +220,12 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Ubicación',
+              'Localización',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
-            _buildInfoRow('Almacén:', 'ID: ${widget.producto.storeid}'),
+            _buildInfoRow('Almacén:', '${widget.almacenName}'),
+            _buildInfoRow('Ubicación:', '${widget.location?.name}'),
           ],
         ),
       ),
