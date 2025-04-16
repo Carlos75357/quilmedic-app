@@ -28,9 +28,9 @@ class ProductoRepository {
         },
       );
 
-      if (response is Map &&
-          response.containsKey('found') &&
-          response.containsKey('missing')) {
+      if (response is Map 
+          && response.containsKey('found') 
+          && response.containsKey('missing')) {
         resultados.addAll(response['found']);
         noEncontrados.addAll(
           (response['missing'] as List).map((item) => item.toString()),

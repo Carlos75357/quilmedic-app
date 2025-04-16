@@ -6,6 +6,7 @@ import 'package:quilmedic/data/local/producto_local_storage.dart';
 import 'package:quilmedic/data/respository/alarm_repository.dart';
 import 'package:quilmedic/domain/alarm.dart';
 import 'package:quilmedic/domain/producto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AlarmUtils {
   static final ApiClient _apiClient = ApiClient();
@@ -17,9 +18,14 @@ class AlarmUtils {
   static final List<Alarm> _generalAlarmCache = [];
   static final Map<String, Color> _stockColorCache = {};
   static final Map<String, Color> _expiryColorCache = {};
+  
+  // Clave para almacenar la última fecha de actualización
+  static const String _lastUpdateKey = 'last_alarm_update';
+  // Tiempo de expiración en horas
+  static const int _cacheExpirationHours = 24;
 
   Future<void> initGeneralAlarms() async {
-    if (_generalAlarmCache.isEmpty) {
+    if (_generalAlarmCache.isEmpty || await _shouldRefreshCache()) {
       final stockResponse = await getGeneralStockAlarms();
       final dateResponse = await getGeneralExpirationDateAlarms();
       
@@ -27,13 +33,36 @@ class AlarmUtils {
       _generalAlarmCache.addAll([...stockResponse, ...dateResponse]);
       
       await ProductoLocalStorage.agregarAlarmas(_generalAlarmCache);
+      await _updateLastRefreshTime();
     }
+  }
+  
+  // Verifica si es necesario actualizar la caché basado en el tiempo transcurrido
+  Future<bool> _shouldRefreshCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastUpdate = prefs.getInt(_lastUpdateKey);
+    
+    if (lastUpdate == null) {
+      return true; // Primera vez, debe actualizar
+    }
+    
+    final lastUpdateTime = DateTime.fromMillisecondsSinceEpoch(lastUpdate);
+    final now = DateTime.now();
+    final difference = now.difference(lastUpdateTime).inHours;
+    
+    return difference >= _cacheExpirationHours;
+  }
+  
+  // Actualiza el timestamp de la última actualización
+  Future<void> _updateLastRefreshTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lastUpdateKey, DateTime.now().millisecondsSinceEpoch);
   }
 
   Future<void> loadAlarmsFromCache() async {
-    if (_generalAlarmCache.isEmpty) {
+    if (_generalAlarmCache.isEmpty || await _shouldRefreshCache()) {
       final alarms = await ProductoLocalStorage.obtenerAlarmas();
-      if (alarms.isNotEmpty) {
+      if (alarms.isNotEmpty && !(await _shouldRefreshCache())) {
         _generalAlarmCache.clear();
         _generalAlarmCache.addAll(alarms);
       } else {
@@ -320,5 +349,11 @@ class AlarmUtils {
     _generalAlarmCache.clear();
     _stockColorCache.clear();
     _expiryColorCache.clear();
+  }
+  
+  // Forzar una actualización de las alarmas desde el servidor
+  Future<void> forceRefresh() async {
+    clearCache();
+    await initGeneralAlarms();
   }
 }
