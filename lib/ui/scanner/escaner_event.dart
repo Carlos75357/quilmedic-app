@@ -38,7 +38,6 @@ class IrAListaProductosEvent extends EscanerEvent {
   IrAListaProductosEvent(this.productos);
 }
 
-class GuardarProductosForzadoEvent extends EscanerEvent {}
 
 class EliminarProductoEvent extends EscanerEvent {
   final ProductoEscaneado producto;

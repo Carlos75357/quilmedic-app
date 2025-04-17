@@ -83,3 +83,21 @@ class SinProductosPendientesState extends EscanerState {
 }
 
 class SelectionsResetState extends EscanerState {}
+
+class HospitalSeleccionadoState extends EscanerState {
+  final Hospital hospital;
+  
+  HospitalSeleccionadoState(this.hospital);
+}
+
+class LocationSeleccionadaState extends EscanerState {
+  final Location location;
+  
+  LocationSeleccionadaState(this.location);
+}
+
+class ProductosGuardadosLocalState extends EscanerState {
+  final List<ProductoEscaneado> productos;
+  
+  ProductosGuardadosLocalState(this.productos);
+}

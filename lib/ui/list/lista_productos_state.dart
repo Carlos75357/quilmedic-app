@@ -21,7 +21,6 @@ final class ProductosCargadosState extends ListaProductosState {
   ProductosCargadosState(this.productos);
 }
 
-// Estados para la carga de hospitales
 final class CargandoHospitalesState extends ListaProductosState {}
 
 final class HospitalesCargadosState extends ListaProductosState {
@@ -36,7 +35,6 @@ final class ErrorCargaHospitalesState extends ListaProductosState {
   ErrorCargaHospitalesState(this.mensaje);
 }
 
-// Estados para el envío de solicitudes de traslado
 final class EnviandoSolicitudTrasladoState extends ListaProductosState {}
 
 final class SolicitudTrasladoEnviadaState extends ListaProductosState {

@@ -29,7 +29,7 @@ class ListaProductosBloc
   ListaProductosBloc() : super(ListaProductosInitial()) {
     on<CargarProductosEvent>(_cargarProductos);
     on<MostrarProductosEvent>(_mostrarProductos);
-    on<CargarHospitalesEvent>(_cargarHospitales);
+    on<CargarHospitalesEvent>(cargarHospitales);
     on<EnviarSolicitudTrasladoEvent>(_enviarSolicitudTraslado);
   }
 
@@ -92,7 +92,7 @@ class ListaProductosBloc
     emit(ProductosCargadosState(event.productos));
   }
 
-  Future<void> _cargarHospitales(
+  Future<void> cargarHospitales(
     CargarHospitalesEvent event,
     Emitter<ListaProductosState> emit,
   ) async {

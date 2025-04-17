@@ -19,18 +19,16 @@ class ProductoRepository {
     try {
       List<String> serialNumbers =
           productos.map((producto) => producto.serialnumber).toList();
-      final response = await apiClient.post(
-        '${ApiConfig.productosEndpoint}/bySerialNumbers',
-        {
-          'serial_numbers': serialNumbers,
-          'store_id': hospitalId,
-          'location_id': locationId,
-        },
-      );
+      final response = await apiClient
+          .post('${ApiConfig.productosEndpoint}/bySerialNumbers', {
+            'serial_numbers': serialNumbers,
+            'store_id': hospitalId,
+            'location_id': locationId,
+          });
 
-      if (response is Map 
-          && response.containsKey('found') 
-          && response.containsKey('missing')) {
+      if (response is Map &&
+          response.containsKey('found') &&
+          response.containsKey('missing')) {
         resultados.addAll(response['found']);
         noEncontrados.addAll(
           (response['missing'] as List).map((item) => item.toString()),
@@ -51,7 +49,7 @@ class ProductoRepository {
 
       return RepositoryResponse.success({
         'found': resultados,
-        'missing': noEncontrados
+        'missing': noEncontrados,
       }, message: message);
     } catch (e) {
       return RepositoryResponse.error(
