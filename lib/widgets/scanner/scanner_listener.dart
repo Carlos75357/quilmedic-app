@@ -11,12 +11,12 @@ class ScannerListener extends StatelessWidget {
   final Function(bool) onPendingProductsChanged;
 
   const ScannerListener({
-    Key? key,
+    super.key,
     required this.child,
     required this.resetSelections,
     required this.onProductosUpdated,
     required this.onPendingProductsChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

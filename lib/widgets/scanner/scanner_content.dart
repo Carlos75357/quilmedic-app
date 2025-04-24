@@ -30,7 +30,7 @@ class ScannerContent extends StatelessWidget {
   final Function() onSaveProducts;
 
   const ScannerContent({
-    Key? key,
+    super.key,
     required this.state,
     required this.hospitales,
     required this.locations,
@@ -47,7 +47,7 @@ class ScannerContent extends StatelessWidget {
     required this.onRemoveProduct,
     required this.onUndoRemoveProduct,
     required this.onSaveProducts,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +85,7 @@ class ScannerContent extends StatelessWidget {
                   label: const Text('Ingresar código manualmente'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
-                    side: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.5)),
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),

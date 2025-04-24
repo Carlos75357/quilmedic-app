@@ -6,10 +6,10 @@ class RecentScannedProductsPanel extends StatefulWidget {
   final VoidCallback onClose;
 
   const RecentScannedProductsPanel({
-    Key? key,
+    super.key,
     required this.productos,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   State<RecentScannedProductsPanel> createState() => _RecentScannedProductsPanelState();
@@ -24,7 +24,7 @@ class _RecentScannedProductsPanelState extends State<RecentScannedProductsPanel>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           width: 1.0,
         ),
       ),

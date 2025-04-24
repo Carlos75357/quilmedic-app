@@ -124,7 +124,6 @@ class _SelectorLocationsState extends State<SelectorLocations> {
           ? [] 
           : uniqueLocations.map<DropdownMenuItem<int>>(
               (Location location) {
-                print('Location: ${location}');
                 return DropdownMenuItem(
                   value: location.id,
                   child: Text(

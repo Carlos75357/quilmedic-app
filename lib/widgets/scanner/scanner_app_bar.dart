@@ -7,9 +7,9 @@ class ScannerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool hayProductosPendientes;
 
   const ScannerAppBar({
-    Key? key,
+    super.key,
     required this.hayProductosPendientes,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +41,15 @@ class ScannerAppBar extends StatelessWidget implements PreferredSizeWidget {
             
             final alarmUtils = AlarmUtils();
             alarmUtils.forceRefresh().then((_) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Alarmas actualizadas correctamente'),
-                  duration: Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Alarmas actualizadas correctamente'),
+                    duration: Duration(seconds: 2),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
             });
           },
           tooltip: 'Recargar datos',
