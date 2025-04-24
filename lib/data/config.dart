@@ -5,10 +5,10 @@ import 'package:http/http.dart' as http;
 class ApiConfig {
   // URL base de la API
   // static const String baseUrl = 'https://api.quilmedic.com';
-  // static const String baseUrl = 'http://localhost:3000';
   static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
   static const String masterToken = String.fromEnvironment('MASTER_TOKEN');
+  // static const String baseUrl = 'https://controlalmacen.quilmedic.com/api';
   static const String baseUrl = 'http://localhost:8000/api';
 
   static Future<String?> getToken() async {

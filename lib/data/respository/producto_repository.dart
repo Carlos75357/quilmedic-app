@@ -161,29 +161,4 @@ class ProductoRepository {
       );
     }
   }
-
-  Future<RepositoryResponse> getProductByCodigo(int codigo) async {
-    try {
-      final response = await apiClient.getAll(
-        '${ApiConfig.productosEndpoint}?numproducto=$codigo',
-        null,
-      );
-      return RepositoryResponse.success(response);
-    } catch (e) {
-      return RepositoryResponse.error(e.toString());
-    }
-  }
-
-  Future<RepositoryResponse> getProductosByCodigos(List<String> codigos) async {
-    try {
-      final response = await apiClient.getAll(
-        '${ApiConfig.productosEndpoint}?numproducto=${codigos.join(',')}',
-        null,
-      );
-
-      return RepositoryResponse.success(response);
-    } catch (e) {
-      return RepositoryResponse.error(e.toString());
-    }
-  }
 }

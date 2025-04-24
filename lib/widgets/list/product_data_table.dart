@@ -62,6 +62,10 @@ class ProductDataTable extends StatelessWidget {
             isWideScreen
                 ? (availableWidth * 0.15).toDouble()
                 : (isVerySmallScreen ? 40.0 : (isSmallScreen ? 60.0 : 80.0));
+        final codeWidth =
+            isWideScreen
+                ? (availableWidth * 0.15).toDouble()
+                : (isVerySmallScreen ? 70.0 : (isSmallScreen ? 80.0 : 100.0));
 
         return Card(
           elevation: 2,
@@ -128,6 +132,22 @@ class ProductDataTable extends StatelessWidget {
                       ),
                       DataColumn(
                         label: SizedBox(
+                          width: codeWidth,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.code_outlined,
+                                size: isVerySmallScreen ? 14 : 16,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: isVerySmallScreen ? 2 : 4),
+                              const Text('Código'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: SizedBox(
                           width: expiryWidth,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -169,9 +189,7 @@ class ProductDataTable extends StatelessWidget {
                           0;
 
                       return DataRow(
-                        color: WidgetStateProperty.resolveWith<Color?>((
-                          Set<WidgetState> states,
-                        ) {
+                        color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states,) {
                           if (states.contains(WidgetState.hovered)) {
                             return Colors.grey.shade100;
                           }
@@ -192,6 +210,26 @@ class ProductDataTable extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: isVerySmallScreen ? 11 : null,
                                     fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            onTap: () => onProductTap(producto),
+                          ),
+                          DataCell(
+                            SizedBox(
+                              width: codeWidth,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                ),
+                                child: Text(
+                                  producto.productcode,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: isVerySmallScreen ? 11 : null,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'monospace',
                                   ),
                                 ),
                               ),

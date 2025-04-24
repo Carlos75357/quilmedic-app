@@ -122,10 +122,9 @@ class ListaProductosBloc
 
       // final Map<String, dynamic> data = {
       //   'producto_id': event.producto.productcode,
-      //   'hospital_origen_id': event.producto.storeid,
+      //   'location_origin': event.producto.locationid,
       //   'hospital_destino_id': event.hospitalDestinoId,
       //   'hospital_destino_nombre': event.hospitalDestinoNombre,
-      //   'comentarios': event.comentarios,
       // };
 
       try {
@@ -145,7 +144,6 @@ class ListaProductosBloc
         //   ));
         // }
       } catch (e) {
-        // Si hay un error de conexión, simular que se ha enviado correctamente
         // TODO guardar localmente para reintento
         if (e.toString().contains('SocketException') ||
             e.toString().contains('Connection refused') ||

@@ -21,12 +21,10 @@ class EnviarSolicitudTrasladoEvent extends ListaProductosEvent {
   final Producto producto;
   final int hospitalDestinoId;
   final String hospitalDestinoNombre;
-  final String comentarios;
 
   EnviarSolicitudTrasladoEvent({
     required this.producto,
     required this.hospitalDestinoId,
     required this.hospitalDestinoNombre,
-    required this.comentarios,
   });
 }
