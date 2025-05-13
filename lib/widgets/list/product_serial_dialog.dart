@@ -10,67 +10,98 @@ class ProductSerialDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Row(
-        children: [
-          const Icon(Icons.qr_code, color: Colors.blue),
-          const SizedBox(width: 8),
-          Text(
-            'Productos no encontrados (${notFounds?.length ?? 0})',
-          ),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.close, size: 20),
-            onPressed: () => Navigator.of(context).pop(),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ],
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
       ),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: notFounds?.length ?? 0,
-          itemBuilder: (context, index) {
-            final serialNumber = notFounds?[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                children: [
-                  const Icon(Icons.qr_code, size: 18, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      serialNumber!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header with title and close button
+            Row(
+              children: [
+                const Icon(Icons.qr_code, color: Colors.blue),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Productos no encontrados (${notFounds?.length ?? 0})',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      'No encontrado',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.red.shade700,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 20),
+                  onPressed: () => Navigator.of(context).pop(),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            const Divider(),
+            // List of not found products
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
               ),
-            );
-          },
+              child: notFounds != null && notFounds!.isNotEmpty
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: notFounds!.length,
+                      itemBuilder: (context, index) {
+                        final serialNumber = notFounds![index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.qr_code, size: 18, color: Colors.blue),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  serialNumber,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'No encontrado',
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.red.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Text('No hay productos no encontrados'),
+                    ),
+            ),
+            const SizedBox(height: 16),
+            // Close button at the bottom
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cerrar'),
+              ),
+            ),
+          ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cerrar'),
-        ),
-      ],
     );
   }
 }

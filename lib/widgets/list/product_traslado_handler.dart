@@ -51,8 +51,8 @@ class ProductTrasladoHandler {
         productos: productos,
         hospitales: hospitales,
         hospitalIdOrigen: hospitalIdOrigen,
-        onTrasladoConfirmado: (hospitalIdDestino, hospitalNombreDestino) => 
-            realizarTrasladoMasivo(context, hospitalIdDestino, hospitalNombreDestino, productos),
+        onTrasladoConfirmado: (hospitalIdDestino, hospitalNombreDestino, email, selectedProducts) => 
+            realizarTrasladoMasivo(context, hospitalIdDestino, hospitalNombreDestino, email, selectedProducts),
       ),
     );
   }
@@ -62,40 +62,108 @@ class ProductTrasladoHandler {
     BuildContext context, 
     int hospitalIdDestino, 
     String hospitalNombreDestino,
-    List<Producto> productos
+    String email,
+    List<Producto> selectedProducts
   ) {
-    // Ejemplo de implementación:
-    // BlocProvider.of<ListaProductosBloc>(context).add(
-    //   EnviarSolicitudTrasladoEvent(
-    //     productos: productos,
-    //     hospitalDestinoId: hospitalIdDestino,
-    //     hospitalDestinoNombre: hospitalNombreDestino,
-    //   ),
-    // );
-    
-    Future.delayed(const Duration(seconds: 2), () {
-      if (context.mounted) {
-        Navigator.of(context).pop(); 
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Productos trasladados exitosamente a $hospitalNombreDestino'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
+    // Mostrar diálogo de procesamiento
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.swap_horiz, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Trasladando productos'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text('Procesando traslado de ${selectedProducts.length} productos...'),
+            ],
           ),
         );
+      },
+    );
+
+    // Configurar listener para estados del bloc
+    final bloc = Provider.of<ListaProductosBloc>(context, listen: false);
+    late final void Function() listener;
+    
+    listener = () {
+      final currentState = bloc.state;
+      
+      if (currentState is SolicitudTrasladoEnviadaState) {
+        // Forzar el cierre de todos los diálogos después de 3 segundos
+        Future.delayed(const Duration(seconds: 3), () {
+          if (context.mounted) {
+            // Cerrar todos los diálogos abiertos
+            Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+            
+            // Mostrar mensaje de éxito
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(currentState.mensaje),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
+              ),
+            );
+            
+            // Recargar la lista de productos
+            bloc.add(CargarProductosEvent());
+          }
+        });
         
-        if (Provider.of<ListaProductosBloc?>(context, listen: false) != null) {
-          Provider.of<ListaProductosBloc>(
-            context,
-            listen: false,
-          ).add(CargarProductosEvent());
-        }
+        // Eliminar el listener
+        bloc.stream.listen(null).cancel();
+        bloc.stream.listen((state) {}).cancel();
+      } else if (currentState is ErrorSolicitudTrasladoState) {
+        // Forzar el cierre de todos los diálogos después de 3 segundos
+        Future.delayed(const Duration(seconds: 3), () {
+          if (context.mounted) {
+            // Cerrar todos los diálogos abiertos
+            Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+            
+            // Mostrar mensaje de error
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(currentState.mensaje),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
+              ),
+            );
+          }
+        });
+        
+        // Eliminar el listener
+        bloc.stream.listen(null).cancel();
+        bloc.stream.listen((state) {}).cancel();
       }
-    });
+    };
+    
+    // Añadir listener al stream del bloc
+    bloc.stream.listen((_) => listener());
+    
+    // Enviar la solicitud de traslado al bloc
+    bloc.add(
+      EnviarSolicitudTrasladoEvent(
+        productos: selectedProducts,
+        hospitalDestinoId: hospitalIdDestino,
+        hospitalDestinoNombre: hospitalNombreDestino,
+        email: email,
+      ),
+    );
   }
 }

@@ -10,6 +10,7 @@ class ProductListSection extends StatelessWidget {
   final Color rowColor;
   final Function(Producto) onProductTap;
   final Function(Producto)? onTransferTap;
+  final List<Color> alarmColors;
 
   const ProductListSection({
     super.key,
@@ -19,6 +20,7 @@ class ProductListSection extends StatelessWidget {
     required this.rowColor,
     required this.onProductTap,
     this.onTransferTap,
+    required this.alarmColors,
   });
 
   @override
@@ -38,6 +40,7 @@ class ProductListSection extends StatelessWidget {
           rowColor: rowColor,
           onProductTap: onProductTap,
           onTransferTap: onTransferTap,
+          alarmColors: alarmColors,
         ),
       ],
     );

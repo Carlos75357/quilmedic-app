@@ -14,6 +14,7 @@ class ProductListContent extends StatelessWidget {
   final String almacenName;
   final Location? location;
   final List<Producto>? predefinedProductos;
+  final List<Color> alarmColors;
   final Function() onProductUpdated;
 
   const ProductListContent({
@@ -24,6 +25,7 @@ class ProductListContent extends StatelessWidget {
     required this.almacenName,
     this.location,
     this.predefinedProductos,
+    required this.alarmColors,
     required this.onProductUpdated,
   });
 
@@ -93,6 +95,7 @@ class ProductListContent extends StatelessWidget {
                               onProductTap:
                                   (producto) =>
                                       _navegarADetalle(context, producto),
+                              alarmColors: alarmColors,
                             ),
                             const SizedBox(height: 8),
                             Row(
@@ -142,6 +145,7 @@ class ProductListContent extends StatelessWidget {
                                 onProductTap:
                                     (producto) =>
                                         _navegarADetalle(context, producto),
+                                alarmColors: alarmColors,
                               ),
                               const SizedBox(height: 8),
                               Row(

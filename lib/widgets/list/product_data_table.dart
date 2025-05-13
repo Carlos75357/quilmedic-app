@@ -12,6 +12,7 @@ class ProductDataTable extends StatelessWidget {
   final Color rowColor;
   final Function(Producto) onProductTap;
   final Function(Producto)? onTransferTap;
+  final List<Color> alarmColors;
 
   const ProductDataTable({
     super.key,
@@ -20,17 +21,20 @@ class ProductDataTable extends StatelessWidget {
     required this.rowColor,
     required this.onProductTap,
     this.onTransferTap,
+    required this.alarmColors,
   });
 
   @override
   Widget build(BuildContext context) {
     final alarmUtils = AlarmUtils();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      alarmUtils.loadAlarmsFromCache();
+    });
 
     final Map<String, List<Producto>> groupedProducts = {};
     for (final producto in productos) {
-      groupedProducts
-          .putIfAbsent(producto.productcode, () => [])
-          .add(producto);
+      groupedProducts.putIfAbsent(producto.productcode, () => []).add(producto);
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -44,16 +48,25 @@ class ProductDataTable extends StatelessWidget {
         productos: productos,
         onProductTap: onProductTap,
         onTransferTap: onTransferTap,
+        alarmColors: alarmColors,
       );
     }
 
+    if (productos.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'No hay productos para mostrar',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+        ),
+      );
+    }
+    
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
-        final descriptionWidth =
-            isWideScreen
-                ? (availableWidth * 0.4).toDouble()
-                : (isVerySmallScreen ? 80.0 : (isSmallScreen ? 100.0 : 150.0));
         final expiryWidth =
             isWideScreen
                 ? (availableWidth * 0.2).toDouble()
@@ -116,22 +129,6 @@ class ProductDataTable extends StatelessWidget {
                     columns: [
                       DataColumn(
                         label: SizedBox(
-                          width: descriptionWidth,
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.description_outlined,
-                                size: isVerySmallScreen ? 14 : 16,
-                                color: Colors.white,
-                              ),
-                              SizedBox(width: isVerySmallScreen ? 2 : 4),
-                              const Text('Descripción'),
-                            ],
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: SizedBox(
                           width: codeWidth,
                           child: Row(
                             children: [
@@ -184,38 +181,22 @@ class ProductDataTable extends StatelessWidget {
                     rows: List<DataRow>.generate(productos.length, (index) {
                       final producto = productos[index];
                       final totalStock =
-                          groupedProducts[producto.productcode]
-                              ?.fold<int>(0, (sum, p) => sum + p.stock) ??
+                          groupedProducts[producto.productcode]?.fold<int>(
+                            0,
+                            (sum, p) => sum + p.stock,
+                          ) ??
                           0;
 
                       return DataRow(
-                        color: WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states,) {
+                        color: WidgetStateProperty.resolveWith<Color?>((
+                          Set<WidgetState> states,
+                        ) {
                           if (states.contains(WidgetState.hovered)) {
                             return Colors.grey.shade100;
                           }
                           return rowColor;
                         }),
                         cells: [
-                          DataCell(
-                            SizedBox(
-                              width: descriptionWidth,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                ),
-                                child: Text(
-                                  producto.description ?? '',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                    fontSize: isVerySmallScreen ? 11 : null,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            onTap: () => onProductTap(producto),
-                          ),
                           DataCell(
                             SizedBox(
                               width: codeWidth,
@@ -240,7 +221,7 @@ class ProductDataTable extends StatelessWidget {
                             SizedBox.expand(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: getExpiryColor(producto),
+                                color: alarmUtils.getColorForExpiryFromCache(producto.id, producto.expirationdate),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 margin: const EdgeInsets.symmetric(
@@ -261,10 +242,7 @@ class ProductDataTable extends StatelessWidget {
                             SizedBox.expand(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: alarmUtils.getColorForStockFromCache(
-                                    totalStock,
-                                    producto.productcode,
-                                  ),
+                                color: alarmUtils.getColorForStockFromCache(producto.stock, producto.id, producto.locationid),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 margin: const EdgeInsets.symmetric(
@@ -287,10 +265,5 @@ class ProductDataTable extends StatelessWidget {
         );
       },
     );
-  }
-
-  Color getExpiryColor(Producto producto) {
-    final alarmUtils = AlarmUtils();
-    return alarmUtils.getColorForExpiryFromCache(producto.serialnumber, producto.expirationdate);
   }
 }
