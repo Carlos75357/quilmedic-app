@@ -56,16 +56,55 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanerLoading());
 
     try {
+      // Siempre eliminar el hospital y ubicación seleccionados al recargar
       hospitalSeleccionado = null;
       locationSeleccionada = null;
-      
+
       List<Hospital> hospitales = await hospitalRepository
           .getAllHospitals()
           .then((value) => value.data);
 
       emit(HospitalesCargados(hospitales));
+      // Emitir un estado adicional para notificar que las selecciones se han reseteado
+      // emit(SelectionsResetState());
     } catch (e) {
-      emit(EscanerError(e.toString()));
+      await _guardarProductosEnCacheEnCasoDeError(emit);
+
+      emit(EscanerError('Error al cargar hospitales: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _guardarProductosEnCacheEnCasoDeError([
+    Emitter<EscanerState>? emitter,
+  ]) async {
+    if (productosEscaneados.isNotEmpty) {
+      try {
+        int hospitalId = hospitalSeleccionado?.id ?? 0;
+        int locationId = locationSeleccionada?.id ?? 0;
+
+        await ProductoLocalStorage.guardarProductosPendientes(
+          productosEscaneados,
+          hospitalId,
+          locationId,
+        );
+
+        hayProductosPendientes = true;
+
+        if (emitter != null && !emitter.isDone) {
+          emitter.call(
+            ProductosListadosState(
+              productosEscaneados,
+              hayProductosPendientes: true,
+            ),
+          );
+        }
+
+        debugPrint(
+          'Productos guardados en caché debido a un error y vista actualizada',
+        );
+      } catch (e) {
+        debugPrint('Error al guardar productos en caché: ${e.toString()}');
+      }
     }
   }
 
@@ -77,17 +116,24 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
     try {
       locationSeleccionada = null;
-      
+
+      if (hospitalSeleccionado == null) {
+        emit(EscanerError('No hay hospital seleccionado'));
+        return;
+      }
+
       await locationRepository
           .getLocationsForAStore(hospitalSeleccionado!.id)
           .then((value) => value.data)
           .then((locations) {
-        if (!emit.isDone) {
-          emit(LocationsCargadas(locations));
-        }
-      });
+            if (!emit.isDone) {
+              emit(LocationsCargadas(locations));
+            }
+          });
     } catch (e) {
-      emit(EscanerError(e.toString()));
+      await _guardarProductosEnCacheEnCasoDeError(emit);
+
+      emit(EscanerError('Error al cargar ubicaciones: ${e.toString()}'));
     }
   }
 
@@ -104,14 +150,18 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       final ProductoEscaneado nuevoProducto = ProductoEscaneado(code);
 
-      if (productosEscaneados.any((p) => p.serialnumber == nuevoProducto.serialnumber)) {
+      if (productosEscaneados.any(
+        (p) => p.serialnumber == nuevoProducto.serialnumber,
+      )) {
         emit(ProductoEscaneadoExistenteState(nuevoProducto));
         return;
       }
 
       final productosPendientes =
           await ProductoLocalStorage.obtenerProductosPendientes();
-      if (productosPendientes.any((p) => p.serialnumber == nuevoProducto.serialnumber)) {
+      if (productosPendientes.any(
+        (p) => p.serialnumber == nuevoProducto.serialnumber,
+      )) {
         emit(ProductoEscaneadoExistenteState(nuevoProducto));
         return;
       }
@@ -125,17 +175,21 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         ),
       );
     } catch (e) {
+      await _guardarProductosEnCacheEnCasoDeError(emit);
+
       emit(
         EscanerError("Error al procesar el código de barras: ${e.toString()}"),
       );
     }
   }
 
-  Future<void> elegirHospitales(ChooseStoreEvent event, Emitter<EscanerState> emit) async {
+  Future<void> elegirHospitales(
+    ChooseStoreEvent event,
+    Emitter<EscanerState> emit,
+  ) async {
     hospitalSeleccionado = event.hospital;
     emit(HospitalSeleccionadoState(event.hospital));
-    
-    // Si hay productos pendientes, actualizar el hospital en caché
+
     if (hayProductosPendientes && productosEscaneados.isNotEmpty) {
       int locationId = locationSeleccionada?.id ?? 0;
       await ProductoLocalStorage.guardarProductosPendientes(
@@ -148,11 +202,16 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     add(LoadLocations());
   }
 
-  Future<void> chooseLocation(ChooseLocationEvent event, Emitter<EscanerState> emit) async {
+  Future<void> chooseLocation(
+    ChooseLocationEvent event,
+    Emitter<EscanerState> emit,
+  ) async {
     locationSeleccionada = event.location;
     emit(LocationSeleccionadaState(event.location));
 
-    if (hayProductosPendientes && productosEscaneados.isNotEmpty && hospitalSeleccionado != null) {
+    if (hayProductosPendientes &&
+        productosEscaneados.isNotEmpty &&
+        hospitalSeleccionado != null) {
       await ProductoLocalStorage.guardarProductosPendientes(
         productosEscaneados,
         hospitalSeleccionado!.id,
@@ -182,11 +241,20 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
       if (!hayConexion) {
         await _guardarProductosLocal(emit);
+
+        emit(
+          GuardarOfflineSuccess(
+            message:
+                "No hay conexión a Internet. Los productos se han guardado localmente.",
+          ),
+        );
         return;
       }
 
       await _guardarProductosEnServidor(emit);
     } catch (e) {
+      await _guardarProductosEnCacheEnCasoDeError(emit);
+
       emit(EscanerError("Error general al guardar productos: ${e.toString()}"));
     }
   }
@@ -195,7 +263,9 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     EliminarProductoEvent event,
     Emitter<EscanerState> emit,
   ) {
-    productosEscaneados.removeWhere((p) => p.serialnumber == event.producto.serialnumber);
+    productosEscaneados.removeWhere(
+      (p) => p.serialnumber == event.producto.serialnumber,
+    );
     _eliminarProductoPorserialnumber(event.producto.serialnumber);
 
     ProductoLocalStorage.eliminarProductoPendiente(event.producto.serialnumber);
@@ -244,7 +314,12 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         return;
       }
 
-      await _sincronizarConServidor(emit, hospitalId, locationId, productosPendientes);
+      await _sincronizarConServidor(
+        emit,
+        hospitalId,
+        locationId,
+        productosPendientes,
+      );
     } catch (e) {
       emit(
         EscanerError(
@@ -293,21 +368,20 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
             if (hospitalSeleccionado != null) {
               emit(HospitalSeleccionadoState(hospitalSeleccionado!));
-              
-              // Cargar ubicaciones para el hospital seleccionado
+
               if (locationId != null) {
                 try {
                   List<Location> locations = await locationRepository
                       .getLocationsForAStore(hospitalSeleccionado!.id)
                       .then((value) => value.data);
-                  
+
                   for (var location in locations) {
                     if (location.id == locationId) {
                       locationSeleccionada = location;
                       break;
                     }
                   }
-                  
+
                   if (locationSeleccionada != null) {
                     emit(LocationSeleccionadaState(locationSeleccionada!));
                   }
@@ -430,7 +504,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           final responseData = response.data as Map<String, dynamic>;
           final foundProducts = responseData['found'] as List<dynamic>;
           final missingSerials = responseData['missing'] as List<String>;
-          
+
           List<Producto> productos = List<Producto>.from(
             foundProducts.map((item) => Producto.fromApiMap(item)),
           );
@@ -438,15 +512,24 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           await _guardarProductosEscaneadosLocalmente(productos);
 
           try {
-            await alarmUtils.loadStockColorsForProducts(productos);
-            
-            await alarmUtils.loadExpiryColorsForProducts(productos);
+            await alarmUtils.loadAlarmsForProducts(productos);
+            await alarmUtils.getGeneralAlarms();
           } catch (e) {
-            emit(EscanerError("Error al cargar colores de alarmas: ${e.toString()}"));
+            emit(
+              EscanerError(
+                "Error al cargar colores de alarmas: ${e.toString()}",
+              ),
+            );
           }
 
           emit(GuardarSuccess(productos: productos, mensaje: response.message));
-          emit(ProductosRecibidosState(productos, missingSerials, mensaje: response.message));
+          emit(
+            ProductosRecibidosState(
+              productos,
+              missingSerials,
+              mensaje: response.message,
+            ),
+          );
         } else {
           emit(
             EscanerError(
@@ -486,7 +569,9 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         }
       }
     } catch (e) {
-      throw Exception('Error al eliminar producto por serialnumber: ${e.toString()}');
+      throw Exception(
+        'Error al eliminar producto por serialnumber: ${e.toString()}',
+      );
     }
   }
 
@@ -519,14 +604,13 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       );
 
       if (response.success) {
-        // Limpiar todos los datos de caché cuando la sincronización es exitosa
         await ProductoLocalStorage.limpiarProductosPendientes();
         hayProductosPendientes = false;
 
         final responseData = response.data as Map<String, dynamic>;
         final foundProducts = responseData['found'] as List<dynamic>;
         final missingSerials = responseData['missing'] as List<String>;
-        
+
         List<Producto> productos = List<Producto>.from(
           foundProducts.map((item) => Producto.fromApiMap(item)),
         );
@@ -534,6 +618,9 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         await _guardarProductosEscaneadosLocalmente(productos);
 
         await _actualizarHospitalSeleccionado(emit, hospitalId);
+        
+        // Forzar actualización de las alarmas después de recibir nuevos productos
+        await alarmUtils.forceRefresh();
 
         productosEscaneados.clear();
 
@@ -542,7 +629,13 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
             SincronizacionCompletaState(productos, mensaje: response.message),
           );
           emit(GuardarSuccess(productos: productos, mensaje: response.message));
-          emit(ProductosRecibidosState(productos, missingSerials, mensaje: response.message));
+          emit(
+            ProductosRecibidosState(
+              productos,
+              missingSerials,
+              mensaje: response.message,
+            ),
+          );
         } else {
           emit(SincronizacionCompletaState(productos));
           emit(GuardarSuccess(productos: productos));
@@ -599,7 +692,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       );
     }
   }
-  
+
   void resetSelections(ResetSelectionsEvent event, Emitter<EscanerState> emit) {
     hospitalSeleccionado = null;
     locationSeleccionada = null;

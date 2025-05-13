@@ -9,6 +9,7 @@ class ScannerListener extends StatelessWidget {
   final Function() resetSelections;
   final Function(List<ProductoEscaneado>) onProductosUpdated;
   final Function(bool) onPendingProductsChanged;
+  final Function()? onSelectionsReset;
 
   const ScannerListener({
     super.key,
@@ -16,6 +17,7 @@ class ScannerListener extends StatelessWidget {
     required this.resetSelections,
     required this.onProductosUpdated,
     required this.onPendingProductsChanged,
+    this.onSelectionsReset,
   });
 
   @override
@@ -76,7 +78,7 @@ class ScannerListener extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
             ),
           );
-          onProductosUpdated([]);
+          // No vaciamos la lista de productos para que el usuario pueda ver lo que se guardó localmente
           onPendingProductsChanged(true);
         } else if (state is SincronizacionCompletaState) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -130,6 +132,11 @@ class ScannerListener extends StatelessWidget {
           onPendingProductsChanged(false);
         } else if (state is HospitalesCargados) {
           // Manejar el estado de hospitales cargados si es necesario
+        } else if (state is SelectionsResetState) {
+          // Notificar que las selecciones han sido reseteadas
+          if (onSelectionsReset != null) {
+            onSelectionsReset!();
+          }
         }
       },
       child: child,

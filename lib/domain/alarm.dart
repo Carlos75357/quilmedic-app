@@ -4,13 +4,15 @@ class Alarm {
   String? condition;
   String? type;
   int? productId;
+  int? locationId;
 
   Alarm({
     this.id,
     this.color,
     this.condition,
     this.type,
-    this.productId
+    this.productId,
+    this.locationId,
   });
 
   factory Alarm.fromJson(Map<String, dynamic> json) {
@@ -19,7 +21,8 @@ class Alarm {
       color: json['color'],
       condition: json['condition'],
       type: json['type'],
-      productId: json['productId'],
+      productId: json['products']?[0]['id'],
+      locationId: json['locations'] != null && json['locations'].isNotEmpty ? json['locations'][0]['id'] : null,
     );
   }
 
@@ -29,7 +32,8 @@ class Alarm {
       'color': color,
       'condition': condition,
       'type': type,
-      'productId': productId
+      'productId': productId,
+      'locationId': locationId,
     };
   }
 
@@ -39,7 +43,8 @@ class Alarm {
       color: map['color'],
       condition: map['condition'],
       type: map['type'],
-      productId: map['productId'],
+      productId: map['products']?[0]['id'] ?? map['productId'],
+      locationId: map['locations']?[0]['id'],
     );
   }
 
@@ -49,7 +54,8 @@ class Alarm {
       'color': color,
       'condition': condition,
       'type': type,
-      'productId': productId
+      'productId': productId,
+      'locationId': locationId,
     };
   }
 }

@@ -52,9 +52,10 @@ class ScannerContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           BlocBuilder<EscanerBloc, EscanerState>(
             builder: (context, state) {
               return Selector(
@@ -85,7 +86,7 @@ class ScannerContent extends StatelessWidget {
                   label: const Text('Ingresar código manualmente'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.primary,
-                    side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)),
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.5)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -119,18 +120,7 @@ class ScannerContent extends StatelessWidget {
                     onRemove: onRemoveProduct,
                     onUndoRemove: onUndoRemoveProduct,
                   )
-                : LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
-                          ),
-                          child: const EmptyProductsView(),
-                        ),
-                      );
-                    },
-                  ),
+                : const EmptyProductsView(),
           ),
 
           if (state is! EscanerLoading) ...[
@@ -141,6 +131,7 @@ class ScannerContent extends StatelessWidget {
               ),
           ],
         ],
+        ),
       ),
     );
   }

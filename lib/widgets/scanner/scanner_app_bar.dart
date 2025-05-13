@@ -6,10 +6,7 @@ import 'package:quilmedic/utils/alarm_utils.dart';
 class ScannerAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool hayProductosPendientes;
 
-  const ScannerAppBar({
-    super.key,
-    required this.hayProductosPendientes,
-  });
+  const ScannerAppBar({super.key, required this.hayProductosPendientes});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +35,7 @@ class ScannerAppBar extends StatelessWidget implements PreferredSizeWidget {
           icon: const Icon(Icons.refresh),
           onPressed: () {
             BlocProvider.of<EscanerBloc>(context).add(LoadHospitales());
-            
+
             final alarmUtils = AlarmUtils();
             alarmUtils.forceRefresh().then((_) {
               if (context.mounted) {
