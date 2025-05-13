@@ -2,12 +2,14 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:quilmedic/data/respository/alarm_repository.dart';
 import 'package:quilmedic/data/respository/hospital_repository.dart';
+import 'package:quilmedic/data/respository/transfer_repository.dart';
 import 'package:quilmedic/domain/alarm.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/respository/producto_repository.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
+import 'package:quilmedic/domain/transfer_request.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
 
 part 'lista_productos_event.dart';
@@ -20,6 +22,9 @@ class ListaProductosBloc
     apiClient: apiClient,
   );
   late HospitalRepository hospitalRepository = HospitalRepository(
+    apiClient: apiClient,
+  );
+  late TransferRepository transferRepository = TransferRepository(
     apiClient: apiClient,
   );
   late AlarmRepository alarmRepository = AlarmRepository(apiClient: apiClient);
@@ -120,31 +125,36 @@ class ListaProductosBloc
     try {
       emit(EnviandoSolicitudTrasladoState());
 
-      // final Map<String, dynamic> data = {
-      //   'producto_id': event.producto.productcode,
-      //   'location_origin': event.producto.locationid,
-      //   'hospital_destino_id': event.hospitalDestinoId,
-      //   'hospital_destino_nombre': event.hospitalDestinoNombre,
-      // };
+      final int userId = 1; // TODO: Obtener el ID del usuario actual
 
       try {
-        // final response = await apiClient.post('/solicitudes-traslado', data);
-        emit(
-          SolicitudTrasladoEnviadaState(
-            'Solicitud de traslado enviada correctamente',
+        final response = await transferRepository.transferProducts(
+          TransferRequest(
+            email: event.email,
+            fromStoreId:
+                event.productos.isNotEmpty
+                    ? event.productos.first.locationid
+                    : 0,
+            toStoreId: event.hospitalDestinoId,
+            userId: userId,
+            products: event.productos.map((p) => p.serialnumber).toList(),
           ),
         );
-        // if (response is Map<String, dynamic> && response['success'] == true) {
-        //   emit(SolicitudTrasladoEnviadaState(
-        //     'Solicitud de traslado enviada correctamente',
-        //   ));
-        // } else {
-        //   emit(ErrorSolicitudTrasladoState(
-        //     'Error al enviar la solicitud de traslado: ${response['message'] ?? 'Error desconocido'}',
-        //   ));
-        // }
+
+        if (response.success) {
+          emit(
+            SolicitudTrasladoEnviadaState(
+              'Solicitud de traslado enviada correctamente a ${event.hospitalDestinoNombre}',
+            ),
+          );
+        } else {
+          emit(
+            ErrorSolicitudTrasladoState(
+              'Error al enviar la solicitud de traslado: Respuesta vacía del servidor',
+            ),
+          );
+        }
       } catch (e) {
-        // TODO guardar localmente para reintento
         if (e.toString().contains('SocketException') ||
             e.toString().contains('Connection refused') ||
             e.toString().contains('Network is unreachable')) {
@@ -153,6 +163,8 @@ class ListaProductosBloc
               'Solicitud de traslado registrada (pendiente de sincronización)',
             ),
           );
+
+          // TODO: Guardar la solicitud localmente para reintento posterior
         } else {
           emit(
             ErrorSolicitudTrasladoState(

@@ -18,13 +18,15 @@ class MostrarProductosEvent extends ListaProductosEvent {
 class CargarHospitalesEvent extends ListaProductosEvent {}
 
 class EnviarSolicitudTrasladoEvent extends ListaProductosEvent {
-  final Producto producto;
+  final List<Producto> productos;
   final int hospitalDestinoId;
   final String hospitalDestinoNombre;
+  final String email;
 
   EnviarSolicitudTrasladoEvent({
-    required this.producto,
+    required this.productos,
     required this.hospitalDestinoId,
     required this.hospitalDestinoNombre,
+    required this.email,
   });
 }

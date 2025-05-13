@@ -136,8 +136,6 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                       _hospitales = state.hospitales;
                     });
 
-                    Navigator.of(context).pop();
-
                     ProductTrasladoHandler.mostrarDialogoConfirmacionTraslado(
                       context,
                       _hospitales,
@@ -177,6 +175,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                           almacenName: widget.almacenName,
                           location: widget.location,
                           predefinedProductos: widget.productos,
+                          alarmColors: const [], // Añadiendo lista vacía para alarmColors
                           onProductUpdated: () {
                             if (mounted) {
                               Navigator.pushReplacement(
@@ -221,6 +220,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                               locationId: widget.locationId,
                               almacenName: widget.almacenName,
                               location: widget.location,
+                              alarmColors: const [], // Añadiendo lista vacía para alarmColors
                               onProductUpdated: () {},
                             );
                           },
