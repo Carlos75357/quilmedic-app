@@ -1,5 +1,6 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ApiConfig {
@@ -41,6 +42,22 @@ class ApiConfig {
       return null;
     }
   }
+  
+  /// Renueva el token de autenticación usando el token maestro
+  /// Retorna true si se renovó exitosamente, false en caso contrario
+  static Future<bool> renewToken() async {
+    try {
+      final newToken = await _fetchInitialToken();
+      if (newToken != null) {
+        await _storage.write(key: _tokenKey, value: newToken);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error al renovar token: $e');
+      return false;
+    }
+  }
 
   static Future<void> clearToken() async {
     await _storage.delete(key: _tokenKey);
@@ -51,6 +68,7 @@ class ApiConfig {
   static const String productosEndpoint = '/products';
   static const String alarmasEndpoint = '/alarms';
   static const String locationEndpoint = '/locations';
+  static const String transferEndpoint = '/notifications/transfer';
 
   // Timeouts
   static const int connectionTimeout = 30000;

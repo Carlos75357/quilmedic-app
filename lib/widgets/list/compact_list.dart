@@ -9,22 +9,33 @@ class CompactList extends StatelessWidget {
   final List<Producto> productos;
   final Function(Producto) onProductTap;
   final Function(Producto)? onTransferTap;
-  const CompactList({super.key, required this.productos, required this.onProductTap, required this.onTransferTap});
+  final List<Color> alarmColors;
+
+  const CompactList({
+    super.key,
+    required this.productos,
+    required this.onProductTap,
+    required this.onTransferTap,
+    required this.alarmColors,
+  });
 
   @override
   Widget build(BuildContext context) {
     final alarmUtils = AlarmUtils();
-  
+
     return ListView.separated(
       itemCount: productos.length,
       separatorBuilder: (context, index) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final producto = productos[index];
-        
+
         return InkWell(
           onTap: () => onProductTap(producto),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+            padding: const EdgeInsets.symmetric(
+              vertical: 8.0,
+              horizontal: 12.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -62,7 +73,7 @@ class CompactList extends StatelessWidget {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: alarmUtils.getColorForExpiryFromCache(producto.serialnumber),
+                          color: alarmUtils.getColorForExpiryFromCache(producto.id, producto.expirationdate),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding: const EdgeInsets.symmetric(
@@ -95,7 +106,7 @@ class CompactList extends StatelessWidget {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: alarmUtils.getColorForStockFromCache(producto.stock, producto.serialnumber),
+                          color: alarmUtils.getColorForStockFromCache(producto.stock, producto.id, producto.locationid),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding: const EdgeInsets.symmetric(

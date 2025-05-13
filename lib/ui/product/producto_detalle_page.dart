@@ -34,14 +34,19 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
 
   Future<void> _loadColors() async {
     try {
+      // Cargar las alarmas desde el caché primero
+      await _alarmUtils.loadAlarmsFromCache();
+      
+      // Usar los métodos sincronizados para obtener los colores
       final expColor = _alarmUtils.getColorForExpiryFromCache(
-        widget.producto.serialnumber,
+        widget.producto.id, 
         widget.producto.expirationdate,
       );
 
       final stColor = _alarmUtils.getColorForStockFromCache(
         widget.producto.stock,
-        widget.producto.productcode,
+        widget.producto.id,
+        widget.producto.locationid,
       );
 
       if (mounted) {
@@ -52,6 +57,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         });
       }
     } catch (e) {
+      debugPrint('Error al cargar colores: $e');
       if (mounted) {
         setState(() {
           expiryColor = Colors.grey.withValues(alpha: 0.3);
@@ -176,33 +182,26 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
+
             Row(
               children: [
                 const Text(
-                  'stock Disponible:',
+                  'Stock Mínimo:',
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: stockColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    widget.producto.stock.toString(),
-                    style: TextStyle(
-                      color:
-                          stockColor == Colors.red
-                              ? Colors.white
-                              : Colors.black,
-                      fontWeight: FontWeight.bold,
+                widget.producto.minStock != null
+                    ? Text(
+                      widget.producto.minStock.toString(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    )
+                    : const Text(
+                      'No hay stock mínimo asignado',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
-                ),
               ],
             ),
           ],

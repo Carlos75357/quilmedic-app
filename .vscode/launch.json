@@ -7,8 +7,6 @@
         "request": "launch",
         "type": "dart",
         "toolArgs": [
-          "--dart-define",
-          "MASTER_TOKEN=~0W06LuZ#Q<?"
         ]
       },
       {
@@ -17,8 +15,6 @@
         "type": "dart",
         "flutterMode": "profile",
         "toolArgs": [
-          "--dart-define",
-          "MASTER_TOKEN=~0W06LuZ#Q<?"
         ]
       },
       {
@@ -27,8 +23,6 @@
         "type": "dart",
         "flutterMode": "release",
         "toolArgs": [
-          "--dart-define",
-          "MASTER_TOKEN=~0W06LuZ#Q<?"
         ]
       },
       {
@@ -38,7 +32,10 @@
         "flutterMode": "debug",
         "toolArgs": [
           "--dart-define",
-          "MASTER_TOKEN=12345"
+          // "MASTER_TOKEN=0W06LuZ#Q?"
+          // "MASTER_TOKEN=123456"
+          "MASTER_TOKEN=1234",
+          // "MASTER_TOKEN=5|ywMzCVzNwqLZZgOQVrFnFxB6tIL8VApxi6AGkUMA609441ec"
         ],
         // "debugServer": "f782ed43"
         "debugServer": "chrome"
