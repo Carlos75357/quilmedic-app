@@ -92,18 +92,7 @@ class ScannerListener extends StatelessWidget {
           );
           onPendingProductsChanged(false);
         } else if (state is ProductosRecibidosState) {
-          if (state.mensaje != null && state.mensaje!.contains("No se encontraron")) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.mensaje!),
-                backgroundColor: Colors.orange,
-                duration: const Duration(seconds: 5),
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
-              ),
-            );
-          }
-          
+          // Pasar directamente a la siguiente vista sin mostrar el SnackBar de error
           Navigator.push(
             context,
             MaterialPageRoute(

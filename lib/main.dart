@@ -18,12 +18,11 @@ import 'package:quilmedic/utils/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Obtener y mostrar el ID de Android
   final deviceInfo = DeviceInfoPlugin();
+  String androidId = 'unknown_device';
   try {
     final androidInfo = await deviceInfo.androidInfo;
-    final androidId = androidInfo.id;
-    // Imprimir el ID para que sea visible en la consola
+    androidId = androidInfo.id;
     debugPrint('=========================================');
     debugPrint('ANDROID ID: $androidId');
     debugPrint('=========================================');
@@ -31,14 +30,11 @@ void main() async {
     debugPrint('Error al obtener Android ID: $e');
   }
   
-  // Crear el servicio de autenticación
   final authService = AuthService();
   
-  // Iniciar la aplicación inmediatamente
-  runApp(MainApp(authService: authService));
+  await InitializationService.initialize();
   
-  // Inicializar los servicios en segundo plano para no bloquear la UI
-  InitializationService.initialize();
+  runApp(MainApp(authService: authService));
 }
 
 class MainApp extends StatelessWidget {

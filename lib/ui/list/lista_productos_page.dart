@@ -4,6 +4,7 @@ import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
+import 'package:quilmedic/widgets/list/empty_products_message.dart';
 import 'package:quilmedic/widgets/list/product_list_components.dart';
 import 'package:quilmedic/widgets/list/product_serial_dialog.dart';
 import 'package:quilmedic/widgets/list/product_traslado_handler.dart';
@@ -168,32 +169,36 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                 },
                 child:
                     widget.productos != null
-                        ? ProductListContent(
-                          productos: productos,
-                          hospitalId: widget.hospitalId,
-                          locationId: widget.locationId,
-                          almacenName: widget.almacenName,
-                          location: widget.location,
-                          predefinedProductos: widget.productos,
-                          alarmColors: const [], // Añadiendo lista vacía para alarmColors
-                          onProductUpdated: () {
-                            if (mounted) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => ListaProductosPage(
-                                        productos: widget.productos,
-                                        location: widget.location,
-                                        hospitalId: widget.hospitalId,
-                                        locationId: widget.locationId,
-                                        almacenName: widget.almacenName,
+                        ? (productos.isEmpty && widget.notFounds != null && widget.notFounds!.isNotEmpty
+                            ? EmptyProductsMessage(notFoundSerials: widget.notFounds)
+                            : ProductListContent(
+                                productos: productos,
+                                hospitalId: widget.hospitalId,
+                                locationId: widget.locationId,
+                                almacenName: widget.almacenName,
+                                location: widget.location,
+                                predefinedProductos: widget.productos,
+                                alarmColors: const [], // Añadiendo lista vacía para alarmColors
+                                onProductUpdated: () {
+                                  if (mounted) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => ListaProductosPage(
+                                              productos: widget.productos,
+                                              location: widget.location,
+                                              hospitalId: widget.hospitalId,
+                                              locationId: widget.locationId,
+                                              almacenName: widget.almacenName,
+                                              notFounds: widget.notFounds,
+                                            ),
                                       ),
-                                ),
-                              );
-                            }
-                          },
-                        )
+                                    );
+                                  }
+                                },
+                              )
+                          )
                         : BlocBuilder<ListaProductosBloc, ListaProductosState>(
                           builder: (context, state) {
                             if (state is ListaProductosLoading) {
@@ -214,15 +219,17 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                                 ),
                               );
                             }
-                            return ProductListContent(
-                              productos: productos,
-                              hospitalId: widget.hospitalId,
-                              locationId: widget.locationId,
-                              almacenName: widget.almacenName,
-                              location: widget.location,
-                              alarmColors: const [], // Añadiendo lista vacía para alarmColors
-                              onProductUpdated: () {},
-                            );
+                            return productos.isEmpty
+                                ? EmptyProductsMessage(notFoundSerials: widget.notFounds)
+                                : ProductListContent(
+                                    productos: productos,
+                                    hospitalId: widget.hospitalId,
+                                    locationId: widget.locationId,
+                                    almacenName: widget.almacenName,
+                                    location: widget.location,
+                                    alarmColors: const [], // Añadiendo lista vacía para alarmColors
+                                    onProductUpdated: () {},
+                                  );
                           },
                         ),
               ),

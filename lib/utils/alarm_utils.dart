@@ -1,6 +1,5 @@
 import 'dart:core';
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
@@ -260,6 +259,7 @@ Future<void> loadAlarmsForProducts(
         }
         return const Color.fromARGB(255, 37, 238, 44).withValues(alpha: 0.3);
       }
+      return const Color.fromARGB(255, 82, 83, 82).withValues(alpha: 0.3);
     }
     return Colors.green.withValues(alpha: 0.3);
   }
@@ -269,15 +269,14 @@ Future<void> loadAlarmsForProducts(
       if (_evaluateAlarm(_expiryColorCache[productId]!.condition!, expiryDate!.difference(DateTime.now()).inDays)) {
         return _expiryColorCache[productId]!.color!;
       } 
-      for (var alarm in _generalAlarmCache) {
-        if (alarm.type?.toLowerCase() == 'date') {
-          if (_evaluateAlarm(alarm.condition!, expiryDate.difference(DateTime.now()).inDays)) {
-            return _parseColor(alarm.color) ?? Colors.green.withValues(alpha: 0.3);
-          }
+    }
+    for (var alarm in _generalAlarmCache) {
+      if (alarm.type?.toLowerCase() == 'date') {
+        if (_evaluateAlarm(alarm.condition!, expiryDate!.difference(DateTime.now()).inDays)) {
+          return _parseColor(alarm.color) ?? Colors.green.withValues(alpha: 0.3);
         }
       }
     }
-
     return Colors.green.withValues(alpha: 0.3);
   }
 
