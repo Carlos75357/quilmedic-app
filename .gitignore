@@ -50,6 +50,8 @@ app.*.map.json
 secrets.dart
 /lib/data/secrets.dart
 
+# Archivos de configuración de la aplicación
 /json-server
 /node_modules
 /errores
+.vscode
