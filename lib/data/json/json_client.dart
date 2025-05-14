@@ -2,23 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:quilmedic/data/config.dart';
+import 'package:quilmedic/exceptions/authentication_exceptions.dart';
 import 'package:quilmedic/services/navigation_service.dart';
 import 'json_rpc.dart';
-
-// Excepciones personalizadas para manejo de errores de autenticación
-class TokenExpiredException implements Exception {
-  final String message;
-  TokenExpiredException(this.message);
-  @override
-  String toString() => message;
-}
-
-class AuthenticationException implements Exception {
-  final String message;
-  AuthenticationException(this.message);
-  @override
-  String toString() => message;
-}
 
 class JsonClient {
   Future<dynamic> call(String endpoint, JsonRequest jsonRequest) async {

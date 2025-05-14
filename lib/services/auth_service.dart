@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/config.dart';
-import 'package:quilmedic/data/json/json_client.dart';
 import 'package:quilmedic/domain/user.dart';
+import 'package:quilmedic/exceptions/authentication_exceptions.dart';
 import 'package:quilmedic/services/navigation_service.dart';
 import 'package:quilmedic/services/device_id_service.dart';
 

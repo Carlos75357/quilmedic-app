@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:quilmedic/utils/alarm_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InitializationService {
