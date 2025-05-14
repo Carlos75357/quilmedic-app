@@ -115,13 +115,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     TokenExpired event,
     Emitter<AuthState> emit,
   ) async {
-    await _authService.logout(); 
-    
-    emit(const AuthError('Sesión expirada. Por favor inicie sesión nuevamente.'));
-    
-    await Future.delayed(const Duration(seconds: 1));
-    
-    emit(Unauthenticated());
+    // Verificar el estado actual para evitar emitir eventos duplicados
+    if (state is! AuthError && state is! Unauthenticated) {
+      await _authService.logout(); 
+      
+      emit(const AuthError('Sesión expirada. Por favor inicie sesión nuevamente.'));
+      
+      // Reducir el tiempo de espera para evitar problemas de sincronización
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      emit(Unauthenticated());
+    }
   }
   
   @override
