@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ApiConfig {
   // URL base de la API
-  // static const String baseUrl = 'https://api.quilmedic.com';
   static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'auth_token';
   static const String masterToken = String.fromEnvironment('MASTER_TOKEN');
-  // static const String baseUrl = 'https://controlalmacen.quilmedic.com/api';
-  static const String baseUrl = 'http://localhost:8000/api';
+  static const String baseUrl = 'https://controlalmacen.quilmedic.com/api';
+  // static const String baseUrl = 'http://localhost:8000/api';
 
   static Future<String?> getToken() async {
     final savedToken = await _storage.read(key: _tokenKey);
@@ -43,8 +43,6 @@ class ApiConfig {
     }
   }
   
-  /// Renueva el token de autenticación usando el token maestro
-  /// Retorna true si se renovó exitosamente, false en caso contrario
   static Future<bool> renewToken() async {
     try {
       final newToken = await _fetchInitialToken();
@@ -75,9 +73,11 @@ class ApiConfig {
   static const int receiveTimeout = 30000;
 
   // Headers
-  static Map<String, String> get headers => {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Authorization': 'Bearer $masterToken',
-  };
+  static Map<String, String> get headers {
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $masterToken',
+    };
+  }
 }

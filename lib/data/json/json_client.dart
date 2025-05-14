@@ -24,7 +24,7 @@ class JsonClient {
   Future<dynamic> call(String endpoint, JsonRequest jsonRequest) async {
     try {
       final headers = await _getHeaders();
-      
+
       if (jsonRequest.method == 'create') {
         final response = await http.post(
           Uri.parse(ApiConfig.baseUrl + endpoint),
@@ -41,12 +41,11 @@ class JsonClient {
           }
         });
 
-        Uri uri = Uri.parse(ApiConfig.baseUrl + endpoint).replace(queryParameters: formattedParams);
-        
-        final response = await http.get(
-          uri,
-          headers: headers,
-        );
+        Uri uri = Uri.parse(
+          ApiConfig.baseUrl + endpoint,
+        ).replace(queryParameters: formattedParams);
+
+        final response = await http.get(uri, headers: headers);
 
         return _handleResponse(response, endpoint, jsonRequest);
       } else if (jsonRequest.method == 'update') {
@@ -68,6 +67,7 @@ class JsonClient {
           headers.clear();
           headers.addAll(ApiConfig.headers);
         }
+
         final response = await http.post(
           Uri.parse(ApiConfig.baseUrl + endpoint),
           headers: headers,
@@ -77,16 +77,20 @@ class JsonClient {
       }
     } catch (e) {
       if (e is TokenExpiredException) {
-        throw AuthenticationException('Sesión expirada. Por favor inicie sesión nuevamente.');
-      } else if (e.toString().contains('401') || 
-                e.toString().contains('unauthorized') || 
-                e.toString().contains('Unauthorized')) {
-        throw AuthenticationException('Error de autenticación. Por favor inicie sesión nuevamente.');
+        throw AuthenticationException(
+          'Sesión expirada. Por favor inicie sesión nuevamente.',
+        );
+      } else if (e.toString().contains('401') ||
+          e.toString().contains('unauthorized') ||
+          e.toString().contains('Unauthorized')) {
+        throw AuthenticationException(
+          'Error de autenticación. Por favor inicie sesión nuevamente.',
+        );
       }
       throw Exception(e.toString());
     }
   }
-  
+
   Future<Map<String, String>> _getHeaders() async {
     final token = await ApiConfig.getToken();
     return {
@@ -95,7 +99,7 @@ class JsonClient {
       'Authorization': 'Bearer $token',
     };
   }
-  
+
   Future<dynamic> _handleResponse(http.Response response, String endpoint, JsonRequest jsonRequest) async {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final String decodedBody = utf8.decode(response.bodyBytes);
@@ -104,16 +108,14 @@ class JsonClient {
     } else if (response.statusCode == 401) {
       debugPrint('Token expirado, intentando renovar...');
       final bool tokenRenewed = await ApiConfig.renewToken();
-      
+
       if (tokenRenewed) {
         return await call(endpoint, jsonRequest);
       } else {
-        // Limpiar datos y navegar al login
         await ApiConfig.clearToken();
-        
-        // Usar NavigationService para navegar al login
+
         NavigationService.navigateToLogin();
-        
+
         throw TokenExpiredException('Token expirado y no se pudo renovar');
       }
     } else {

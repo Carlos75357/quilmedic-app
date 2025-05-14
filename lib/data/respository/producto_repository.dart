@@ -35,11 +35,11 @@ class ProductoRepository {
         );
       }
 
-      if (resultados.isEmpty) {
-        return RepositoryResponse.error(
-          'No se encontraron productos con las serialnumbers escaneadas: ${noEncontrados.join(", ")}',
-        );
-      }
+      // if (resultados.isEmpty) {
+      //   return RepositoryResponse.error(
+      //     'No se encontraron productos con las serialnumbers escaneadas: ${noEncontrados.join(", ")}',
+      //   );
+      // }
 
       String message = 'Productos enviados correctamente';
       if (noEncontrados.isNotEmpty) {
