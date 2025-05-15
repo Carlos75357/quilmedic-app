@@ -11,6 +11,7 @@ import 'package:quilmedic/data/respository/producto_repository.dart';
 import 'package:quilmedic/data/local/producto_local_storage.dart';
 import 'package:quilmedic/domain/transfer_request.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
+import 'package:quilmedic/services/auth_service.dart';
 
 part 'lista_productos_event.dart';
 part 'lista_productos_state.dart';
@@ -125,7 +126,9 @@ class ListaProductosBloc
     try {
       emit(EnviandoSolicitudTrasladoState());
 
-      final int userId = 1; // TODO: Obtener el ID del usuario actual
+      final authService = AuthService();
+      final user = await authService.getCurrentUser();
+      final int userId = user?.id ?? 0;
 
       try {
         final response = await transferRepository.transferProducts(
