@@ -204,19 +204,34 @@ class ProductDataTable extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 4.0,
                                 ),
-                                child: Text(
-                                  producto.productcode,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: isVerySmallScreen ? 11 : null,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'monospace',
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      producto.productcode,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: isVerySmallScreen ? 11 : null,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                    Text(
+                                      producto.serialnumber,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: isVerySmallScreen ? 10 : 12,
+                                        color: Colors.grey.shade700,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 ),
                               ),
-                            ),
                             onTap: () => onProductTap(producto),
-                          ),
+                            ),
                           DataCell(
                             SizedBox.expand(
                               child: Container(
@@ -242,7 +257,7 @@ class ProductDataTable extends StatelessWidget {
                             SizedBox.expand(
                               child: Container(
                                 decoration: BoxDecoration(
-                                color: alarmUtils.getColorForStockFromCache(producto.stock, producto.id, producto.locationid),
+                                color: alarmUtils.getColorForStockFromCache(totalStock, producto.id, producto.locationid),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 margin: const EdgeInsets.symmetric(
@@ -250,7 +265,12 @@ class ProductDataTable extends StatelessWidget {
                                   horizontal: 4,
                                 ),
                                 width: stockWidth,
-                                child: ProductStockBadge(stock: totalStock),
+                                child: ProductStockBadge(
+                                  stock: totalStock,
+                                  alarmUtils: alarmUtils,
+                                  productId: producto.id,
+                                  locationId: producto.locationid,
+                                ),
                               ),
                             ),
                           ),

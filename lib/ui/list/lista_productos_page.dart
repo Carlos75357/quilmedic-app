@@ -227,7 +227,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                                     locationId: widget.locationId,
                                     almacenName: widget.almacenName,
                                     location: widget.location,
-                                    alarmColors: const [], // Añadiendo lista vacía para alarmColors
+                                    alarmColors: const [],
                                     onProductUpdated: () {},
                                   );
                           },

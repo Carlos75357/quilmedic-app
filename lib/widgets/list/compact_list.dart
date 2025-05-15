@@ -125,6 +125,9 @@ class CompactList extends StatelessWidget {
                             ProductStockBadge(
                               stock: producto.stock,
                               isSmallScreen: true,
+                              alarmUtils: alarmUtils,
+                              productId: producto.id,
+                              locationId: producto.locationid,
                             ),
                           ],
                         ),

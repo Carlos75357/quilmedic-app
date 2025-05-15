@@ -31,13 +31,37 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     super.initState();
     _loadColors();
   }
+  
+  Future<int?> _getStockMinimo(int productId) async {
+    final hasSpecific = await _alarmUtils.hasSpecificAlarms(productId);
+    final locationId = widget.producto.locationid;
+    
+    if (hasSpecific) {
+      final alarms = await _alarmUtils.getSpecificAlarmsForProduct(productId);
+      for (var alarm in alarms) {
+        if (alarm.type?.toLowerCase() == 'stock' && 
+            (alarm.locationId == null || alarm.locationId == locationId)) {
+          final condition = alarm.condition;
+          if (condition != null && condition.isNotEmpty) {
+            final RegExp regExp = RegExp(r'(\D*)(\d+)');
+            final Match? match = regExp.firstMatch(condition);
+
+            if (match != null) {
+              final value = int.parse(match.group(2)!);
+              return value;
+            }
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
 
   Future<void> _loadColors() async {
     try {
-      // Cargar las alarmas desde el caché primero
       await _alarmUtils.loadAlarmsFromCache();
       
-      // Usar los métodos sincronizados para obtener los colores
       final expColor = _alarmUtils.getColorForExpiryFromCache(
         widget.producto.id, 
         widget.producto.expirationdate,
@@ -57,7 +81,6 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
         });
       }
     } catch (e) {
-      debugPrint('Error al cargar colores: $e');
       if (mounted) {
         setState(() {
           expiryColor = Colors.grey.withValues(alpha: 0.3);
@@ -183,27 +206,40 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
             ),
             const Divider(),
 
-            Row(
-              children: [
-                const Text(
-                  'Stock Mínimo:',
-                  style: TextStyle(fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(width: 8),
-                widget.producto.minStock != null
-                    ? Text(
-                      widget.producto.minStock.toString(),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    )
-                    : const Text(
-                      'No hay stock mínimo asignado',
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey,
-                      ),
+            FutureBuilder<int?>(  
+              future: _getStockMinimo(widget.producto.id),
+              builder: (context, snapshot) {
+                return Row(
+                  children: [
+                    const Text(
+                      'Stock Mínimo:',
+                      style: TextStyle(fontWeight: FontWeight.w500),
                     ),
-              ],
-            ),
+                    const SizedBox(width: 8),
+                    if (snapshot.connectionState == ConnectionState.waiting)
+                      const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    else if (snapshot.hasData && snapshot.data != null)
+                      Text(
+                        snapshot.data.toString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    else if (widget.producto.minStock != null)
+                      Text(
+                        widget.producto.minStock.toString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    else
+                      const Text(
+                        'No hay stock mínimo asignado',
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey,
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),  
           ],
         ),
       ),

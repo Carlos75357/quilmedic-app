@@ -5,10 +5,10 @@ import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 import 'package:quilmedic/widgets/list/product_traslado_popup.dart';
 
-/// Clase que maneja la funcionalidad de traslado de productos
 class ProductTrasladoHandler {
-  /// Muestra el diálogo de carga de hospitales
-  static Future<void> mostrarDialogoCargaHospitales(BuildContext context) async {
+  static Future<void> mostrarDialogoCargaHospitales(
+    BuildContext context,
+  ) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -18,7 +18,10 @@ class ProductTrasladoHandler {
     );
 
     try {
-      Provider.of<ListaProductosBloc>(context, listen: false).add(CargarHospitalesEvent());
+      Provider.of<ListaProductosBloc>(
+        context,
+        listen: false,
+      ).add(CargarHospitalesEvent());
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -38,7 +41,6 @@ class ProductTrasladoHandler {
     }
   }
 
-  /// Muestra el diálogo de confirmación de traslado
   static void mostrarDialogoConfirmacionTraslado(
     BuildContext context,
     List<Hospital> hospitales,
@@ -47,64 +49,52 @@ class ProductTrasladoHandler {
   ) {
     showDialog(
       context: context,
-      builder: (context) => ProductTrasladoPopup(
-        productos: productos,
-        hospitales: hospitales,
-        hospitalIdOrigen: hospitalIdOrigen,
-        onTrasladoConfirmado: (hospitalIdDestino, hospitalNombreDestino, email, selectedProducts) => 
-            realizarTrasladoMasivo(context, hospitalIdDestino, hospitalNombreDestino, email, selectedProducts),
-      ),
+      builder:
+          (context) => ProductTrasladoPopup(
+            productos: productos,
+            hospitales: hospitales,
+            hospitalIdOrigen: hospitalIdOrigen,
+            onTrasladoConfirmado: (
+              hospitalIdDestino,
+              hospitalNombreDestino,
+              email,
+              selectedProducts,
+            ) {
+              realizarTrasladoMasivo(
+                context,
+                hospitalIdDestino,
+                hospitalNombreDestino,
+                email,
+                selectedProducts,
+              );
+            },
+          ),
     );
   }
 
-  /// Realiza el traslado masivo de productos
   static void realizarTrasladoMasivo(
-    BuildContext context, 
-    int hospitalIdDestino, 
+    BuildContext context,
+    int hospitalIdDestino,
     String hospitalNombreDestino,
     String email,
-    List<Producto> selectedProducts
+    List<Producto> selectedProducts,
   ) {
-    // Mostrar diálogo de procesamiento
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.swap_horiz, color: Colors.blue),
-              SizedBox(width: 8),
-              Text('Trasladando productos'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16),
-              Text('Procesando traslado de ${selectedProducts.length} productos...'),
-            ],
-          ),
-        );
-      },
-    );
 
-    // Configurar listener para estados del bloc
     final bloc = Provider.of<ListaProductosBloc>(context, listen: false);
     late final void Function() listener;
-    
+
     listener = () {
       final currentState = bloc.state;
-      
+
       if (currentState is SolicitudTrasladoEnviadaState) {
-        // Forzar el cierre de todos los diálogos después de 3 segundos
+        // Navigator.of(context).pop();
         Future.delayed(const Duration(seconds: 3), () {
           if (context.mounted) {
-            // Cerrar todos los diálogos abiertos
-            Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
-            
-            // Mostrar mensaje de éxito
+            Navigator.of(
+              context,
+              rootNavigator: true,
+            ).popUntil((route) => route.isFirst);
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(currentState.mensaje),
@@ -116,23 +106,21 @@ class ProductTrasladoHandler {
                 margin: const EdgeInsets.only(bottom: 80, right: 20, left: 20),
               ),
             );
-            
-            // Recargar la lista de productos
+
             bloc.add(CargarProductosEvent());
           }
         });
-        
-        // Eliminar el listener
+
         bloc.stream.listen(null).cancel();
         bloc.stream.listen((state) {}).cancel();
       } else if (currentState is ErrorSolicitudTrasladoState) {
-        // Forzar el cierre de todos los diálogos después de 3 segundos
         Future.delayed(const Duration(seconds: 3), () {
           if (context.mounted) {
-            // Cerrar todos los diálogos abiertos
-            Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
-            
-            // Mostrar mensaje de error
+            Navigator.of(
+              context,
+              rootNavigator: true,
+            ).popUntil((route) => route.isFirst);
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(currentState.mensaje),
@@ -146,17 +134,14 @@ class ProductTrasladoHandler {
             );
           }
         });
-        
-        // Eliminar el listener
+
         bloc.stream.listen(null).cancel();
         bloc.stream.listen((state) {}).cancel();
       }
     };
-    
-    // Añadir listener al stream del bloc
+
     bloc.stream.listen((_) => listener());
-    
-    // Enviar la solicitud de traslado al bloc
+
     bloc.add(
       EnviarSolicitudTrasladoEvent(
         productos: selectedProducts,
