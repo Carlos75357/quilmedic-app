@@ -5,25 +5,43 @@ import 'package:quilmedic/ui/auth/auth_event.dart';
 import 'package:quilmedic/ui/auth/auth_state.dart';
 import 'package:quilmedic/ui/scanner/escaner_page.dart';
 
+/// Pantalla de inicio de sesión de la aplicación.
+/// Permite al usuario autenticarse mediante un nombre de usuario y contraseña.
+/// Utiliza el AuthBloc para gestionar el estado de autenticación.
 class LoginPage extends StatefulWidget {
+  /// Constructor de LoginPage
+  /// @param key Clave del widget
   const LoginPage({super.key});
 
+  /// Crea el estado mutable para este widget
+  /// @return Una instancia de _LoginPageState
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
+/// Estado mutable para la pantalla de inicio de sesión.
+/// Gestiona los controladores de texto, validación del formulario y estado de carga.
 class _LoginPageState extends State<LoginPage> {
+  /// Clave global para identificar y validar el formulario
   final _formKey = GlobalKey<FormState>();
+  /// Controlador para el campo de texto del nombre de usuario
   final _usernameController = TextEditingController();
+  /// Controlador para el campo de texto de la contraseña
   final _passwordController = TextEditingController();
+  /// Controla la visibilidad de la contraseña
   bool _obscurePassword = true;
+  /// Indica si se está procesando la solicitud de inicio de sesión
   bool _isLoading = false;
 
+  /// Inicializa el estado del widget
+  /// Se llama cuando este objeto se inserta en el árbol
   @override
   void initState() {
     super.initState();
   }
 
+  /// Libera los recursos utilizados por este objeto
+  /// Limpia los controladores de texto cuando el widget se elimina del árbol
   @override
   void dispose() {
     _usernameController.dispose();
@@ -31,6 +49,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// Construye la interfaz de usuario de la pantalla de inicio de sesión
+  /// Utiliza BlocConsumer para escuchar y construir la UI basada en el estado de autenticación
+  /// @param context Contexto de construcción
+  /// @return Widget con el formulario de inicio de sesión
   @override
   Widget build(BuildContext context) {
     // Usar el BlocConsumer directamente sin crear un nuevo BlocProvider
