@@ -4,11 +4,19 @@ import 'package:quilmedic/services/auth_service.dart';
 import 'package:quilmedic/ui/auth/auth_event.dart';
 import 'package:quilmedic/ui/auth/auth_state.dart';
 
+/// Bloc que gestiona el estado de autenticación de la aplicación.
+/// Maneja eventos relacionados con el inicio de sesión, cierre de sesión
+/// y verificación del estado de autenticación.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  /// Servicio de autenticación utilizado para realizar operaciones de login/logout
   final AuthService _authService;
+  /// Suscripción al stream de eventos de expiración de autenticación
   StreamSubscription? _authExpirationSubscription;
+  /// Temporizador para verificar periódicamente la validez del token
   Timer? _tokenValidityTimer;
   
+  /// Constructor del AuthBloc
+  /// @param authService Servicio de autenticación requerido para las operaciones
   AuthBloc({required AuthService authService}) : _authService = authService, super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
@@ -22,6 +30,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _startTokenValidityCheck();
   }
   
+  /// Inicia una verificación periódica de la validez del token cada 5 minutos
+  /// Si el token no es válido, dispara el evento TokenExpired
   void _startTokenValidityCheck() {
     _tokenValidityTimer?.cancel();
     _tokenValidityTimer = Timer.periodic(const Duration(minutes: 5), (_) async {
@@ -34,6 +44,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
+  /// Maneja el evento de solicitud de inicio de sesión
+  /// @param event Evento con el nombre de usuario y contraseña
+  /// @param emit Emisor para cambiar el estado de autenticación
   Future<void> _onLoginRequested(LoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     
@@ -53,6 +66,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Maneja el evento de solicitud de cierre de sesión
+  /// @param event Evento de cierre de sesión
+  /// @param emit Emisor para cambiar el estado de autenticación
   Future<void> _onLogoutRequested(LogoutRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     
@@ -64,6 +80,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  /// Verifica el estado actual de autenticación del usuario
+  /// Comprueba si el usuario está autenticado y si el token es válido
+  /// @param event Evento para verificar el estado de autenticación
+  /// @param emit Emisor para cambiar el estado de autenticación
   Future<void> _onCheckAuthStatus(CheckAuthStatus event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     
@@ -84,6 +104,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
   
+  /// Maneja el evento de expiración del token de autenticación
+  /// Cierra la sesión y muestra un mensaje de error antes de cambiar al estado no autenticado
+  /// @param event Evento de token expirado
+  /// @param emit Emisor para cambiar el estado de autenticación
   Future<void> _onTokenExpired(TokenExpired event, Emitter<AuthState> emit) async {
     if (state is! AuthError && state is! Unauthenticated) {
       await _authService.logout(); 
@@ -96,7 +120,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
   
-  @override
+  /// Libera los recursos utilizados por el bloc
+  /// Cancela las suscripciones y temporizadores activos
+  /// @override
   Future<void> close() {
     _authExpirationSubscription?.cancel();
     _tokenValidityTimer?.cancel();
