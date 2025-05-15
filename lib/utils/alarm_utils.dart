@@ -36,12 +36,11 @@ class AlarmUtils {
           await ProductoLocalStorage.agregarAlarmas(_generalAlarmCache);
           await _updateLastRefreshTime();
         } catch (e) {
-          debugPrint('Error al obtener alarmas del servidor: $e');
           await loadAlarmsFromCache();
         }
       }
     } catch (e) {
-      debugPrint('Error en initGeneralAlarms: $e');
+      await loadAlarmsFromCache();
     }
   }
 
@@ -72,13 +71,9 @@ class AlarmUtils {
         if (alarms.isNotEmpty) {
           _generalAlarmCache.clear();
           _generalAlarmCache.addAll(alarms);
-          debugPrint('Alarmas cargadas desde caché: ${alarms.length}');
-        } else {
-          debugPrint('No hay alarmas en caché');
         }
       }
     } catch (e) {
-      debugPrint('Error al cargar alarmas desde caché: $e');
       _generalAlarmCache.clear();
     }
   }
@@ -92,7 +87,7 @@ class AlarmUtils {
             .toList();
       }
     } catch (e) {
-      debugPrint('Error al obtener alarmas generales de fecha de caducidad: $e');
+      _generalAlarmCache.clear();
     }
     return [];
   }
@@ -106,74 +101,49 @@ class AlarmUtils {
             .toList();
       }
     } catch (e) {
-      debugPrint('Error al obtener alarmas generales de stock: $e');
+      _generalAlarmCache.clear();
     }
     return [];
   }
 
   Future<List<Alarm>> getGeneralAlarms() async {
     if (_generalAlarmCache.isNotEmpty) {
-      debugPrint('Usando ${_generalAlarmCache.length} alarmas generales de caché en memoria');
       return List.from(_generalAlarmCache);
     }
-    
+
     await loadAlarmsFromCache();
     if (_generalAlarmCache.isNotEmpty) {
-      debugPrint('Usando ${_generalAlarmCache.length} alarmas generales de almacenamiento local');
       return List.from(_generalAlarmCache);
     }
-    
-    debugPrint('Obteniendo alarmas generales del servidor');
+
     final stockResponse = await getGeneralStockAlarms();
     final dateResponse = await getGeneralExpirationDateAlarms();
     final generalAlarms = [...stockResponse, ...dateResponse];
-    
+
     if (generalAlarms.isNotEmpty) {
       await saveAlarmsToCache(generalAlarms);
-      debugPrint('${generalAlarms.length} alarmas generales obtenidas del servidor y guardadas en caché');
-    } else {
-      debugPrint('No se encontraron alarmas generales en el servidor');
     }
-    
+
     return generalAlarms;
   }
-  
+
   Future<void> saveAlarmsToCache(List<Alarm> alarms) async {
     try {
       if (alarms.isNotEmpty) {
         _generalAlarmCache.clear();
         _generalAlarmCache.addAll(alarms);
-        
+
         await ProductoLocalStorage.agregarAlarmas(alarms);
-        debugPrint('${alarms.length} alarmas generales guardadas en caché');
       }
     } catch (e) {
-      debugPrint('Error al guardar alarmas en caché: $e');
+      _generalAlarmCache.clear();
     }
   }
 
   bool hasSpecificAlarms(int? productId) {
     if (productId == null) return false;
 
-    final hasAlarms =
-        _productAlarmCache.containsKey(productId) &&
-        _productAlarmCache[productId]!.isNotEmpty;
-
-    debugPrint(
-      'Verificando alarmas específicas para producto ID: $productId - ${hasAlarms ? "SÍ tiene alarmas" : "NO tiene alarmas"}',
-    );
-
-    if (hasAlarms) {
-      final alarms = _productAlarmCache[productId]!;
-      debugPrint('  Alarmas encontradas: ${alarms.length}');
-
-      for (var i = 0; i < alarms.length; i++) {
-        final alarm = alarms[i];
-        debugPrint(
-          '  [$i] Tipo: ${alarm.type}, Condición: ${alarm.condition}, Color: ${alarm.color}',
-        );
-      }
-    }
+    final hasAlarms = _stockColorCache.containsKey(productId);
 
     return hasAlarms;
   }
@@ -181,41 +151,40 @@ class AlarmUtils {
   Future<List<Alarm>> getSpecificAlarmsForProduct(int? productId) async {
     if (productId == null) return [];
 
-    if (_productAlarmCache.containsKey(productId) && _productAlarmCache[productId]!.isNotEmpty) {
-      debugPrint('Usando alarmas específicas de caché en memoria para producto $productId');
+    if (_productAlarmCache.containsKey(productId) &&
+        _productAlarmCache[productId]!.isNotEmpty) {
       return _productAlarmCache[productId]!;
     }
-    
+
     try {
-      final specificAlarms = await ProductoLocalStorage.obtenerAlarmasEspecificas();
-      final productSpecificAlarms = specificAlarms
-          .where((alarm) => alarm.productId == productId)
-          .toList();
-      
+      final specificAlarms =
+          await ProductoLocalStorage.obtenerAlarmasEspecificas();
+      final productSpecificAlarms =
+          specificAlarms
+              .where((alarm) => alarm.productId == productId)
+              .toList();
+
       if (productSpecificAlarms.isNotEmpty) {
         _productAlarmCache[productId] = productSpecificAlarms;
-        debugPrint('Usando alarmas específicas de almacenamiento local para producto $productId');
+
         return productSpecificAlarms;
       }
     } catch (e) {
-      debugPrint('Error al obtener alarmas específicas desde almacenamiento local: $e');
+      _productAlarmCache[productId] = [];
     }
-    
+
     return [];
   }
 
-Future<void> loadAlarmsForProducts(
-    List<Producto> productos,
-  ) async {
+  Future<void> loadAlarmsForProducts(List<Producto> productos) async {
     Map<int, AlarmInfo> stockColorsMap = {};
     Map<int, AlarmInfo> expiryColorsMap = {};
 
     await loadAlarmsFromCache();
 
     List<int> productIds = productos.map((p) => p.id).toList();
-    
+
     if (productIds.isEmpty) {
-      debugPrint('No hay productos para cargar alarmas');
       return;
     }
 
@@ -231,29 +200,35 @@ Future<void> loadAlarmsForProducts(
             final color = _parseColor(alarm.color);
             if (color != null) {
               if (alarm.type?.toLowerCase() == 'stock') {
-                stockColorsMap[alarm.productId!] = AlarmInfo(productId: alarm.productId!, condition: alarm.condition!, locationId: alarm.locationId);
-                debugPrint('Cargada alarma específica de stock para producto ${alarm.productId}');
+                stockColorsMap[alarm.productId!] = AlarmInfo(
+                  productId: alarm.productId!,
+                  condition: alarm.condition!,
+                  locationId: alarm.locationId,
+                );
               } else if (alarm.type?.toLowerCase() == 'date') {
-                expiryColorsMap[alarm.productId!] = AlarmInfo(productId: alarm.productId!, condition: alarm.condition!, color: color);
-                debugPrint('Cargada alarma específica de caducidad para producto ${alarm.productId}');
+                expiryColorsMap[alarm.productId!] = AlarmInfo(
+                  productId: alarm.productId!,
+                  condition: alarm.condition!,
+                  color: color,
+                );
               }
             }
           }
         }
       }
     } catch (e) {
-      debugPrint('Error al cargar alarmas específicas: $e');
+      _stockColorCache.clear();
+      _expiryColorCache.clear();
     }
 
     _stockColorCache.addAll(stockColorsMap);
     _expiryColorCache.addAll(expiryColorsMap);
-    
-    debugPrint('Alarmas cargadas: ${stockColorsMap.length} de stock, ${expiryColorsMap.length} de caducidad');
   }
 
   Color getColorForStockFromCache(int stock, int? productId, int locationId) {
     if (productId != null) {
-      if (_stockColorCache.containsKey(productId) && _stockColorCache[productId]!.locationId == locationId) {
+      if (_stockColorCache.containsKey(productId) &&
+          _stockColorCache[productId]!.locationId == locationId) {
         if (_evaluateAlarm(_stockColorCache[productId]!.condition!, stock)) {
           return Color.fromARGB(255, 233, 236, 11).withValues(alpha: 0.3);
         }
@@ -266,14 +241,21 @@ Future<void> loadAlarmsForProducts(
 
   Color getColorForExpiryFromCache(int? productId, [DateTime? expiryDate]) {
     if (productId != null && _expiryColorCache.containsKey(productId)) {
-      if (_evaluateAlarm(_expiryColorCache[productId]!.condition!, expiryDate!.difference(DateTime.now()).inDays)) {
+      if (_evaluateAlarm(
+        _expiryColorCache[productId]!.condition!,
+        expiryDate!.difference(DateTime.now()).inDays,
+      )) {
         return _expiryColorCache[productId]!.color!;
-      } 
+      }
     }
     for (var alarm in _generalAlarmCache) {
       if (alarm.type?.toLowerCase() == 'date') {
-        if (_evaluateAlarm(alarm.condition!, expiryDate!.difference(DateTime.now()).inDays)) {
-          return _parseColor(alarm.color) ?? Colors.green.withValues(alpha: 0.3);
+        if (_evaluateAlarm(
+          alarm.condition!,
+          expiryDate!.difference(DateTime.now()).inDays,
+        )) {
+          return _parseColor(alarm.color) ??
+              Colors.green.withValues(alpha: 0.3);
         }
       }
     }
@@ -285,7 +267,6 @@ Future<void> loadAlarmsForProducts(
 
     switch (_getOperator(condition)) {
       case '<':
-        print(days < value);
         return days < value;
       case '<=':
         return days <= value;
@@ -351,7 +332,6 @@ Future<void> loadAlarmsForProducts(
       await initGeneralAlarms();
       await _updateLastRefreshTime();
     } catch (e) {
-      debugPrint('Error al forzar la actualización de alarmas: $e');
       await loadAlarmsFromCache();
     }
   }

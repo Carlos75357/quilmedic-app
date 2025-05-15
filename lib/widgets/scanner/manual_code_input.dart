@@ -52,9 +52,6 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
     _lastTextLength = text.length;
 
     if (timeDiff < 50 && textLengthDiff > 0) {
-      debugPrint(
-        'Posible escaneo detectado: $text (tiempo: $timeDiff ms, caracteres añadidos: $textLengthDiff)',
-      );
 
       _lastScannedCode = text;
 
@@ -63,8 +60,6 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
         final currentText = _controller.text;
 
         if (currentText == _lastScannedCode) {
-          debugPrint('Procesando código escaneado directamente: $currentText');
-
           final codeToSubmit = currentText;
           _controller.clear();
 
@@ -158,35 +153,21 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
                           isDense: true,
                         ),
                         keyboardType: TextInputType.text,
-                        // validator: (value) {
-                        //   if (value == null || value.isEmpty) {
-                        //     return 'Ingrese un código';
-                        //   }
-                        //   return null;
-                        // },
                         autofocus: true,
                         focusNode: _textFieldFocusNode,
                         style: const TextStyle(fontSize: 14),
                         onFieldSubmitted: (_) => _submitCode(),
                         onChanged: (value) {
-                          debugPrint('TextField value changed: "$value"');
 
                           if (value.contains('\n') || value.contains('\r')) {
-                            debugPrint(
-                              'PDA scan detected with return character',
-                            );
                             final cleanCode = value
                                 .replaceAll('\n', '')
                                 .replaceAll('\r', '');
                             _controller.text = cleanCode;
 
-                            debugPrint('Auto-submitting code: $cleanCode');
                             Future.microtask(() => _submitCode());
                           } else if (value.isNotEmpty &&
                               value.codeUnitAt(value.length - 1) == 13) {
-                            debugPrint(
-                              'PDA scan detected with ASCII 13 (CR) at the end',
-                            );
                             _controller.text = value.substring(
                               0,
                               value.length - 1,

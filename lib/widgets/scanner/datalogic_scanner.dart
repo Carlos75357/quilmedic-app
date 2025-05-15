@@ -31,7 +31,6 @@ class _DatalogicScannerState extends State<DatalogicScanner> {
   void initState() {
     super.initState();
     _focusNode.requestFocus();
-    debugPrint('DatalogicScanner initialized, focus requested');
   }
 
   void _resetScanner() {
@@ -71,7 +70,6 @@ class _DatalogicScannerState extends State<DatalogicScanner> {
               if (char != null) {
                 if (char == widget.scannerEndChar) {
                   if (_scannedChars.isNotEmpty) {
-                    debugPrint('Barcode scanned: $_scannedChars');
                     widget.onBarcodeScanned(_scannedChars);
                   }
                   _resetScanner();

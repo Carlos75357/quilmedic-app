@@ -28,21 +28,4 @@ class HospitalRepository {
       throw Exception('Error al obtener hospitales: ${e.toString()}');
     }
   }
-
-  Future<RepositoryResponse> getStoreNameById(int id) async {
-    try {
-      final response = await apiClient.getAll(
-        '${ApiConfig.hospitalesEndpoint}/$id',
-        null,
-      );
-
-      var hospitals = response
-          .map((item) => Hospital.fromJson(item as Map<String, dynamic>))
-          .toList();
-
-      return RepositoryResponse.success(hospitals, message: 'Hospitales obtenidos correctamente');
-    } catch (e) {
-      return RepositoryResponse.error(e.toString());
-    }
-  }
 }

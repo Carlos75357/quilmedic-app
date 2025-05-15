@@ -9,9 +9,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   StreamSubscription? _authExpirationSubscription;
   Timer? _tokenValidityTimer;
   
-  AuthBloc({required AuthService authService}) 
-      : _authService = authService,
-        super(AuthInitial()) {
+  AuthBloc({required AuthService authService}) : _authService = authService, super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
     on<CheckAuthStatus>(_onCheckAuthStatus);
@@ -36,10 +34,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
-  Future<void> _onLoginRequested(
-    LoginRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onLoginRequested(LoginRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     
     try {
@@ -58,10 +53,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onLogoutRequested(
-    LogoutRequested event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onLogoutRequested(LogoutRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     
     try {
@@ -72,10 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onCheckAuthStatus(
-    CheckAuthStatus event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onCheckAuthStatus(CheckAuthStatus event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     
     try {
@@ -83,45 +72,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       
       if (isAuthenticated) {
         final user = await _authService.getCurrentUser();
-        if (user != null) {
-          final isTokenValid = await _authService.isTokenValid();
-          if (isTokenValid) {
-            emit(Authenticated(user));
-          } else {
-            final tokenRenewed = await _authService.handleAuthError();
-            if (tokenRenewed) {
-              final updatedUser = await _authService.getCurrentUser();
-              if (updatedUser != null) {
-                emit(Authenticated(updatedUser));
-              } else {
-                emit(Unauthenticated());
-              }
-            } else {
-              emit(Unauthenticated());
-            }
-          }
-        } else {
-          emit(Unauthenticated());
+        if (user != null && await _authService.isTokenValid()) {
+          emit(Authenticated(user));
+          return;
         }
-      } else {
-        emit(Unauthenticated());
       }
+      
+      emit(Unauthenticated());
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
   
-  Future<void> _onTokenExpired(
-    TokenExpired event,
-    Emitter<AuthState> emit,
-  ) async {
-    // Verificar el estado actual para evitar emitir eventos duplicados
+  Future<void> _onTokenExpired(TokenExpired event, Emitter<AuthState> emit) async {
     if (state is! AuthError && state is! Unauthenticated) {
       await _authService.logout(); 
       
       emit(const AuthError('Sesión expirada. Por favor inicie sesión nuevamente.'));
       
-      // Reducir el tiempo de espera para evitar problemas de sincronización
       await Future.delayed(const Duration(milliseconds: 500));
       
       emit(Unauthenticated());

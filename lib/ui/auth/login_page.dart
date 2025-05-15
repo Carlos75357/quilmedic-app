@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:quilmedic/ui/auth/auth_bloc.dart';
 import 'package:quilmedic/ui/auth/auth_event.dart';
 import 'package:quilmedic/ui/auth/auth_state.dart';
@@ -19,27 +18,10 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
-  String _androidId = 'Obteniendo...';
-  final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
 
   @override
   void initState() {
     super.initState();
-    _getAndroidId();
-  }
-  
-  Future<void> _getAndroidId() async {
-    try {
-      final androidInfo = await _deviceInfo.androidInfo;
-      setState(() {
-        _androidId = androidInfo.id;
-      });
-      debugPrint('Android ID en LoginPage: $_androidId');
-    } catch (e) {
-      setState(() {
-        _androidId = 'Error: ${e.toString()}';
-      });
-    }
   }
 
   @override

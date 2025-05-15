@@ -23,20 +23,4 @@ class TransferRepository {
       return RepositoryResponse.error('Error al enviar solicitud de traslado: ${e.toString()}');
     }
   }
-
-  Future<RepositoryResponse> getAvailableStores() async {
-    try {
-      final response = await apiClient.getAll(
-        ApiConfig.hospitalesEndpoint,
-        null,
-      );
-
-      return RepositoryResponse.success(
-        response,
-        message: 'Tiendas obtenidas correctamente',
-      );
-    } catch (e) {
-      return RepositoryResponse.error('Error al obtener tiendas: ${e.toString()}');
-    }
-  }
 }

@@ -251,35 +251,6 @@ class _ProductTrasladoPopupState extends State<ProductTrasladoPopup> {
                       
                       Navigator.of(context, rootNavigator: true).pop();
 
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext context) {
-                          return WillPopScope(
-                            // Prevenir que se cierre con el botón de atrás
-                            onWillPop: () async => false,
-                            child: AlertDialog(
-                              title: const Row(
-                                children: [
-                                  Icon(Icons.swap_horiz, color: Colors.blue),
-                                  SizedBox(width: 8),
-                                  Text('Trasladando productos'),
-                                ],
-                              ),
-                              content: const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(),
-                                  SizedBox(height: 16),
-                                  Text('Procesando traslado de productos...'),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-
-                      // Llamar a la función de callback para realizar el traslado
                       widget.onTrasladoConfirmado(
                         selectedHospitalId!,
                         selectedHospitalName!,

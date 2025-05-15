@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:quilmedic/domain/alarm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 
 class ProductoLocalStorage {
@@ -9,9 +8,7 @@ class ProductoLocalStorage {
   static const String _productosPendientesKey = 'productos_pendientes';
   static const String _hospitalPendienteKey = 'hospital_pendiente';
   static const String _locationPendienteKey = 'location_pendiente';
-  static const String _productosCompletos =  'productos_completos';
   static const String _alarmasKey = 'alarmas';
-  static const String _alarmasKeyStock = 'alarmas_stock';
   static const String _alarmasKeyEspecificas = 'alarmas_especificas';
   
   static Future<bool> guardarProductosEscaneados(List<String> productosIds) async {
@@ -65,15 +62,6 @@ class ProductoLocalStorage {
       }
       
       return true; 
-    } catch (e) {
-      return false;
-    }
-  }
-  
-  static Future<bool> limpiarProductosEscaneados() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.remove(_productosEscaneadosKey);
     } catch (e) {
       return false;
     }
@@ -182,72 +170,6 @@ class ProductoLocalStorage {
     }
   }
 
-  static Future<bool> guardarProductosCompletos(List<ProductoEscaneado> productos) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      final List<Map<String, dynamic>> productosMap = 
-          productos.map((p) => p.toMap()).toList();
-      
-      final String jsonString = jsonEncode(productosMap);
-      
-      return await prefs.setString(_productosCompletos, jsonString);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  static Future<List<ProductoEscaneado>> obtenerProductosCompletos() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? jsonString = prefs.getString(_productosCompletos);
-      
-      if (jsonString == null || jsonString.isEmpty) {
-        return [];
-      }
-      
-      final List<dynamic> decodedList = jsonDecode(jsonString);
-      return decodedList
-          .map<ProductoEscaneado>((item) => ProductoEscaneado.fromMap(item))
-          .toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  static Future<bool> limpiarProductosCompletos() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.remove(_productosCompletos);
-    } catch (e) {
-      return false;
-    }
-  }
-
-  static Future<Producto?> obtenerProductoPorserialnumber(String serialnumber) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? jsonString = prefs.getString(_productosCompletos);
-      
-      if (jsonString == null || jsonString.isEmpty) {
-        return null;
-      }
-      
-      final List<dynamic> decodedList = jsonDecode(jsonString);
-      final productos = decodedList.map((item) => Producto.fromMap(item as Map<String, dynamic>)).toList();
-      
-      for (var producto in productos) {
-        if (producto.serialnumber == serialnumber) {
-          return producto;
-        }
-      }
-      
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
   static Future<bool> agregarAlarma(Alarm alarm) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -277,15 +199,6 @@ class ProductoLocalStorage {
     }
   }
 
-  static Future<bool> agregarAlarmasStock(List<Alarm> alarms) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.setString(_alarmasKeyStock, jsonEncode(alarms.map((a) => a.toMap()).toList()));
-    } catch (e) {
-      return false;
-    }
-  }
-
   static Future<bool> agregarAlarmasEspecificas(List<Alarm> alarms) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -299,22 +212,6 @@ class ProductoLocalStorage {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? jsonString = prefs.getString(_alarmasKeyEspecificas);
-      
-      if (jsonString == null || jsonString.isEmpty) {
-        return [];
-      }
-      
-      final List<dynamic> decodedList = jsonDecode(jsonString);
-      return decodedList.map((item) => Alarm.fromMap(item)).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  static Future<List<Alarm>> obtenerAlarmasStock() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? jsonString = prefs.getString(_alarmasKeyStock);
       
       if (jsonString == null || jsonString.isEmpty) {
         return [];

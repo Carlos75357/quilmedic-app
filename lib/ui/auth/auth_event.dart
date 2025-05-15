@@ -24,5 +24,4 @@ class LogoutRequested extends AuthEvent {}
 
 class CheckAuthStatus extends AuthEvent {}
 
-/// Evento que se dispara cuando el token ha expirado
 class TokenExpired extends AuthEvent {}

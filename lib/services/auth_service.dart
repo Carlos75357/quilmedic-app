@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:quilmedic/data/json/api_client.dart';
 import 'package:quilmedic/data/config.dart';
@@ -24,7 +23,6 @@ class AuthService {
     try {
       return await _deviceIdService.getUniqueDeviceId();
     } catch (e) {
-      debugPrint('Error al obtener ID único de dispositivo: $e');
       return 'unknown_device';
     }
   }
@@ -65,7 +63,6 @@ class AuthService {
         }
       }
     } catch (e) {
-      debugPrint('Error en login: $e');
       rethrow;
     }
   }
@@ -86,7 +83,6 @@ class AuthService {
             e.toString().contains('401') || 
             e.toString().contains('unauthorized') || 
             e.toString().contains('Unauthorized')) {
-          debugPrint('Token expirado o inválido en isAuthenticated: $e');
           
           await logout();
           
@@ -98,7 +94,6 @@ class AuthService {
         return true;
       }
     } catch (e) {
-      debugPrint('Error al verificar autenticación: $e');
       return false;
     }
   }
@@ -111,7 +106,6 @@ class AuthService {
       }
       return null;
     } catch (e) {
-      debugPrint('Error al obtener usuario actual: $e');
       return null;
     }
   }
@@ -120,7 +114,6 @@ class AuthService {
     try {
       return await _secureStorage.read(key: _tokenKey);
     } catch (e) {
-      debugPrint('Error al obtener token: $e');
       return null;
     }
   }
@@ -131,10 +124,8 @@ class AuthService {
       await _secureStorage.delete(key: _userKey);
       
       await ApiConfig.clearToken();
-      
-      debugPrint('Sesión cerrada correctamente. Todos los datos eliminados.');
     } catch (e) {
-      debugPrint('Error al cerrar sesión: $e');
+      //
     }
   }
   
@@ -147,41 +138,10 @@ class AuthService {
           e.toString().contains('401') || 
           e.toString().contains('unauthorized') || 
           e.toString().contains('Unauthorized')) {
-        debugPrint('Token inválido o expirado: $e');
         _authExpirationController.add(true);
         return false;
       }
       return await isAuthenticated();
-    }
-  }
-  
-  Future<bool> handleAuthError() async {
-    try {
-      final tokenRenewed = await ApiConfig.renewToken();
-      
-      if (tokenRenewed) {
-        final token = await ApiConfig.getToken();
-        final currentUser = await getCurrentUser();
-        
-        if (currentUser != null && token != null) {
-          final updatedUser = User(
-            id: currentUser.id,
-            username: currentUser.username,
-            token: token,
-            androidId: currentUser.androidId,
-          );
-          
-          await _secureStorage.write(key: _userKey, value: jsonEncode(updatedUser.toJson()));
-          return true;
-        }
-      }
-      
-      _authExpirationController.add(true);
-      return false;
-    } catch (e) {
-      debugPrint('Error al manejar error de autenticación: $e');
-      _authExpirationController.add(true);
-      return false;
     }
   }
   

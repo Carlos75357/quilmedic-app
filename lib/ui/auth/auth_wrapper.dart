@@ -4,8 +4,6 @@ import 'package:quilmedic/ui/auth/auth_bloc.dart';
 import 'package:quilmedic/ui/auth/auth_state.dart';
 import 'package:quilmedic/ui/auth/login_page.dart';
 
-/// Widget que escucha los cambios de estado de autenticación y redirecciona
-/// al usuario a la pantalla de login cuando sea necesario
 class AuthWrapper extends StatelessWidget {
   final Widget child;
 
@@ -15,7 +13,6 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (previous, current) {
-        // Solo escuchar cambios relevantes para la autenticación
         return current is Unauthenticated || 
                (current is AuthError && 
                 (current.message.contains('expirada') || 
@@ -29,7 +26,6 @@ class AuthWrapper extends StatelessWidget {
               state.message.contains('sesión') || 
               state.message.contains('autenticación')))) {
           
-          // Mostrar un mensaje al usuario
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state is AuthError ? state.message : 'Sesión expirada. Por favor inicie sesión nuevamente.'),
@@ -38,13 +34,13 @@ class AuthWrapper extends StatelessWidget {
             ),
           );
           
-          // Navegar a la pantalla de login después de un breve retraso
-          // para que el usuario pueda ver el mensaje
           Future.delayed(const Duration(seconds: 1), () {
+            if (context.mounted){
             Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const LoginPage()),
-              (route) => false, // Eliminar todas las rutas anteriores
+              (route) => false,
             );
+            }
           });
         }
       },

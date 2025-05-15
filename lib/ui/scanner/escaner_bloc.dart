@@ -56,7 +56,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     emit(EscanerLoading());
 
     try {
-      // Siempre eliminar el hospital y ubicación seleccionados al recargar
       hospitalSeleccionado = null;
       locationSeleccionada = null;
 
@@ -65,8 +64,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           .then((value) => value.data);
 
       emit(HospitalesCargados(hospitales));
-      // Emitir un estado adicional para notificar que las selecciones se han reseteado
-      // emit(SelectionsResetState());
     } catch (e) {
       await _guardarProductosEnCacheEnCasoDeError(emit);
 
@@ -98,12 +95,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
             ),
           );
         }
-
-        debugPrint(
-          'Productos guardados en caché debido a un error y vista actualizada',
-        );
       } catch (e) {
-        debugPrint('Error al guardar productos en caché: ${e.toString()}');
+        emitter!(EscanerError('Error al guardar productos en caché: ${e.toString()}'));
       }
     }
   }

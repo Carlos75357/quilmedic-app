@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
@@ -32,8 +31,6 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
   final bool _hayConexion = true;
   bool _hayProductosPendientes = false;
   
-  DateTime _lastKeyEventTime = DateTime.now();
-  int _consecutiveKeyEvents = 0;
   Timer? _scannerDetectionTimer;
   final FocusNode _globalFocusNode = FocusNode();
 
@@ -46,11 +43,7 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
-  // Future<void> _updateAlarmsIfNeeded() async {
-  //   final alarmUtils = AlarmUtils();
 
-  //   await alarmUtils.loadAlarmsFromCache();
-  // }
 
   @override
   void dispose() {
@@ -59,13 +52,6 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
     _globalFocusNode.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-  
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _consecutiveKeyEvents = 0;
-    }
   }
 
   void _resetSelections() {
@@ -161,7 +147,6 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
 
                   return DatalogicScannerListener(
                     onBarcodeScanned: (code) {
-                      debugPrint('Código recibido del escáner Datalogic: $code');
                       ScannerHandler.procesarCodigoEscaneado(
                         context,
                         code,
