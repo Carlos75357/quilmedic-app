@@ -8,17 +8,29 @@ import 'package:quilmedic/exceptions/authentication_exceptions.dart';
 import 'package:quilmedic/services/navigation_service.dart';
 import 'package:quilmedic/services/device_id_service.dart';
 
+/// Servicio que gestiona la autenticación de usuarios en la aplicación.
+/// Proporciona métodos para iniciar sesión, cerrar sesión, validar tokens
+/// y obtener información del usuario autenticado.
 class AuthService {
+  /// Clave para almacenar el token de autenticación en el almacenamiento seguro
   static const String _tokenKey = 'auth_token';
+  /// Clave para almacenar los datos del usuario en el almacenamiento seguro
   static const String _userKey = 'user_data';
   
+  /// Instancia de almacenamiento seguro para guardar datos sensibles
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  /// Servicio para obtener el ID único del dispositivo
   final DeviceIdService _deviceIdService = DeviceIdService();
+  /// Cliente API para realizar peticiones al servidor
   final ApiClient _apiClient = ApiClient();
   
+  /// Controlador de stream para notificar cuando la autenticación ha expirado
   final StreamController<bool> _authExpirationController = StreamController<bool>.broadcast();
+  /// Stream que emite eventos cuando la autenticación expira
   Stream<bool> get onAuthExpired => _authExpirationController.stream;
 
+  /// Obtiene el ID único del dispositivo
+  /// @return ID del dispositivo o 'unknown_device' si ocurre un error
   Future<String> getDeviceId() async {
     try {
       return await _deviceIdService.getUniqueDeviceId();
@@ -27,6 +39,10 @@ class AuthService {
     }
   }
 
+  /// Inicia sesión con las credenciales proporcionadas
+  /// @param username Nombre de usuario
+  /// @param password Contraseña del usuario
+  /// @return Usuario autenticado o null si falla la autenticación
   Future<User?> login(String username, String password) async {
     try {
       final deviceId = await getDeviceId();
@@ -67,6 +83,9 @@ class AuthService {
     }
   }
     
+  /// Verifica si el usuario está autenticado actualmente
+  /// Valida el token almacenado contra el servidor
+  /// @return true si el usuario está autenticado, false en caso contrario
   Future<bool> isAuthenticated() async {
     try {
       final token = await _secureStorage.read(key: _tokenKey);
@@ -98,6 +117,8 @@ class AuthService {
     }
   }
 
+  /// Obtiene los datos del usuario actualmente autenticado
+  /// @return Usuario actual o null si no hay usuario autenticado
   Future<User?> getCurrentUser() async {
     try {
       final userData = await _secureStorage.read(key: _userKey);
@@ -110,6 +131,8 @@ class AuthService {
     }
   }
 
+  /// Obtiene el token de autenticación almacenado
+  /// @return Token de autenticación o null si no existe
   Future<String?> getToken() async {
     try {
       return await _secureStorage.read(key: _tokenKey);
@@ -118,6 +141,8 @@ class AuthService {
     }
   }
 
+  /// Cierra la sesión del usuario actual
+  /// Elimina el token y los datos del usuario del almacenamiento seguro
   Future<void> logout() async {
     try {
       await _secureStorage.delete(key: _tokenKey);
@@ -129,6 +154,9 @@ class AuthService {
     }
   }
   
+  /// Verifica si el token actual es válido
+  /// Realiza una petición al servidor para validar el token
+  /// @return true si el token es válido, false en caso contrario
   Future<bool> isTokenValid() async {
     try {
       await _apiClient.getAll('/validate-token', {});
@@ -145,6 +173,8 @@ class AuthService {
     }
   }
   
+  /// Libera los recursos utilizados por el servicio
+  /// Cierra el stream controller para evitar fugas de memoria
   void dispose() {
     _authExpirationController.close();
   }
