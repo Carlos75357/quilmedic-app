@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:quilmedic/services/auth_service.dart';
 import 'package:quilmedic/services/initialization_service.dart';
 import 'package:quilmedic/services/navigation_service.dart';
@@ -17,18 +16,7 @@ import 'package:quilmedic/utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  final deviceInfo = DeviceInfoPlugin();
-  String androidId = 'unknown_device';
-  try {
-    final androidInfo = await deviceInfo.androidInfo;
-    androidId = androidInfo.id;
-    debugPrint('=========================================');
-    debugPrint('ANDROID ID: $androidId');
-    debugPrint('=========================================');
-  } catch (e) {
-    debugPrint('Error al obtener Android ID: $e');
-  }
+
   
   final authService = AuthService();
   

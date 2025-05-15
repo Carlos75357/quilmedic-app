@@ -1,8 +1,4 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 
 class ApiConfig {
   // URL base de la API
@@ -17,44 +13,7 @@ class ApiConfig {
 
     if (savedToken != null) return savedToken;
 
-    final newToken = await _fetchInitialToken();
-    if (newToken != null) {
-      await _storage.write(key: _tokenKey, value: newToken);
-    }
-
-    return newToken;
-  }
-
-  static Future<String?> _fetchInitialToken() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/get-token'),
-        headers: {'Authorization': 'Bearer $masterToken'},
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['token'];
-      } else {
-        return null;
-      }
-    } catch (e) {
-      return null;
-    }
-  }
-  
-  static Future<bool> renewToken() async {
-    try {
-      final newToken = await _fetchInitialToken();
-      if (newToken != null) {
-        await _storage.write(key: _tokenKey, value: newToken);
-        return true;
-      }
-      return false;
-    } catch (e) {
-      debugPrint('Error al renovar token: $e');
-      return false;
-    }
+    return masterToken;
   }
 
   static Future<void> clearToken() async {
