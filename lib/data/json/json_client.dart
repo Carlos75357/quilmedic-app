@@ -1,12 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 import 'package:quilmedic/data/config.dart';
 import 'package:quilmedic/exceptions/authentication_exceptions.dart';
 import 'package:quilmedic/services/navigation_service.dart';
 import 'json_rpc.dart';
 
+/// Clase que implementa un cliente para realizar peticiones HTTP utilizando el protocolo JSON-RPC.
+/// Se encarga de gestionar las peticiones HTTP, manejar los encabezados de autenticación
+/// y procesar las respuestas del servidor.
 class JsonClient {
+  /// Realiza una llamada HTTP al endpoint especificado con los datos de la petición JSON-RPC.
+  /// Selecciona automáticamente el método HTTP adecuado según el tipo de operación.
+  /// @param endpoint Ruta del endpoint de la API
+  /// @param jsonRequest Objeto con los datos de la petición JSON-RPC
+  /// @return Respuesta procesada de la API
   Future<dynamic> call(String endpoint, JsonRequest jsonRequest) async {
     try {
       final headers = await _getHeaders();
@@ -77,6 +84,8 @@ class JsonClient {
     }
   }
 
+  /// Obtiene los encabezados HTTP necesarios para la petición, incluyendo el token de autenticación.
+  /// @return Mapa con los encabezados HTTP
   Future<Map<String, String>> _getHeaders() async {
     final token = await ApiConfig.getToken();
     return {
@@ -86,24 +95,24 @@ class JsonClient {
     };
   }
 
+  /// Procesa la respuesta HTTP y maneja los posibles errores.
+  /// Si la respuesta es exitosa, decodifica el cuerpo de la respuesta.
+  /// Si hay un error de autenticación (401), limpia el token y redirige al login.
+  /// @param response Respuesta HTTP recibida
+  /// @param endpoint Endpoint utilizado en la petición
+  /// @param jsonRequest Petición original enviada
+  /// @return Datos decodificados de la respuesta
   Future<dynamic> _handleResponse(http.Response response, String endpoint, JsonRequest jsonRequest) async {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final String decodedBody = utf8.decode(response.bodyBytes);
       final responseData = jsonDecode(decodedBody);
       return responseData;
     } else if (response.statusCode == 401) {
-      debugPrint('Token expirado, intentando renovar...');
-      final bool tokenRenewed = await ApiConfig.renewToken();
+      await ApiConfig.clearToken();
 
-      if (tokenRenewed) {
-        return await call(endpoint, jsonRequest);
-      } else {
-        await ApiConfig.clearToken();
+      NavigationService.navigateToLogin();
 
-        NavigationService.navigateToLogin();
-
-        throw TokenExpiredException('Token expirado y no se pudo renovar');
-      }
+      throw TokenExpiredException('Token expirado y no se pudo renovar');
     } else {
       throw Exception(response.body);
     }
