@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
 
+/// Clase que define los temas y estilos visuales de la aplicación
+/// Proporciona colores, temas claro y oscuro, y estilos para los componentes UI
+
 class AppTheme {
+  /// Color primario de la aplicación
   static final Color primaryColor = Color.fromARGB(255, 6, 179, 202);
+  /// Color secundario de la aplicación
   static final Color secondaryColor = Color.fromARGB(255, 151, 243, 255);
+  /// Color de acento para elementos destacados
   static final Color accentColor = Color.fromARGB(255, 0, 140, 158);
+  /// Color de fondo predeterminado
   static final Color backgroundColor = Colors.white;
+  /// Color para errores y alertas críticas
   static final Color errorColor = Colors.red.shade700;
+  /// Color para mensajes de éxito
   static final Color successColor = Colors.green.shade600;
+  /// Color para advertencias
   static final Color warningColor = Colors.amber.shade700;
+  /// Color principal para textos
   static final Color textPrimaryColor = Colors.black87;
+  /// Color secundario para textos menos importantes
   static final Color textSecondaryColor = Colors.black54;
 
-  // Light Theme
+  /// Tema claro de la aplicación
+  /// Define los estilos para el modo de día
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -92,7 +105,8 @@ class AppTheme {
     scaffoldBackgroundColor: Colors.grey.shade50,
   );
 
-  // Dark Theme
+  /// Tema oscuro de la aplicación
+  /// Define los estilos para el modo nocturno
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
