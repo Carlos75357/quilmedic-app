@@ -4,11 +4,21 @@ import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
 import 'package:quilmedic/utils/services.dart';
 
+/// Pantalla que muestra el detalle completo de un producto
+/// Incluye información sobre descripción, fecha de caducidad, stock y ubicación
 class ProductoDetallePage extends StatefulWidget {
+  /// Producto a mostrar en detalle
   final Producto producto;
+  /// Ubicación actual del producto
   final Location? location;
+  /// Nombre del almacén o hospital donde se encuentra el producto
   final String? almacenName;
 
+  /// Constructor de la página de detalle de producto
+  /// @param key Clave del widget
+  /// @param producto Producto a mostrar en detalle
+  /// @param location Ubicación actual del producto
+  /// @param almacenName Nombre del almacén o hospital
   const ProductoDetallePage({
     super.key,
     required this.producto,
@@ -16,22 +26,35 @@ class ProductoDetallePage extends StatefulWidget {
     required this.almacenName,
   });
 
+  /// Crea el estado mutable para este widget
+  /// @return Una instancia de _ProductoDetallePageState
   @override
   State<ProductoDetallePage> createState() => _ProductoDetallePageState();
 }
 
+/// Estado mutable para la pantalla de detalle de producto
 class _ProductoDetallePageState extends State<ProductoDetallePage> {
+  /// Color para mostrar el estado de la fecha de caducidad
   Color? expiryColor;
+  /// Color para mostrar el estado del stock
   Color? stockColor;
+  /// Indica si se están cargando los datos
   bool isLoading = true;
+  /// Utilidad para gestionar alarmas de productos
   final AlarmUtils _alarmUtils = AlarmUtils();
 
+  /// Inicializa el estado del widget
+  /// Carga los colores para las alarmas de caducidad y stock
   @override
   void initState() {
     super.initState();
     _loadColors();
   }
   
+  /// Obtiene el stock mínimo para un producto específico
+  /// Primero busca alarmas específicas para el producto, luego usa el valor por defecto
+  /// @param productId ID del producto
+  /// @return Stock mínimo o null si no está definido
   Future<int?> _getStockMinimo(int productId) async {
     final hasSpecific = await _alarmUtils.hasSpecificAlarms(productId);
     final locationId = widget.producto.locationid;
@@ -58,6 +81,8 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     return null;
   }
 
+  /// Carga los colores para las alarmas de caducidad y stock
+  /// Utiliza la caché de alarmas para obtener los colores
   Future<void> _loadColors() async {
     try {
       await _alarmUtils.loadAlarmsFromCache();
@@ -94,6 +119,9 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     }
   }
 
+  /// Construye la interfaz de usuario de la pantalla de detalle de producto
+  /// @param context Contexto de construcción
+  /// @return Widget con la estructura completa de la pantalla
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,6 +151,9 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     );
   }
 
+  /// Construye la tarjeta con la información general del producto
+  /// @param context Contexto de construcción
+  /// @return Widget con la tarjeta de información
   Widget _buildInfoCard(BuildContext context) {
     return Card(
       elevation: 2,
@@ -144,6 +175,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     );
   }
 
+  /// Construye la sección de información sobre la fecha de caducidad
+  /// Muestra la fecha con un color de fondo según su estado
+  /// @param context Contexto de construcción
+  /// @return Widget con la información de caducidad
   Widget _buildExpiryInfo(BuildContext context) {
     return Card(
       elevation: 2,
@@ -192,6 +227,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     );
   }
 
+  /// Construye la sección de información sobre el stock
+  /// Muestra el stock actual y el stock mínimo
+  /// @param context Contexto de construcción
+  /// @return Widget con la información de stock
   Widget _buildStockInfo(BuildContext context) {
     return Card(
       elevation: 2,
@@ -246,6 +285,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     );
   }
 
+  /// Construye la sección de información sobre la ubicación
+  /// Muestra el almacén y la ubicación específica del producto
+  /// @param context Contexto de construcción
+  /// @return Widget con la información de ubicación
   Widget _buildLocationInfo(BuildContext context) {
     return Card(
       elevation: 2,
@@ -267,6 +310,11 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     );
   }
 
+  /// Construye una fila de información con etiqueta y valor
+  /// Utilizado para mostrar datos en formato clave-valor
+  /// @param label Etiqueta o nombre del campo
+  /// @param value Valor del campo
+  /// @return Widget con la fila de información
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),

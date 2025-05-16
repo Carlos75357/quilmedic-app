@@ -67,7 +67,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
           );
         } else if (state is AuthError) {
-          // Evitar mostrar mensajes de error duplicados
           if (!state.message.contains('Sesión expirada')) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
