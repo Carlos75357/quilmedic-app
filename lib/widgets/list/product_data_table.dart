@@ -6,14 +6,26 @@ import 'package:quilmedic/utils/alarm_utils.dart';
 import 'package:quilmedic/widgets/list/compact_list.dart';
 import 'package:quilmedic/utils/services.dart';
 
+/// Widget que muestra una tabla de datos de productos con información detallada
+/// Se adapta a diferentes tamaños de pantalla y muestra indicadores visuales
+/// para fechas de caducidad y niveles de stock basados en las alarmas configuradas.
+
 class ProductDataTable extends StatelessWidget {
+  /// Lista de productos a mostrar en la tabla
   final List<Producto> productos;
+  /// Color para el encabezado de la tabla
   final Color headerColor;
+  /// Color para las filas de la tabla
   final Color rowColor;
+  /// Función que se ejecuta cuando se toca un producto en la tabla
   final Function(Producto) onProductTap;
+  /// Función opcional que se ejecuta cuando se presiona el botón de traslado
+  /// Si es null, no se muestra el botón de traslado
   final Function(Producto)? onTransferTap;
+  /// Lista de colores para las alarmas de los productos
   final List<Color> alarmColors;
 
+  /// Constructor del widget ProductDataTable
   const ProductDataTable({
     super.key,
     required this.productos,
@@ -24,6 +36,9 @@ class ProductDataTable extends StatelessWidget {
     required this.alarmColors,
   });
 
+  /// Construye la interfaz de la tabla de datos de productos
+  /// Se adapta automáticamente al tamaño de la pantalla y muestra una vista compacta
+  /// en dispositivos muy pequeños
   @override
   Widget build(BuildContext context) {
     final alarmUtils = AlarmUtils();

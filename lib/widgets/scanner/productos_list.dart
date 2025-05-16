@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 
+/// Widget que muestra una lista de productos escaneados
+/// Permite eliminar productos mediante deslizamiento o botón de eliminación
+/// y ofrece la opción de deshacer la eliminación
+
 class ProductosList extends StatefulWidget {
+  /// Lista de productos escaneados para mostrar
   final List<ProductoEscaneado> productos;
+  /// Función que se ejecuta cuando se elimina un producto
   final Function(ProductoEscaneado) onRemove;
+  /// Función que se ejecuta cuando se deshace la eliminación de un producto
+  /// Recibe el producto y su posición original en la lista
   final Function(ProductoEscaneado, int) onUndoRemove;
 
+  /// Constructor del widget ProductosList
+  /// @param productos Lista de productos escaneados
+  /// @param onRemove Función que se ejecuta al eliminar un producto
+  /// @param onUndoRemove Función que se ejecuta al deshacer la eliminación
   const ProductosList({
     super.key,
     required this.productos,
@@ -13,11 +25,15 @@ class ProductosList extends StatefulWidget {
     required this.onUndoRemove,
   });
 
+  /// Crea el estado mutable para este widget
   @override
   State<ProductosList> createState() => _ProductosListState();
 }
 
+/// Estado interno del widget ProductosList
 class _ProductosListState extends State<ProductosList> {
+  /// Construye la interfaz de la lista de productos
+  /// Adapta el tamaño de los elementos según el tamaño de la pantalla
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 360;

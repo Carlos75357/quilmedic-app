@@ -7,16 +7,29 @@ import 'package:quilmedic/ui/product/producto_detalle_page.dart';
 import 'package:quilmedic/widgets/list/empty_products_message.dart';
 import 'package:quilmedic/widgets/list/product_list_section.dart';
 
+/// Widget que muestra el contenido principal de la lista de productos,
+/// organizando los productos por almacén y proporcionando opciones
+/// para ver detalles y trasladar productos entre hospitales.
+
 class ProductListContent extends StatelessWidget {
+  /// Lista completa de productos a mostrar
   final List<Producto> productos;
+  /// ID del hospital actual
   final int hospitalId;
+  /// ID de la ubicación actual (puede ser null)
   final int? locationId;
+  /// Nombre del almacén actual para mostrar en el encabezado
   final String almacenName;
+  /// Información completa de la ubicación (puede ser null)
   final Location? location;
+  /// Lista predefinida de productos (opcional)
   final List<Producto>? predefinedProductos;
+  /// Colores para las alarmas visuales de productos
   final List<Color> alarmColors;
+  /// Función que se ejecuta cuando un producto es actualizado
   final Function() onProductUpdated;
 
+  /// Constructor del widget ProductListContent
   const ProductListContent({
     super.key,
     required this.productos,
@@ -29,6 +42,8 @@ class ProductListContent extends StatelessWidget {
     required this.onProductUpdated,
   });
 
+  /// Construye la interfaz principal de la lista de productos
+  /// Si no hay productos, muestra un mensaje de lista vacía
   @override
   Widget build(BuildContext context) {
     if (productos.isEmpty) {
@@ -38,6 +53,9 @@ class ProductListContent extends StatelessWidget {
     return _buildProductosLayout(context);
   }
 
+  /// Construye el diseño principal de la lista de productos
+  /// Separa los productos entre el almacén actual y otros almacenes
+  /// y los muestra en secciones distintas con estilos diferentes
   Widget _buildProductosLayout(BuildContext context) {
     final List<Producto> productosAlmacenActual = [];
     final List<Producto> productosOtrosAlmacenes = [];
@@ -204,6 +222,8 @@ class ProductListContent extends StatelessWidget {
     );
   }
 
+  /// Navega a la página de detalle del producto seleccionado
+  /// y maneja la actualización de la lista si el producto fue modificado
   Future<void> _navegarADetalle(BuildContext context, Producto producto) async {
     final result = await Navigator.push(
       context,
@@ -230,6 +250,8 @@ class ProductListContent extends StatelessWidget {
     }
   }
 
+  /// Inicia el proceso de carga de hospitales para mostrar
+  /// el diálogo de traslado de productos
   void _cargarHospitalesYMostrarDialogo(BuildContext context) {
     // Esta función ahora se maneja en la página principal
     Provider.of<ListaProductosBloc>(context, listen: false)

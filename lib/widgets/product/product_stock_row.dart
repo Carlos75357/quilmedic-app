@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 
+/// Widget que muestra la información de stock de un producto
+/// Presenta el nivel de stock actual con un formato visual destacado
+/// para facilitar su visualización en la pantalla de detalle
+
 class ProductStockRow extends StatelessWidget {
+  /// Cantidad actual en stock del producto
   final int stock;
 
+  /// Constructor del widget ProductStockRow
   const ProductStockRow({
     super.key,
     required this.stock,
   });
 
+  /// Construye la interfaz de la fila de stock
+  /// Muestra un icono de inventario y el valor numérico del stock
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

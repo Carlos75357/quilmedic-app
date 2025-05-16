@@ -3,12 +3,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/ui/scanner/escaner_bloc.dart';
 
+/// Widget que permite seleccionar una ubicación de una lista desplegable
+/// Muestra un menú desplegable con las ubicaciones disponibles y maneja
+/// la selección y actualización del valor seleccionado
+
 class SelectorLocations extends StatefulWidget {
+  /// Lista de ubicaciones disponibles para seleccionar
   final List<Location> locations;
+  /// Ubicación seleccionada actualmente (puede ser null)
   final Location? selectedLocation;
+  /// Función que se ejecuta cuando se selecciona una ubicación
   final Function(Location) onOptionsSelected;
+  /// Indica si el selector está habilitado para interacción del usuario
   final bool enabled;
   
+  /// Constructor del widget SelectorLocations
+  /// @param locations Lista de ubicaciones disponibles
+  /// @param selectedLocation Ubicación seleccionada inicialmente
+  /// @param onOptionsSelected Función que se ejecuta al seleccionar una ubicación
+  /// @param enabled Indica si el selector está habilitado (por defecto es true)
   const SelectorLocations({
     super.key,
     required this.locations,
@@ -16,14 +29,21 @@ class SelectorLocations extends StatefulWidget {
     required this.onOptionsSelected,
     this.enabled = true,
   });
+  /// Crea el estado mutable para este widget
   @override
   State<SelectorLocations> createState() => _SelectorLocationsState();
 }
 
+/// Estado interno del widget SelectorLocations
+/// Maneja la lógica de selección y los controladores de texto
 class _SelectorLocationsState extends State<SelectorLocations> {
+  /// Controlador para el campo de texto del selector de ubicaciones
   late TextEditingController _locationsController;
+  /// Ubicación seleccionada actualmente en el estado interno
   Location? _selectedLocation;
 
+  /// Inicializa el estado del widget
+  /// Configura el controlador de texto y el valor inicial seleccionado
   @override
   void initState() {
     super.initState();
@@ -35,6 +55,9 @@ class _SelectorLocationsState extends State<SelectorLocations> {
     }
   }
 
+  /// Se llama cuando el widget padre se reconstruye
+  /// Actualiza la ubicación seleccionada cuando cambian las propiedades
+  /// Maneja cambios en la lista de ubicaciones disponibles
   @override
   void didUpdateWidget(SelectorLocations oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -68,12 +91,17 @@ class _SelectorLocationsState extends State<SelectorLocations> {
     });
   }
 
+  /// Libera recursos cuando el widget se elimina
+  /// Limpia el controlador de texto
   @override
   void dispose() {
     _locationsController.dispose();
     super.dispose();
   }
 
+  /// Construye la interfaz del selector de ubicaciones
+  /// Muestra un menú desplegable con las ubicaciones disponibles
+  /// Filtra ubicaciones duplicadas por ID para mostrar solo valores únicos
   @override
   Widget build(BuildContext context) {
     final List<Location> uniqueLocations = [];

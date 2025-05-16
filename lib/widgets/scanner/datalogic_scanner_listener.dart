@@ -2,39 +2,63 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 
+/// Widget que escucha eventos de teclado para detectar escaneos de códigos de barras
+/// provenientes de un escáner Datalogic. Captura las pulsaciones de teclas,
+/// las procesa y notifica cuando se ha completado un escaneo.
+
 class DatalogicScannerListener extends StatefulWidget {
+  /// Widget hijo que será envuelto por el listener del escáner
   final Widget child;
+  /// Función que se ejecuta cuando se detecta un código de barras escaneado
+  /// Recibe el código escaneado como parámetro
   final Function(String) onBarcodeScanned;
 
+  /// Constructor del widget DatalogicScannerListener
+  /// @param child Widget hijo que será envuelto por el listener
+  /// @param onBarcodeScanned Función que se ejecuta cuando se detecta un código
   const DatalogicScannerListener({
     super.key,
     required this.child,
     required this.onBarcodeScanned,
   });
 
+  /// Crea el estado mutable para este widget
   @override
   State<DatalogicScannerListener> createState() => _DatalogicScannerListenerState();
 }
 
+/// Estado interno del widget DatalogicScannerListener
+/// Maneja la lógica de captura y procesamiento de eventos de teclado
 class _DatalogicScannerListenerState extends State<DatalogicScannerListener> {
+  /// Nodo de enfoque para capturar eventos de teclado
   final FocusNode _focusNode = FocusNode();
+  /// Caracteres acumulados durante el proceso de escaneo
   String _scannedChars = '';
+  /// Marca de tiempo de la última pulsación de tecla detectada
   DateTime _lastScanTime = DateTime.now();
+  /// Temporizador para gestionar el enfoque del escáner
   Timer? _focusTimer;
 
+  /// Tiempo máximo en milisegundos entre pulsaciones de tecla para considerarlas parte del mismo escaneo
   final int _scanTimeout = 100;
 
+  /// Inicializa el estado del widget
+  /// Solicita el enfoque para capturar eventos de teclado
   @override
   void initState() {
     super.initState();
     _focusNode.requestFocus();
   }
 
+  /// Reinicia el estado del escáner
+  /// Limpia los caracteres acumulados y actualiza la marca de tiempo
   void _resetScanner() {
     _scannedChars = '';
     _lastScanTime = DateTime.now();
   }
 
+  /// Libera recursos cuando el widget se elimina
+  /// Cancela temporizadores y libera el nodo de enfoque
   @override
   void dispose() {
     _focusTimer?.cancel();
@@ -42,6 +66,8 @@ class _DatalogicScannerListenerState extends State<DatalogicScannerListener> {
     super.dispose();
   }
 
+  /// Construye el widget KeyboardListener que captura eventos de teclado
+  /// y procesa las pulsaciones para detectar códigos de barras
   @override
   Widget build(BuildContext context) {
     return KeyboardListener(
@@ -94,9 +120,13 @@ class _DatalogicScannerListenerState extends State<DatalogicScannerListener> {
     );
   }
 
+  /// Busca campos de texto en el árbol de widgets que puedan contener un código escaneado
+  /// y luego intenta encontrar y activar el botón de añadir
   void _findTextFieldAndSubmit(BuildContext context) {
     String? foundCode;
 
+    /// Función recursiva que busca widgets EditableText en el árbol de elementos
+    /// y extrae el texto si cumple con los criterios de un código de barras
     void findTextFields(Element element) {
       if (element.widget is EditableText) {
         final EditableText textField = element.widget as EditableText;
@@ -120,9 +150,13 @@ class _DatalogicScannerListenerState extends State<DatalogicScannerListener> {
     }
   }
 
+  /// Busca un botón "Añadir" en el árbol de widgets y lo activa
+  /// @param scannedCode Código escaneado que se procesará al pulsar el botón
   void _findAddButton(BuildContext context, String? scannedCode) {
     bool buttonFound = false;
 
+    /// Función recursiva que busca un botón ElevatedButton con el texto "Añadir"
+    /// y lo activa cuando lo encuentra
     void findButton(Element element) {
       if (buttonFound) return;
 

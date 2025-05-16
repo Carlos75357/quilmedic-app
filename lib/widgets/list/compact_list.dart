@@ -5,12 +5,22 @@ import 'package:quilmedic/utils/services.dart';
 import 'package:quilmedic/widgets/list/product_expiry_badge.dart';
 import 'package:quilmedic/widgets/list/product_stock_badge.dart';
 
+/// Widget que muestra una lista compacta de productos con información resumida
+/// Incluye detalles como código, fecha de caducidad y nivel de stock
+/// con indicadores visuales de color basados en las alarmas configuradas.
+
 class CompactList extends StatelessWidget {
+  /// Lista de productos a mostrar en la lista
   final List<Producto> productos;
+  /// Función que se ejecuta cuando se toca un producto en la lista
   final Function(Producto) onProductTap;
+  /// Función opcional que se ejecuta cuando se presiona el botón de traslado
+  /// Si es null, no se muestra el botón de traslado
   final Function(Producto)? onTransferTap;
+  /// Lista de colores para las alarmas de los productos
   final List<Color> alarmColors;
 
+  /// Constructor del widget CompactList
   const CompactList({
     super.key,
     required this.productos,
@@ -19,6 +29,7 @@ class CompactList extends StatelessWidget {
     required this.alarmColors,
   });
 
+  /// Construye la interfaz de la lista compacta de productos
   @override
   Widget build(BuildContext context) {
     final alarmUtils = AlarmUtils();

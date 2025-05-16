@@ -1,28 +1,51 @@
 import 'package:flutter/material.dart';
 
+/// Widget que permite la entrada manual de códigos de barras
+/// También detecta automáticamente cuando se utiliza un escáner de códigos
+/// de barras físico, procesando la entrada rápida como un escaneo
+
 class ManualCodeInput extends StatefulWidget {
+  /// Función que se ejecuta cuando se envía un código
+  /// Recibe el código como parámetro
   final Function(String) onCodeSubmitted;
+  /// Función que se ejecuta cuando se cierra el campo de entrada
   final VoidCallback onClose;
 
+  /// Constructor del widget ManualCodeInput
+  /// @param onCodeSubmitted Función que se ejecuta al enviar un código
+  /// @param onClose Función que se ejecuta al cerrar el campo de entrada
   const ManualCodeInput({
     super.key,
     required this.onCodeSubmitted,
     required this.onClose,
   });
 
+  /// Crea el estado mutable para este widget
   @override
   State<ManualCodeInput> createState() => _ManualCodeInputState();
 }
 
+/// Estado interno del widget ManualCodeInput
+/// Maneja la lógica de entrada de códigos y detección de escaneo
 class _ManualCodeInputState extends State<ManualCodeInput> {
+  /// Controlador para el campo de texto de entrada de códigos
   final TextEditingController _controller = TextEditingController();
+  /// Clave para acceder y validar el formulario
   final _formKey = GlobalKey<FormState>();
+  /// Nodo de enfoque para el campo de texto
   final FocusNode _textFieldFocusNode = FocusNode();
 
+  /// Marca de tiempo de la última entrada de texto
+  /// Utilizado para detectar si la entrada es de un escáner
   DateTime _lastInputTime = DateTime.now();
+  /// Indica si actualmente se está procesando un código de barras
   bool _processingBarcode = false;
+  /// Longitud del texto en la última comprobación
+  /// Utilizado para detectar cambios rápidos en la entrada
   int _lastTextLength = 0;
 
+  /// Inicializa el estado del widget
+  /// Configura el enfoque inicial y los listeners
   @override
   void initState() {
     super.initState();
@@ -31,8 +54,12 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
     _controller.addListener(_checkForScannerInput);
   }
 
+  /// Último código escaneado
+  /// Almacena temporalmente el código para verificar si cambia
   String _lastScannedCode = '';
 
+  /// Detecta si la entrada de texto proviene de un escáner de códigos de barras
+  /// Analiza la velocidad y patrón de entrada para determinar si es un escaneo
   void _checkForScannerInput() {
     if (_processingBarcode) return;
 
@@ -71,6 +98,8 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
     }
   }
 
+  /// Libera recursos cuando el widget se elimina
+  /// Elimina listeners y controladores
   @override
   void dispose() {
     _controller.removeListener(_checkForScannerInput);
@@ -79,6 +108,8 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
     super.dispose();
   }
 
+  /// Procesa y envía el código ingresado
+  /// Valida el formulario, envía el código y limpia el campo
   void _submitCode() {
     if (_formKey.currentState!.validate()) {
       final code = _controller.text.trim();
@@ -88,6 +119,8 @@ class _ManualCodeInputState extends State<ManualCodeInput> {
     }
   }
 
+  /// Construye la interfaz del campo de entrada manual
+  /// Muestra un campo de texto con un botón para enviar el código
   @override
   Widget build(BuildContext context) {
     return Container(

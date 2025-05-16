@@ -5,7 +5,15 @@ import 'package:quilmedic/domain/producto.dart';
 import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 import 'package:quilmedic/widgets/list/product_traslado_popup.dart';
 
+/// Clase utilitaria que maneja el flujo de traslado de productos entre hospitales.
+/// Proporciona métodos para mostrar diálogos, confirmar traslados y procesar
+/// las solicitudes de traslado de productos.
+
 class ProductTrasladoHandler {
+  /// Muestra un diálogo de carga mientras se obtienen los hospitales disponibles
+  /// para el traslado de productos. Inicia la carga de hospitales a través del BLoC.
+  /// 
+  /// @param context Contexto de la aplicación para mostrar el diálogo y acceder al BLoC
   static Future<void> mostrarDialogoCargaHospitales(
     BuildContext context,
   ) async {
@@ -41,6 +49,13 @@ class ProductTrasladoHandler {
     }
   }
 
+  /// Muestra el diálogo principal de traslado de productos que permite al usuario
+  /// seleccionar el hospital destino y los productos a trasladar.
+  /// 
+  /// @param context Contexto de la aplicación para mostrar el diálogo
+  /// @param hospitales Lista de hospitales disponibles como destino
+  /// @param productos Lista de productos que pueden ser trasladados
+  /// @param hospitalIdOrigen ID del hospital de origen (no aparecerá como destino)
   static void mostrarDialogoConfirmacionTraslado(
     BuildContext context,
     List<Hospital> hospitales,
@@ -72,6 +87,15 @@ class ProductTrasladoHandler {
     );
   }
 
+  /// Procesa la solicitud de traslado de productos y maneja las respuestas del servidor.
+  /// Configura listeners para detectar cuando la solicitud ha sido completada o ha fallado,
+  /// y muestra notificaciones apropiadas al usuario.
+  /// 
+  /// @param context Contexto de la aplicación para mostrar notificaciones
+  /// @param hospitalIdDestino ID del hospital destino seleccionado
+  /// @param hospitalNombreDestino Nombre del hospital destino para mostrar en notificaciones
+  /// @param email Correo electrónico para notificaciones de traslado
+  /// @param selectedProducts Lista de productos seleccionados para trasladar
   static void realizarTrasladoMasivo(
     BuildContext context,
     int hospitalIdDestino,

@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 
+/// Widget que muestra un mensaje cuando no se encuentran productos
+/// Presenta una interfaz informativa con detalles sobre los códigos de barras
+/// que no pudieron ser encontrados en el sistema.
+
 class EmptyProductsMessage extends StatelessWidget {
+  /// Lista opcional de números de serie que no fueron encontrados
+  /// Si se proporciona, se mostrarán en una lista dentro del mensaje
   final List<String>? notFoundSerials;
   
+  /// Constructor del widget EmptyProductsMessage
   const EmptyProductsMessage({super.key, this.notFoundSerials});
 
+  /// Construye la interfaz del mensaje de productos no encontrados
+  /// con un diseño de tarjeta y detalles sobre los códigos no encontrados
   @override
   Widget build(BuildContext context) {
     return Container(

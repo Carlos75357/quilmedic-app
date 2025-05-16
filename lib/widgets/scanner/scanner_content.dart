@@ -10,25 +10,46 @@ import 'package:quilmedic/widgets/scanner/productos_list.dart';
 import 'package:quilmedic/widgets/scanner/save_button.dart';
 import 'package:quilmedic/widgets/scanner/selector.dart';
 
+/// Widget principal que muestra el contenido de la pantalla de escaneo
+/// Organiza los diferentes componentes de la interfaz como el selector de hospital,
+/// entrada manual de códigos, lista de productos escaneados y botón de guardar
+
 class ScannerContent extends StatelessWidget {
+  /// Estado actual del BLoC de escaneo
   final EscanerState state;
+  /// Lista de hospitales disponibles para seleccionar
   final List<Hospital> hospitales;
+  /// Lista de ubicaciones disponibles para seleccionar
   final List<Location> locations;
+  /// Lista de productos que han sido escaneados
   final List<ProductoEscaneado> productos;
+  /// Hospital seleccionado actualmente (puede ser null)
   final Hospital? selectedHospital;
+  /// Ubicación seleccionada actualmente (puede ser null)
   final Location? selectedLocation;
+  /// Indica si el modo de entrada manual está activo
   final bool isManualInput;
+  /// Indica si hay conexión a Internet disponible
   final bool hayConexion;
   
+  /// Función que se ejecuta cuando se selecciona un hospital
   final Function(Hospital) onHospitalSelected;
+  /// Función que se ejecuta cuando se selecciona una ubicación
   final Function(Location) onLocationSelected;
+  /// Función que se ejecuta para activar/desactivar el modo de entrada manual
   final Function() onToggleManualInput;
+  /// Función que se ejecuta cuando se envía un código manual
   final Function(String, BuildContext) onManualCodeSubmitted;
+  /// Función que se ejecuta para cerrar el modo de entrada manual
   final Function() onCloseManualInput;
+  /// Función que se ejecuta para eliminar un producto de la lista
   final Function(ProductoEscaneado) onRemoveProduct;
+  /// Función que se ejecuta para deshacer la eliminación de un producto
   final Function(ProductoEscaneado, int) onUndoRemoveProduct;
+  /// Función que se ejecuta para guardar todos los productos escaneados
   final Function() onSaveProducts;
 
+  /// Constructor del widget ScannerContent
   const ScannerContent({
     super.key,
     required this.state,
@@ -49,6 +70,8 @@ class ScannerContent extends StatelessWidget {
     required this.onSaveProducts,
   });
 
+  /// Construye la interfaz principal de la pantalla de escaneo
+  /// Organiza los componentes en una columna vertical
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(

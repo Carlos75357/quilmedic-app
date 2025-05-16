@@ -1,21 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/producto_scaneado.dart';
 
+/// Widget que muestra un panel con los últimos productos escaneados
+/// Presenta una lista desplazable con los códigos de barras recientemente
+/// escaneados y permite cerrar el panel
+
 class RecentScannedProductsPanel extends StatefulWidget {
+  /// Lista de productos escaneados recientemente a mostrar
   final List<ProductoEscaneado> productos;
+  /// Función que se ejecuta cuando se cierra el panel
   final VoidCallback onClose;
 
+  /// Constructor del widget RecentScannedProductsPanel
+  /// @param productos Lista de productos escaneados recientemente
+  /// @param onClose Función que se ejecuta al cerrar el panel
   const RecentScannedProductsPanel({
     super.key,
     required this.productos,
     required this.onClose,
   });
 
+  /// Crea el estado mutable para este widget
   @override
   State<RecentScannedProductsPanel> createState() => _RecentScannedProductsPanelState();
 }
 
+/// Estado interno del widget RecentScannedProductsPanel
 class _RecentScannedProductsPanelState extends State<RecentScannedProductsPanel> {
+  /// Construye la interfaz del panel de productos escaneados recientemente
+  /// Muestra un encabezado con título y botón de cierre, seguido de una
+  /// lista desplazable con los códigos de barras
   @override
   Widget build(BuildContext context) {
     return Card(

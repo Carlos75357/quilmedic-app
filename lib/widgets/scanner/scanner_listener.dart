@@ -4,13 +4,30 @@ import 'package:quilmedic/domain/producto_scaneado.dart';
 import 'package:quilmedic/ui/list/lista_productos_page.dart';
 import 'package:quilmedic/ui/scanner/escaner_bloc.dart';
 
+/// Widget que escucha los cambios de estado del BLoC del escáner
+/// y ejecuta acciones en respuesta a esos cambios, como mostrar
+/// mensajes, actualizar listas de productos o navegar a otras pantallas.
+
 class ScannerListener extends StatelessWidget {
+  /// Widget hijo que será envuelto por el listener
   final Widget child;
+  /// Función para reiniciar las selecciones (hospital y ubicación)
   final Function() resetSelections;
+  /// Función que se ejecuta cuando la lista de productos es actualizada
+  /// Recibe la lista actualizada de productos escaneados
   final Function(List<ProductoEscaneado>) onProductosUpdated;
+  /// Función que se ejecuta cuando cambia el estado de productos pendientes
+  /// Recibe un booleano que indica si hay productos pendientes
   final Function(bool) onPendingProductsChanged;
+  /// Función opcional que se ejecuta cuando las selecciones son reiniciadas
   final Function()? onSelectionsReset;
 
+  /// Constructor del widget ScannerListener
+  /// @param child Widget hijo que será envuelto por el listener
+  /// @param resetSelections Función para reiniciar las selecciones
+  /// @param onProductosUpdated Función para actualizar la lista de productos
+  /// @param onPendingProductsChanged Función para manejar cambios en productos pendientes
+  /// @param onSelectionsReset Función opcional para cuando se reinician las selecciones
   const ScannerListener({
     super.key,
     required this.child,
@@ -20,9 +37,13 @@ class ScannerListener extends StatelessWidget {
     this.onSelectionsReset,
   });
 
+  /// Construye un BlocListener que escucha los cambios de estado del EscanerBloc
+  /// y ejecuta acciones en respuesta a esos cambios
   @override
   Widget build(BuildContext context) {
     return BlocListener<EscanerBloc, EscanerState>(
+      /// Función que se ejecuta cuando cambia el estado del EscanerBloc
+      /// Maneja diferentes estados y ejecuta acciones correspondientes
       listener: (context, state) {
         if (state is EscanerError) {
           ScaffoldMessenger.of(context).showSnackBar(

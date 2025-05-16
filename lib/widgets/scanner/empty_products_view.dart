@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// Widget que muestra un mensaje cuando no hay productos escaneados
+/// Presenta un icono y texto informativo para indicar al usuario
+/// que debe escanear productos
+
 class EmptyProductsView extends StatelessWidget {
+  /// Constructor del widget EmptyProductsView
   const EmptyProductsView({super.key});
 
+  /// Construye la interfaz del mensaje de lista vacía
+  /// Muestra un icono de escáner y mensajes informativos
   @override
   Widget build(BuildContext context) {
     return SizedBox(

@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:quilmedic/domain/hospital.dart';
 import 'package:quilmedic/domain/producto.dart';
 
+/// Clase utilitaria que proporciona diálogos para el proceso de traslado de productos
+/// Contiene métodos estáticos para mostrar diferentes diálogos relacionados con
+/// la selección de hospital destino, confirmación y envío de solicitudes por email
+
 class ProductTransferDialogs {
+  /// Muestra un diálogo para seleccionar el hospital destino del traslado
+  /// 
+  /// @param context Contexto de la aplicación para mostrar el diálogo
+  /// @param hospitales Lista de hospitales disponibles como destino
+  /// @param onHospitalSelected Función que se ejecuta cuando se selecciona un hospital
+  /// @param onCancel Función que se ejecuta cuando se cancela la operación
   static void showHospitalSelectionDialog({
     required BuildContext context,
     required List<Hospital> hospitales,
@@ -52,6 +62,12 @@ class ProductTransferDialogs {
     );
   }
 
+  /// Muestra un diálogo de confirmación para el traslado de productos
+  /// 
+  /// @param context Contexto de la aplicación para mostrar el diálogo
+  /// @param mensaje Mensaje de confirmación a mostrar
+  /// @param onConfirm Función que se ejecuta cuando se confirma la operación
+  /// @param onCancel Función que se ejecuta cuando se cancela la operación
   static void showConfirmationDialog({
     required BuildContext context,
     required String mensaje,
@@ -83,6 +99,14 @@ class ProductTransferDialogs {
     );
   }
   
+  /// Muestra un diálogo para solicitar el traslado de un producto por email
+  /// Permite seleccionar el hospital destino y añadir comentarios opcionales
+  /// 
+  /// @param context Contexto de la aplicación para mostrar el diálogo
+  /// @param producto Producto que se desea trasladar
+  /// @param hospitales Lista de hospitales disponibles como destino
+  /// @param onSendEmail Función que se ejecuta cuando se envía la solicitud
+  /// @param onCancel Función que se ejecuta cuando se cancela la operación
   static void showEmailTransferDialog({
     required BuildContext context,
     required Producto producto,

@@ -3,11 +3,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quilmedic/ui/scanner/escaner_bloc.dart';
 import 'package:quilmedic/utils/alarm_utils.dart';
 
+/// Barra de aplicación personalizada para la pantalla del escáner
+/// Muestra el título de la pantalla y botones de acción para sincronizar
+/// productos pendientes y recargar datos
+
 class ScannerAppBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Indica si hay productos pendientes de sincronizar
+  /// Si es true, se muestra el botón de sincronización
   final bool hayProductosPendientes;
 
+  /// Constructor del widget ScannerAppBar
+  /// @param hayProductosPendientes Indica si hay productos pendientes de sincronizar
   const ScannerAppBar({super.key, required this.hayProductosPendientes});
 
+  /// Construye la interfaz de la barra de aplicación
+  /// Muestra el título y botones de acción según el estado
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -55,6 +65,8 @@ class ScannerAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  /// Define el tamaño preferido para la barra de aplicación
+  /// Implementación requerida por la interfaz PreferredSizeWidget
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

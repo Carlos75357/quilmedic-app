@@ -5,14 +5,31 @@ import 'package:quilmedic/domain/location.dart';
 import 'package:quilmedic/ui/scanner/escaner_bloc.dart';
 import 'package:quilmedic/widgets/scanner/selector_locations.dart';
 
+/// Widget que permite seleccionar un hospital y una ubicación
+/// Muestra dos selectores desplegables para elegir el almacén (hospital)
+/// y la ubicación donde se realizará el escaneo de productos
+
 class Selector extends StatefulWidget {
+  /// Lista de hospitales disponibles para seleccionar
   final List<Hospital> hospitales;
+  /// Lista de ubicaciones disponibles para seleccionar
   final List<Location> locations;
+  /// Hospital seleccionado actualmente (puede ser null)
   final Hospital? selectedHospital;
+  /// Función que se ejecuta cuando se selecciona un hospital
   final Function(Hospital) onOptionsSelected;
+  /// Ubicación seleccionada actualmente (puede ser null)
   final Location? selectedLocation;
+  /// Función que se ejecuta cuando se selecciona una ubicación
   final Function(Location) onLocationSelected;
 
+  /// Constructor del widget Selector
+  /// @param hospitales Lista de hospitales disponibles
+  /// @param locations Lista de ubicaciones disponibles
+  /// @param selectedHospital Hospital seleccionado inicialmente
+  /// @param onOptionsSelected Función que se ejecuta al seleccionar un hospital
+  /// @param selectedLocation Ubicación seleccionada inicialmente
+  /// @param onLocationSelected Función que se ejecuta al seleccionar una ubicación
   const Selector({
     super.key,
     required this.hospitales,
@@ -23,16 +40,25 @@ class Selector extends StatefulWidget {
     required this.onLocationSelected,
   });
 
+  /// Crea el estado mutable para este widget
   @override
   State<Selector> createState() => _SelectorState();
 }
 
+/// Estado interno del widget Selector
+/// Maneja la lógica de selección y los controladores de texto
 class _SelectorState extends State<Selector> {
+  /// Controlador para el campo de texto del selector de hospitales
   late TextEditingController _hospitalesController;
+  /// Hospital seleccionado actualmente en el estado interno
   Hospital? _selectedHospital;
+  /// Ubicación seleccionada actualmente en el estado interno
   Location? _selectedLocation;
+  /// Controlador para el campo de texto del selector de ubicaciones
   final TextEditingController _locationsController = TextEditingController();
 
+  /// Inicializa el estado del widget
+  /// Configura los controladores y valores iniciales
   @override
   void initState() {
     super.initState();
@@ -44,6 +70,8 @@ class _SelectorState extends State<Selector> {
     }
   }
 
+  /// Se llama cuando el widget padre se reconstruye
+  /// Actualiza los valores seleccionados cuando cambian las propiedades
   @override
   void didUpdateWidget(Selector oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -63,6 +91,8 @@ class _SelectorState extends State<Selector> {
     }
   }
 
+  /// Libera recursos cuando el widget se elimina
+  /// Limpia los controladores de texto y referencias
   @override
   void dispose() {
     _hospitalesController.dispose();
@@ -72,7 +102,10 @@ class _SelectorState extends State<Selector> {
     super.dispose();
   }
 
-  // Widget para construir el encabezado de cada selector
+  /// Widget para construir el encabezado de cada selector
+  /// @param icon Icono a mostrar en el encabezado
+  /// @param title Título del selector
+  /// @param theme Tema actual de la aplicación
   Widget _buildSelectorHeader({
     required IconData icon,
     required String title,
@@ -97,6 +130,8 @@ class _SelectorState extends State<Selector> {
     );
   }
 
+  /// Construye la interfaz del selector
+  /// Muestra los selectores de hospital y ubicación
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
