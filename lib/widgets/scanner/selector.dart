@@ -84,11 +84,11 @@ class _SelectorState extends State<Selector> {
       _hospitalesController.clear();
     }
 
-    if (_selectedLocation != null) {
-      _locationsController.text = _selectedLocation!.name;
-    } else {
-      _locationsController.clear();
-    }
+    // if (_selectedLocation != null) {
+    //   _locationsController.text = _selectedLocation!.name;
+    // } else {
+    //   _locationsController.clear();
+    // }
   }
 
   /// Libera recursos cuando el widget se elimina

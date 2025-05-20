@@ -21,7 +21,7 @@ class ListaProductosPage extends StatefulWidget {
   /// ID del hospital actual
   final int hospitalId;
   /// ID de la ubicación actual
-  final int? locationId;
+  final int locationId;
   /// Nombre del almacén o hospital
   final String almacenName;
 
@@ -90,7 +90,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
               alignment: Alignment.center,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: const Icon(Icons.warning_amber_outlined),
                   tooltip: 'Ver números de serie',
                   onPressed: () {
                     showDialog(
@@ -206,7 +206,7 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
                                 almacenName: widget.almacenName,
                                 location: widget.location,
                                 predefinedProductos: widget.productos,
-                                alarmColors: const [], // Añadiendo lista vacía para alarmColors
+                                alarmColors: const [],
                                 onProductUpdated: () {
                                   if (mounted) {
                                     Navigator.pushReplacement(

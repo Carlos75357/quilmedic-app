@@ -36,7 +36,7 @@ class ProductTrasladoHandler {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al cargar hospitales: ${e.toString()}'),
+            content: Text('Error al cargar hospitales'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -111,7 +111,6 @@ class ProductTrasladoHandler {
       final currentState = bloc.state;
 
       if (currentState is SolicitudTrasladoEnviadaState) {
-        // Navigator.of(context).pop();
         Future.delayed(const Duration(seconds: 3), () {
           if (context.mounted) {
             Navigator.of(

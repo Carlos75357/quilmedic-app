@@ -62,9 +62,23 @@ class _SelectorLocationsState extends State<SelectorLocations> {
   void didUpdateWidget(SelectorLocations oldWidget) {
     super.didUpdateWidget(oldWidget);
     
+    // Si hay una ubicación seleccionada actualmente, la preservamos
+    if (_selectedLocation != null) {
+      // Solo actualizamos si el widget.selectedLocation ha cambiado explícitamente
+      if (widget.selectedLocation != null && 
+          widget.selectedLocation!.id != _selectedLocation!.id) {
+        setState(() {
+          _selectedLocation = widget.selectedLocation;
+          _locationsController.text = _selectedLocation!.name;
+        });
+      }
+      return;
+    }
+    
+    // Si no hay ubicación seleccionada, seguimos la lógica normal
     bool locationsChanged = oldWidget.locations != widget.locations;
     
-    if (locationsChanged) {
+    if (locationsChanged && widget.selectedLocation == null) {
       setState(() {
         _selectedLocation = null;
         _locationsController.clear();
@@ -81,7 +95,8 @@ class _SelectorLocationsState extends State<SelectorLocations> {
         
         if (locationExistsInList) {
           _locationsController.text = _selectedLocation!.name;
-        } else {
+        } else if (widget.locations.isNotEmpty) {
+          // En lugar de restablecer a null, mantenemos la ubicación si existe en la lista
           _selectedLocation = null;
           _locationsController.clear();
         }

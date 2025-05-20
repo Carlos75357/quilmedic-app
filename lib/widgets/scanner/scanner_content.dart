@@ -147,7 +147,7 @@ class ScannerContent extends StatelessWidget {
           ),
 
           if (state is! EscanerLoading) ...[
-            if (selectedHospital != null)
+            if (selectedHospital != null && selectedLocation != null)
               SaveButton(
                 onPressed: onSaveProducts,
                 hayConexion: hayConexion,

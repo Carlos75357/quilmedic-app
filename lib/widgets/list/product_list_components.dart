@@ -14,18 +14,25 @@ import 'package:quilmedic/widgets/list/product_list_section.dart';
 class ProductListContent extends StatelessWidget {
   /// Lista completa de productos a mostrar
   final List<Producto> productos;
+
   /// ID del hospital actual
   final int hospitalId;
+
   /// ID de la ubicación actual (puede ser null)
-  final int? locationId;
+  final int locationId;
+
   /// Nombre del almacén actual para mostrar en el encabezado
   final String almacenName;
+
   /// Información completa de la ubicación (puede ser null)
   final Location? location;
+
   /// Lista predefinida de productos (opcional)
   final List<Producto>? predefinedProductos;
+
   /// Colores para las alarmas visuales de productos
   final List<Color> alarmColors;
+
   /// Función que se ejecuta cuando un producto es actualizado
   final Function() onProductUpdated;
 
@@ -59,7 +66,7 @@ class ProductListContent extends StatelessWidget {
   Widget _buildProductosLayout(BuildContext context) {
     final List<Producto> productosAlmacenActual = [];
     final List<Producto> productosOtrosAlmacenes = [];
-    
+
     for (var producto in productos) {
       if (locationId != null) {
         if (producto.locationid == locationId) {
@@ -75,6 +82,7 @@ class ProductListContent extends StatelessWidget {
     }
 
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -83,9 +91,7 @@ class ProductListContent extends StatelessWidget {
           stops: const [0.0, 0.3],
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
@@ -94,10 +100,14 @@ class ProductListContent extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Card(
+                      margin: EdgeInsets.zero, 
                       elevation: 3,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.blue.shade200, width: 1),
+                        borderRadius: BorderRadius.circular(0), 
+                        side: BorderSide(
+                          color: Colors.blue.shade200,
+                          width: 1,
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -105,8 +115,7 @@ class ProductListContent extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             ProductListSection(
-                              title:
-                                  'Productos del almacén $almacenName',
+                              title: 'Productos del almacén $almacenName',
                               productos: productosAlmacenActual,
                               headerColor: Colors.blue,
                               rowColor: Colors.grey.shade50,
@@ -114,10 +123,11 @@ class ProductListContent extends StatelessWidget {
                                   (producto) =>
                                       _navegarADetalle(context, producto),
                               alarmColors: alarmColors,
+                              selectedLocationId: locationId,
                             ),
                             const SizedBox(height: 8),
                             Row(
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisSize: MainAxisSize.max,
                               children: [
                                 const Icon(
                                   Icons.touch_app,
@@ -143,9 +153,10 @@ class ProductListContent extends StatelessWidget {
                     if (productosOtrosAlmacenes.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Card(
+                        margin: EdgeInsets.zero, 
                         elevation: 3,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(0), 
                           side: BorderSide(
                             color: Colors.orange.shade200,
                             width: 1,
@@ -164,6 +175,7 @@ class ProductListContent extends StatelessWidget {
                                     (producto) =>
                                         _navegarADetalle(context, producto),
                                 alarmColors: alarmColors,
+                                selectedLocationId: locationId,
                               ),
                               const SizedBox(height: 8),
                               Row(
@@ -218,7 +230,6 @@ class ProductListContent extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 
@@ -253,8 +264,9 @@ class ProductListContent extends StatelessWidget {
   /// Inicia el proceso de carga de hospitales para mostrar
   /// el diálogo de traslado de productos
   void _cargarHospitalesYMostrarDialogo(BuildContext context) {
-    // Esta función ahora se maneja en la página principal
-    Provider.of<ListaProductosBloc>(context, listen: false)
-        .add(CargarHospitalesEvent());
+    Provider.of<ListaProductosBloc>(
+      context,
+      listen: false,
+    ).add(CargarHospitalesEvent());
   }
 }

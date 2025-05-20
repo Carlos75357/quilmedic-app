@@ -122,7 +122,7 @@ class ScannerListener extends StatelessWidget {
                 location: context.read<EscanerBloc>().locationSeleccionada,
                 notFounds: state.productosNotFound,
                 hospitalId: context.read<EscanerBloc>().hospitalSeleccionado?.id ?? 0,
-                locationId: context.read<EscanerBloc>().locationSeleccionada?.id,
+                locationId: context.read<EscanerBloc>().locationSeleccionada?.id ?? 0,
                 almacenName: context.read<EscanerBloc>().hospitalSeleccionado?.description ?? '',
               ),
             ),

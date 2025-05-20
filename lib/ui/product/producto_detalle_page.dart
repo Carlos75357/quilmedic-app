@@ -52,9 +52,10 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
   }
   
   /// Obtiene el stock mínimo para un producto específico
-  /// Primero busca alarmas específicas para el producto, luego usa el valor por defecto
+  /// Busca alarmas específicas para el producto y solo devuelve el stock mínimo
+  /// si la alarma corresponde exactamente a la ubicación actual
   /// @param productId ID del producto
-  /// @return Stock mínimo o null si no está definido
+  /// @return Stock mínimo o null si no está definido o si la alarma no es para esta ubicación
   Future<int?> _getStockMinimo(int productId) async {
     final hasSpecific = await _alarmUtils.hasSpecificAlarms(productId);
     final locationId = widget.producto.locationid;
@@ -62,22 +63,27 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
     if (hasSpecific) {
       final alarms = await _alarmUtils.getSpecificAlarmsForProduct(productId);
       for (var alarm in alarms) {
-        if (alarm.type?.toLowerCase() == 'stock' && 
-            (alarm.locationId == null || alarm.locationId == locationId)) {
-          final condition = alarm.condition;
-          if (condition != null && condition.isNotEmpty) {
-            final RegExp regExp = RegExp(r'(\D*)(\d+)');
-            final Match? match = regExp.firstMatch(condition);
+        if (alarm.type?.toLowerCase() == 'stock') {
+          // Solo procesamos la alarma si es para la ubicación actual
+          // Las alarmas con locationId null (globales) no se muestran a menos que
+          // las prioridades de alarmas específicas lo requieran
+          if (alarm.locationId != null && alarm.locationId == locationId) {
+            final condition = alarm.condition;
+            if (condition != null && condition.isNotEmpty) {
+              final RegExp regExp = RegExp(r'(\D*)(\d+)');
+              final Match? match = regExp.firstMatch(condition);
 
-            if (match != null) {
-              final value = int.parse(match.group(2)!);
-              return value;
+              if (match != null) {
+                final value = int.parse(match.group(2)!);
+                return value;
+              }
             }
           }
         }
       }
     }
     
+    // Si llegamos aquí, no hay alarma específica para esta ubicación
     return null;
   }
 
@@ -245,6 +251,7 @@ class _ProductoDetallePageState extends State<ProductoDetallePage> {
             ),
             const Divider(),
 
+            // Mostrar el stock mínimo solo si hay una alarma específica para esta ubicación
             FutureBuilder<int?>(  
               future: _getStockMinimo(widget.producto.id),
               builder: (context, snapshot) {

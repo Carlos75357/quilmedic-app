@@ -22,6 +22,8 @@ class ProductListSection extends StatelessWidget {
   final Function(Producto)? onTransferTap;
   /// Lista de colores para las alarmas de los productos
   final List<Color> alarmColors;
+  /// ID de la ubicación seleccionada actualmente (para evaluar alarmas de stock)
+  final int selectedLocationId;
 
   /// Constructor del widget ProductListSection
   /// @param title Título de la sección
@@ -31,6 +33,7 @@ class ProductListSection extends StatelessWidget {
   /// @param onProductTap Función que se ejecuta al tocar un producto
   /// @param onTransferTap Función opcional para el botón de traslado
   /// @param alarmColors Lista de colores para las alarmas
+  /// @param selectedLocationId ID de la ubicación seleccionada para evaluar alarmas
   const ProductListSection({
     super.key,
     required this.title,
@@ -40,6 +43,7 @@ class ProductListSection extends StatelessWidget {
     required this.onProductTap,
     this.onTransferTap,
     required this.alarmColors,
+    required this.selectedLocationId,
   });
 
   /// Construye la interfaz de la sección de lista de productos
@@ -62,6 +66,7 @@ class ProductListSection extends StatelessWidget {
           onProductTap: onProductTap,
           onTransferTap: onTransferTap,
           alarmColors: alarmColors,
+          selectedLocationId: selectedLocationId,
         ),
       ],
     );

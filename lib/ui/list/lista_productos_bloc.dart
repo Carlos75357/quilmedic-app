@@ -76,7 +76,7 @@ class ListaProductosBloc
         _manejarErrorConexion(e, emit);
       }
     } catch (e) {
-      emit(ListaProductosError('Error inesperado: ${e.toString()}'));
+      emit(ListaProductosError('Error inesperado al cargar los productos'));
     }
   }
 
@@ -96,7 +96,7 @@ class ListaProductosBloc
     } else {
       emit(
         ListaProductosError(
-          'Error al cargar productos: $errorMsg. Usando datos locales.',
+          'Error al cargar productos. Usando datos locales.',
         ),
       );
     }
@@ -201,13 +201,13 @@ class ListaProductosBloc
         } else {
           emit(
             ErrorSolicitudTrasladoState(
-              'Error al enviar la solicitud de traslado: ${e.toString()}',
+              'Error al enviar la solicitud de traslado',
             ),
           );
         }
       }
     } catch (e) {
-      emit(ErrorSolicitudTrasladoState('Error inesperado: ${e.toString()}'));
+      emit(ErrorSolicitudTrasladoState('Error inesperado'));
     }
   }
 }
