@@ -19,6 +19,7 @@ class CompactList extends StatelessWidget {
   final Function(Producto)? onTransferTap;
   /// Lista de colores para las alarmas de los productos
   final List<Color> alarmColors;
+  final int selectedLocationId;
 
   /// Constructor del widget CompactList
   const CompactList({
@@ -27,7 +28,8 @@ class CompactList extends StatelessWidget {
     required this.onProductTap,
     required this.onTransferTap,
     required this.alarmColors,
-  });
+    required this.selectedLocationId,
+    });
 
   /// Construye la interfaz de la lista compacta de productos
   @override
@@ -117,7 +119,7 @@ class CompactList extends StatelessWidget {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: alarmUtils.getColorForStockFromCache(producto.stock, producto.id, producto.locationid),
+                          color: alarmUtils.getColorForStockFromCache(producto.stock, producto.id, selectedLocationId),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding: const EdgeInsets.symmetric(

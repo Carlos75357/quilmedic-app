@@ -31,16 +31,6 @@ class ScannerAppBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: theme.colorScheme.onPrimary,
       elevation: 2,
       actions: [
-        if (hayProductosPendientes)
-          IconButton(
-            icon: const Icon(Icons.sync),
-            onPressed: () {
-              BlocProvider.of<EscanerBloc>(
-                context,
-              ).add(SincronizarProductosPendientesEvent());
-            },
-            tooltip: 'Sincronizar productos pendientes',
-          ),
         IconButton(
           icon: const Icon(Icons.refresh),
           onPressed: () {

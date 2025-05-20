@@ -29,27 +29,37 @@ class EscanerPage extends StatefulWidget {
 class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
   /// Controlador para el campo de texto de hospitales
   final TextEditingController _hospitalesController = TextEditingController();
+
   /// Hospital seleccionado actualmente
   Hospital? selectedHospital;
+
   /// Ubicación seleccionada dentro del hospital
   Location? selectedLocation;
+
   /// Lista de productos escaneados
   List<ProductoEscaneado> productos = [];
+
   /// Lista de hospitales disponibles
   List<Hospital> hospitales = [];
+
   /// Lista de ubicaciones disponibles para el hospital seleccionado
   List<Location> locations = [];
+
   /// Indica si se está escaneando actualmente
   bool isScanning = false;
+
   /// Indica si se está mostrando la entrada manual de códigos
   bool _isManualInput = false;
+
   /// Indica si hay conexión a Internet
   final bool _hayConexion = true;
+
   /// Indica si hay productos pendientes de sincronización
   bool _hayProductosPendientes = false;
-  
+
   /// Temporizador para la detección del escáner
   Timer? _scannerDetectionTimer;
+
   /// Nodo de enfoque global para capturar eventos de teclado
   final FocusNode _globalFocusNode = FocusNode();
 
@@ -59,13 +69,10 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _checkPendingProducts();
     BlocProvider.of<EscanerBloc>(context).add(LoadHospitales());
-    
+
     WidgetsBinding.instance.addObserver(this);
   }
-
-
 
   /// Libera los recursos utilizados por este objeto
   /// Cancela temporizadores, libera controladores y elimina el observador
@@ -88,14 +95,75 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
     BlocProvider.of<EscanerBloc>(context).add(ResetSelectionsEvent());
   }
 
-  /// Comprueba si hay productos pendientes de sincronización
-  /// Actualiza el estado local con el resultado
+  /// Comprueba si hay productos pendientes en el caché local
+  /// Los carga en el array de productos sin intentar sincronizarlos con el servidor
   Future<void> _checkPendingProducts() async {
     final hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
+
     if (mounted) {
       setState(() {
         _hayProductosPendientes = hayPendientes;
       });
+
+      if (hayPendientes) {
+        final productosPendientes =
+            await ProductoLocalStorage.obtenerProductosPendientes();
+
+        final hospitalId =
+            await ProductoLocalStorage.obtenerHospitalPendiente();
+
+        if (hospitalId != null && productosPendientes.isNotEmpty) {
+          final List<ProductoEscaneado> productosNuevos = [];
+
+          for (final productoPendiente in productosPendientes) {
+            final bool yaExiste = productos.any(
+              (p) => p.serialnumber == productoPendiente.serialnumber,
+            );
+
+            if (!yaExiste) {
+              productosNuevos.add(productoPendiente);
+            }
+          }
+
+          if (productosNuevos.isNotEmpty) {
+            setState(() {
+              productos.addAll(productosNuevos);
+            });
+          }
+
+          if (hospitales.isNotEmpty) {
+            final hospital = hospitales.firstWhere(
+              (h) => h.id == hospitalId,
+              orElse: () => hospitales.first,
+            );
+
+            setState(() {
+              selectedHospital = hospital;
+            });
+
+            ScannerHandler.seleccionarHospital(context, hospital);
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _putPendingLocation() async {
+    final locationId = await ProductoLocalStorage.obtenerLocationPendiente();
+
+    if (locations.isNotEmpty && locationId != null) {
+      final location = locations.firstWhere(
+        (l) => l.id == locationId,
+        orElse: () => locations.first,
+      );
+
+      setState(() {
+        selectedLocation = location;
+      });
+
+      if (mounted) {
+        ScannerHandler.seleccionarUbicacion(context, location);
+      }
     }
   }
 
@@ -176,10 +244,22 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
                   if (state is HospitalesCargados) {
                     selectedHospital = null;
                     hospitales = state.hospitales;
+
+                    if (hospitales.isNotEmpty) {
+                      _checkPendingProducts();
+                    }
                   }
                   if (state is LocationsCargadas) {
                     selectedLocation = null;
                     locations = state.locations;
+
+                    // Retrasar la ejecución de _putPendingLocation para asegurar que las ubicaciones
+                    // se hayan cargado completamente en la interfaz de usuario
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (mounted && locations.isNotEmpty) {
+                        _putPendingLocation();
+                      }
+                    });
                   }
 
                   return DatalogicScannerListener(
@@ -209,6 +289,7 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
                         setState(() {
                           selectedLocation = location;
                         });
+                        print(selectedLocation?.toJson());
                         ScannerHandler.seleccionarUbicacion(context, location);
                       },
                       onToggleManualInput: _toggleManualInput,

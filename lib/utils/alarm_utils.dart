@@ -271,15 +271,24 @@ class AlarmUtils {
   /// @return Color correspondiente al nivel de stock
   Color getColorForStockFromCache(int stock, int? productId, int locationId) {
     if (productId != null) {
-      if (_stockColorCache.containsKey(productId) &&
-          _stockColorCache[productId]!.locationId == locationId) {
-        if (_evaluateAlarm(_stockColorCache[productId]!.condition!, stock)) {
-          return Color.fromARGB(255, 233, 236, 11).withValues(alpha: 0.3);
+      // Verificamos que el producto tenga una alarma y que la ubicación coincida exactamente
+      if (_stockColorCache.containsKey(productId)) {
+        final alarmInfo = _stockColorCache[productId]!;
+        
+        // Solo aplicamos la alarma si la ubicación coincide exactamente con la configurada
+        // o si la alarma no tiene ubicación especificada (alarma global)
+        if (alarmInfo.locationId != null && alarmInfo.locationId == locationId) {
+          // La ubicación coincide exactamente, evaluamos la alarma
+          if (_evaluateAlarm(alarmInfo.condition!, stock)) {
+            return Color.fromARGB(255, 233, 236, 11).withValues(alpha: 0.3); // Amarillo para advertencia
+          }
+          return const Color.fromARGB(255, 37, 238, 44).withValues(alpha: 0.3); // Verde para normal
         }
-        return const Color.fromARGB(255, 37, 238, 44).withValues(alpha: 0.3);
       }
-      return const Color.fromARGB(255, 82, 83, 82).withValues(alpha: 0.3);
+      // Si no hay alarma para este producto o la ubicación no coincide, usamos gris
+      return const Color.fromARGB(255, 82, 83, 82).withValues(alpha: 0.3); // Gris para sin alarma
     }
+    // Si no hay ID de producto, usamos verde por defecto
     return Colors.green.withValues(alpha: 0.3);
   }
 

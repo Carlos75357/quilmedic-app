@@ -57,7 +57,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     on<ChooseLocationEvent>(chooseLocation);
     on<GuardarProductosEvent>(guardarProductos);
     on<EliminarProductoEvent>(_eliminarProducto);
-    on<SincronizarProductosPendientesEvent>(_sincronizarProductosPendientes);
+    // on<SincronizarProductosPendientesEvent>(_sincronizarProductosPendientes);
     on<CargarProductosPendientesEvent>(_cargarProductosPendientes);
     on<ResetSelectionsEvent>(resetSelections);
 
@@ -85,7 +85,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     } catch (e) {
       await _guardarProductosEnCacheEnCasoDeError(emit);
 
-      emit(EscanerError('Error al cargar hospitales: ${e.toString()}'));
+      emit(EscanerError('Error al cargar hospitales'));
     }
   }
 
@@ -117,7 +117,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           );
         }
       } catch (e) {
-        emitter!(EscanerError('Error al guardar productos en caché: ${e.toString()}'));
+        emitter!(EscanerError('Error al guardar productos en caché'));
       }
     }
   }
@@ -150,7 +150,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     } catch (e) {
       await _guardarProductosEnCacheEnCasoDeError(emit);
 
-      emit(EscanerError('Error al cargar ubicaciones: ${e.toString()}'));
+      emit(EscanerError('Error al cargar ubicaciones'));
     }
   }
 
@@ -198,8 +198,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     } catch (e) {
       await _guardarProductosEnCacheEnCasoDeError(emit);
 
-      emit(
-        EscanerError("Error al procesar el código de barras: ${e.toString()}"),
+      emit( 
+        EscanerError("Error al procesar el código de barras"),
       );
     }
   }
@@ -286,7 +286,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     } catch (e) {
       await _guardarProductosEnCacheEnCasoDeError(emit);
 
-      emit(EscanerError("Error general al guardar productos: ${e.toString()}"));
+      emit(EscanerError("Error general al guardar productos"));
     }
   }
 
@@ -310,60 +310,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         hayProductosPendientes: hayProductosPendientes,
       ),
     );
-  }
-
-  /// Sincroniza los productos pendientes almacenados localmente con el servidor
-  /// @param event Evento para sincronizar productos pendientes
-  /// @param emit Emisor para cambiar el estado
-  Future<void> _sincronizarProductosPendientes(
-    SincronizarProductosPendientesEvent event,
-    Emitter<EscanerState> emit,
-  ) async {
-    try {
-      bool hayPendientes = await ProductoLocalStorage.hayProductosPendientes();
-      if (!hayPendientes) {
-        emit(SinProductosPendientesState());
-        return;
-      }
-
-      bool hayConexion = await _verificarConexion();
-      if (!hayConexion) {
-        emit(EscanerError("No hay conexión a internet para sincronizar"));
-        return;
-      }
-
-      emit(EscanerLoading());
-
-      final productosPendientes = await _obtenerProductosPendientes(emit);
-      if (productosPendientes == null) return;
-
-      final hospitalId = await ProductoLocalStorage.obtenerHospitalPendiente();
-      if (hospitalId == null || productosPendientes.isEmpty) {
-        await ProductoLocalStorage.limpiarProductosPendientes();
-        emit(SinProductosPendientesState());
-        return;
-      }
-
-      final locationId = await ProductoLocalStorage.obtenerLocationPendiente();
-      if (locationId == null) {
-        await ProductoLocalStorage.limpiarProductosPendientes();
-        emit(SinProductosPendientesState());
-        return;
-      }
-
-      await _sincronizarConServidor(
-        emit,
-        hospitalId,
-        locationId,
-        productosPendientes,
-      );
-    } catch (e) {
-      emit(
-        EscanerError(
-          "Error general durante la sincronización: ${e.toString()}",
-        ),
-      );
-    }
   }
 
   /// Carga los productos pendientes de sincronización almacenados localmente
@@ -436,7 +382,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         }
       }
     } catch (e) {
-      emit(EscanerError(e.toString()));
+      emit(EscanerError("Error al cargar productos pendientes"));
     }
   }
 
@@ -499,7 +445,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       hayProductosPendientes = true;
       emit(ProductosGuardadosLocalState(productosEscaneados));
     } catch (e) {
-      emit(EscanerError("Error al guardar productos: ${e.toString()}"));
+      emit(EscanerError("Error al guardar productos"));
     }
   }
 
@@ -533,7 +479,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     } catch (e) {
       emit(
         EscanerError(
-          "Error al comprobar productos pendientes: ${e.toString()}",
+          "Error al comprobar productos pendientes",
         ),
       );
     }
@@ -571,7 +517,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
           } catch (e) {
             emit(
               EscanerError(
-                "Error al cargar colores de alarmas: ${e.toString()}",
+                "Error al cargar colores de alarmas",
               ),
             );
           }
@@ -602,7 +548,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
         emit(GuardarOfflineSuccess());
       }
     } catch (e) {
-      emit(EscanerError("Error general al guardar productos: ${e.toString()}"));
+      emit(EscanerError("Error general al guardar productos"));
     }
   }
 
@@ -626,120 +572,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       }
     } catch (e) {
       throw Exception(
-        'Error al eliminar producto por serialnumber: ${e.toString()}',
+        'Error al eliminar producto por serialnumber',
       );
-    }
-  }
-
-  /// Obtiene la lista de productos pendientes de sincronización
-  /// @param emit Emisor para cambiar el estado en caso de error
-  /// @return Lista de productos pendientes o null si hay un error
-  Future<List<ProductoEscaneado>?> _obtenerProductosPendientes(
-    Emitter<EscanerState> emit,
-  ) async {
-    try {
-      return await ProductoLocalStorage.obtenerProductosPendientes();
-    } catch (e) {
-      emit(
-        EscanerError("Error al obtener productos pendientes: ${e.toString()}"),
-      );
-      return null;
-    }
-  }
-
-  /// Sincroniza los productos pendientes con el servidor
-  /// @param emit Emisor para cambiar el estado
-  /// @param hospitalId ID del hospital seleccionado
-  /// @param locationId ID de la ubicación seleccionada
-  /// @param productosPendientes Lista de productos pendientes a sincronizar
-  Future<void> _sincronizarConServidor(
-    Emitter<EscanerState> emit,
-    int hospitalId,
-    int locationId,
-    List<ProductoEscaneado> productosPendientes,
-  ) async {
-    try {
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      var response = await productoRepository.enviarProductosEscaneados(
-        hospitalId,
-        locationId,
-        productosPendientes,
-      );
-
-      if (response.success) {
-        await ProductoLocalStorage.limpiarProductosPendientes();
-        hayProductosPendientes = false;
-
-        final responseData = response.data as Map<String, dynamic>;
-        final foundProducts = responseData['found'] as List<dynamic>;
-        final missingSerials = responseData['missing'] as List<String>;
-
-        List<Producto> productos = List<Producto>.from(
-          foundProducts.map((item) => Producto.fromApiMap(item)),
-        );
-
-        await _guardarProductosEscaneadosLocalmente(productos);
-
-        await _actualizarHospitalSeleccionado(emit, hospitalId);
-        
-        // Forzar actualización de las alarmas después de recibir nuevos productos
-        await alarmUtils.forceRefresh();
-
-        productosEscaneados.clear();
-
-        if (response.message?.contains("No se encontraron") ?? false) {
-          emit(
-            SincronizacionCompletaState(productos, mensaje: response.message),
-          );
-          emit(GuardarSuccess(productos: productos, mensaje: response.message));
-          emit(
-            ProductosRecibidosState(
-              productos,
-              missingSerials,
-              mensaje: response.message,
-            ),
-          );
-        } else {
-          emit(SincronizacionCompletaState(productos));
-          emit(GuardarSuccess(productos: productos));
-          emit(ProductosRecibidosState(productos, missingSerials));
-        }
-      } else {
-        emit(
-          EscanerError(
-            response.message ?? "Error desconocido al sincronizar productos",
-          ),
-        );
-      }
-    } catch (e) {
-      emit(EscanerError("Error durante la sincronización: ${e.toString()}"));
-    }
-  }
-
-  /// Actualiza el hospital seleccionado basado en su ID
-  /// @param emit Emisor para cambiar el estado en caso de error
-  /// @param hospitalId ID del hospital a seleccionar
-  Future<void> _actualizarHospitalSeleccionado(
-    Emitter<EscanerState> emit,
-    int hospitalId,
-  ) async {
-    if (hospitalSeleccionado == null ||
-        hospitalSeleccionado!.id != hospitalId) {
-      try {
-        List<Hospital> hospitales = await hospitalRepository
-            .getAllHospitals()
-            .then((value) => value.data);
-
-        for (var hospital in hospitales) {
-          if (hospital.id == hospitalId) {
-            hospitalSeleccionado = hospital;
-            break;
-          }
-        }
-      } catch (e) {
-        emit(EscanerError("Error al obtener hospitales: ${e.toString()}"));
-      }
     }
   }
 
@@ -757,7 +591,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
       }
     } catch (e) {
       throw Exception(
-        'Error al guardar productos escaneados localmente: ${e.toString()}',
+        'Error al guardar productos escaneados localmente',
       );
     }
   }
