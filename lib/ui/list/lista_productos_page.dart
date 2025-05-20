@@ -12,27 +12,27 @@ import 'package:quilmedic/widgets/list/product_traslado_handler.dart';
 /// Pantalla que muestra la lista de productos escaneados
 /// Permite ver detalles de los productos y gestionar traslados entre hospitales
 class ListaProductosPage extends StatefulWidget {
-  /// Lista de productos a mostrar
+  /// [List] Lista de productos a mostrar
   final List<Producto>? productos;
-  /// Ubicación actual de los productos
+  /// [Location] Ubicación actual de los productos
   final Location? location;
-  /// Lista de códigos de productos que no se encontraron
+  /// [List] Lista de códigos de productos que no se encontraron
   final List<String>? notFounds;
-  /// ID del hospital actual
+  /// [int] ID del hospital actual
   final int hospitalId;
-  /// ID de la ubicación actual
+  /// [int] ID de la ubicación actual
   final int locationId;
-  /// Nombre del almacén o hospital
+  /// [String] Nombre del almacén o hospital
   final String almacenName;
 
   /// Constructor de la página de lista de productos
-  /// @param key Clave del widget
-  /// @param productos Lista de productos a mostrar
-  /// @param location Ubicación actual de los productos
-  /// @param notFounds Lista de códigos que no se encontraron
-  /// @param hospitalId ID del hospital actual
-  /// @param locationId ID de la ubicación actual
-  /// @param almacenName Nombre del almacén o hospital
+  /// @param [key] Clave del widget
+  /// @param [productos] Lista de productos a mostrar
+  /// @param [location] Ubicación actual de los productos
+  /// @param [notFounds] Lista de códigos que no se encontraron
+  /// @param [hospitalId] ID del hospital actual
+  /// @param [locationId] ID de la ubicación actual
+  /// @param [almacenName] Nombre del almacén o hospital
   const ListaProductosPage({
     super.key,
     this.productos,
@@ -44,18 +44,18 @@ class ListaProductosPage extends StatefulWidget {
   });
 
   /// Crea el estado mutable para este widget
-  /// @return Una instancia de _ListaProductosPageState
+  /// @return Una instancia de [_ListaProductosPageState]
   @override
   State<ListaProductosPage> createState() => _ListaProductosPageState();
 }
 
 /// Estado mutable para la pantalla de lista de productos
 class _ListaProductosPageState extends State<ListaProductosPage> {
-  /// Lista de productos a mostrar
+  /// [List] Lista de productos a mostrar
   late List<Producto> productos;
-  /// Lista de hospitales disponibles para traslados
+  /// [List] Lista de hospitales disponibles para traslados
   late List<Hospital> _hospitales = [];
-  /// Mensaje de error en caso de fallo al cargar hospitales
+  /// [String] Mensaje de error en caso de fallo al cargar hospitales
   String? _errorCargaHospitales;
 
   /// Inicializa el estado del widget
@@ -72,8 +72,8 @@ class _ListaProductosPageState extends State<ListaProductosPage> {
   }
 
   /// Construye la interfaz de usuario de la pantalla de lista de productos
-  /// @param context Contexto de construcción
-  /// @return Widget con la estructura completa de la pantalla
+  /// @param [context] Contexto de construcción
+  /// @return [Widget] con la estructura completa de la pantalla
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

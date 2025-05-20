@@ -16,7 +16,7 @@ final class ListaProductosSuccess extends ListaProductosState {}
 
 /// Estado de error genérico, indica que ocurrió un problema durante alguna operación
 final class ListaProductosError extends ListaProductosState {
-  /// Mensaje de error para mostrar al usuario
+  /// [String] Mensaje de error para mostrar al usuario
   final String message;
 
   /// Constructor que recibe el mensaje de error
@@ -25,7 +25,7 @@ final class ListaProductosError extends ListaProductosState {
 
 /// Estado que indica que los productos se han cargado correctamente
 final class ProductosCargadosState extends ListaProductosState {
-  /// Lista de productos cargados
+  /// [List] Lista de productos cargados
   final List<Producto> productos;
 
   /// Constructor que recibe la lista de productos
@@ -37,7 +37,7 @@ final class CargandoHospitalesState extends ListaProductosState {}
 
 /// Estado que indica que los hospitales se han cargado correctamente
 final class HospitalesCargadosState extends ListaProductosState {
-  /// Lista de hospitales cargados
+  /// [List] Lista de hospitales cargados
   final List<Hospital> hospitales;
 
   /// Constructor que recibe la lista de hospitales
@@ -46,7 +46,7 @@ final class HospitalesCargadosState extends ListaProductosState {
 
 /// Estado que indica que ocurrió un error al cargar los hospitales
 final class ErrorCargaHospitalesState extends ListaProductosState {
-  /// Mensaje de error para mostrar al usuario
+  /// [String] Mensaje de error para mostrar al usuario
   final String mensaje;
 
   /// Constructor que recibe el mensaje de error
@@ -58,7 +58,7 @@ final class EnviandoSolicitudTrasladoState extends ListaProductosState {}
 
 /// Estado que indica que la solicitud de traslado se ha enviado correctamente
 final class SolicitudTrasladoEnviadaState extends ListaProductosState {
-  /// Mensaje de éxito para mostrar al usuario
+  /// [String] Mensaje de éxito para mostrar al usuario
   final String mensaje;
 
   /// Constructor que recibe el mensaje de éxito
@@ -67,7 +67,7 @@ final class SolicitudTrasladoEnviadaState extends ListaProductosState {
 
 /// Estado que indica que ocurrió un error al enviar la solicitud de traslado
 final class ErrorSolicitudTrasladoState extends ListaProductosState {
-  /// Mensaje de error para mostrar al usuario
+  /// [String] Mensaje de error para mostrar al usuario
   final String mensaje;
 
   /// Constructor que recibe el mensaje de error

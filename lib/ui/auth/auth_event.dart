@@ -7,7 +7,7 @@ abstract class AuthEvent extends Equatable {
   const AuthEvent();
 
   /// Sobrescribe el método props de Equatable
-  /// @return Lista vacía por defecto, las subclases pueden sobrescribirlo
+  /// @return [List] Lista vacía por defecto, las subclases pueden sobrescribirlo
   @override
   List<Object> get props => [];
 }
@@ -21,15 +21,15 @@ class LoginRequested extends AuthEvent {
   final String password;
 
   /// Constructor del evento LoginRequested
-  /// @param username Nombre de usuario
-  /// @param password Contraseña
+  /// @param [username] Nombre de usuario
+  /// @param [password] Contraseña
   const LoginRequested({
     required this.username,
     required this.password,
   });
 
   /// Sobrescribe el método props para incluir username y password
-  /// @return Lista con username y password para comparación de eventos
+  /// @return [List] Lista con username y password para comparación de eventos
   @override
   List<Object> get props => [username, password];
 }

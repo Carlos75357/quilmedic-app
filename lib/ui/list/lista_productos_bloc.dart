@@ -16,7 +16,7 @@ import 'package:quilmedic/services/auth_service.dart';
 part 'lista_productos_event.dart';
 part 'lista_productos_state.dart';
 
-/// Bloc que gestiona el estado de la lista de productos
+/// [Bloc] que gestiona el estado de la lista de productos
 /// Maneja eventos relacionados con la carga de productos, hospitales y solicitudes de traslado
 class ListaProductosBloc
     extends Bloc<ListaProductosEvent, ListaProductosState> {
@@ -51,8 +51,8 @@ class ListaProductosBloc
   }
 
   /// Carga los productos recibidos y las alarmas asociadas
-  /// @param event Evento con los productos a cargar
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento con los productos a cargar
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _cargarProductos(
     CargarProductosEvent event,
     Emitter<ListaProductosState> emit,
@@ -82,8 +82,8 @@ class ListaProductosBloc
 
   /// Maneja los errores de conexión al cargar productos
   /// Emite estados de error apropiados según el tipo de error
-  /// @param e Excepción que ocurrió
-  /// @param emit Emisor para cambiar el estado
+  /// @param [e] Excepción que ocurrió
+  /// @param [emit] Emisor para cambiar el estado
   void _manejarErrorConexion(Object e, Emitter<ListaProductosState> emit) {
     final String errorMsg = e.toString();
 
@@ -104,8 +104,8 @@ class ListaProductosBloc
   }
 
   /// Determina si un mensaje de error indica un problema de conexión
-  /// @param errorMsg Mensaje de error a analizar
-  /// @return true si es un error de conexión, false en caso contrario
+  /// @param [errorMsg] Mensaje de error a analizar
+  /// @return [bool] true si es un error de conexión, false en caso contrario
   bool _esErrorDeConexion(String errorMsg) {
     return errorMsg.contains('SocketException') ||
         errorMsg.contains('Connection refused') ||
@@ -113,8 +113,8 @@ class ListaProductosBloc
   }
 
   /// Muestra la lista de productos recibidos
-  /// @param event Evento con los productos a mostrar
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento con los productos a mostrar
+  /// @param [emit] Emisor para cambiar el estado
   void _mostrarProductos(
     MostrarProductosEvent event,
     Emitter<ListaProductosState> emit,
@@ -123,8 +123,8 @@ class ListaProductosBloc
   }
 
   /// Carga la lista de hospitales desde el servidor
-  /// @param event Evento para cargar hospitales
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento para cargar hospitales
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> cargarHospitales(
     CargarHospitalesEvent event,
     Emitter<ListaProductosState> emit,
@@ -147,8 +147,8 @@ class ListaProductosBloc
   }
 
   /// Envía una solicitud de traslado de productos entre hospitales
-  /// @param event Evento con los datos de la solicitud
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento con los datos de la solicitud
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _enviarSolicitudTraslado(
     EnviarSolicitudTrasladoEvent event,
     Emitter<ListaProductosState> emit,

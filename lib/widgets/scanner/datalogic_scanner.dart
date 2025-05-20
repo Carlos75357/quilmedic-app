@@ -22,10 +22,10 @@ class DatalogicScanner extends StatefulWidget {
   final int scanTimeout;
 
   /// Constructor del widget DatalogicScanner
-  /// @param child Widget hijo que será envuelto por el escáner
-  /// @param onBarcodeScanned Función que se ejecuta cuando se detecta un código
-  /// @param scannerEndChar Caracter que indica el final de un escaneo
-  /// @param scanTimeout Tiempo máximo entre pulsaciones de tecla
+  /// @param [child] Widget hijo que será envuelto por el escáner
+  /// @param [onBarcodeScanned] Función que se ejecuta cuando se detecta un código
+  /// @param [scannerEndChar] Caracter que indica el final de un escaneo
+  /// @param [scanTimeout] Tiempo máximo entre pulsaciones de tecla
   const DatalogicScanner({
     super.key,
     required this.child,

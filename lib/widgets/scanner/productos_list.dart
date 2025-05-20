@@ -48,7 +48,6 @@ class _ProductosListState extends State<ProductosList> {
   @override
   void didUpdateWidget(ProductosList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Si la lista de productos cambió, verificamos que la página actual siga siendo válida
     if (oldWidget.productos.length != widget.productos.length) {
       final maxPage = (widget.productos.length / _itemsPerPage).ceil() - 1;
       if (_currentPage > maxPage && maxPage >= 0) {
@@ -66,15 +65,12 @@ class _ProductosListState extends State<ProductosList> {
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 360;
     
-    // Calculamos el número total de páginas
     final int totalPages = (widget.productos.length / _itemsPerPage).ceil();
-    // Calculamos el índice inicial y final para la página actual
     final int startIndex = _currentPage * _itemsPerPage;
     final int endIndex = (startIndex + _itemsPerPage > widget.productos.length) 
         ? widget.productos.length 
         : startIndex + _itemsPerPage;
     
-    // Obtenemos los productos para la página actual
     final List<ProductoEscaneado> productosPaginados = 
         widget.productos.isEmpty ? [] : widget.productos.sublist(startIndex, endIndex);
     
@@ -84,7 +80,6 @@ class _ProductosListState extends State<ProductosList> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Lista de productos para la página actual
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -93,7 +88,6 @@ class _ProductosListState extends State<ProductosList> {
             separatorBuilder:
                 (context, index) => Divider(color: Colors.grey.shade300, height: 1),
             itemBuilder: (context, index) {
-              // Calculamos el índice real en la lista completa
               final int realIndex = startIndex + index;
               final producto = widget.productos[realIndex];
               
@@ -166,14 +160,12 @@ class _ProductosListState extends State<ProductosList> {
             },
           ),
           
-          // Controles de paginación (solo se muestran si hay más de una página)
           if (totalPages > 1)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Botón para ir a la página anterior
                   IconButton(
                     icon: const Icon(Icons.arrow_back_ios, size: 18),
                     onPressed: _currentPage > 0
@@ -187,7 +179,6 @@ class _ProductosListState extends State<ProductosList> {
                     disabledColor: Colors.grey.shade400,
                   ),
                   
-                  // Indicador de página actual
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(

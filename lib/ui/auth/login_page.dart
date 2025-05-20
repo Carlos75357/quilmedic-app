@@ -50,13 +50,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   /// Construye la interfaz de usuario de la pantalla de inicio de sesión
-  /// Utiliza BlocConsumer para escuchar y construir la UI basada en el estado de autenticación
-  /// @param context Contexto de construcción
-  /// @return Widget con el formulario de inicio de sesión
+  /// Utiliza [BlocConsumer] para escuchar y construir la UI basada en el estado de autenticación
+  /// @param [context] Contexto de construcción
+  /// @return [Widget] con el formulario de inicio de sesión
   @override
   Widget build(BuildContext context) {
-    // Usar el BlocConsumer directamente sin crear un nuevo BlocProvider
-    // ya que el AuthBloc ya está disponible desde el contexto principal
+    // Usar el [BlocConsumer] directamente sin crear un nuevo [BlocProvider]
+    // ya que el [AuthBloc] ya está disponible desde el contexto principal
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is Authenticated) {

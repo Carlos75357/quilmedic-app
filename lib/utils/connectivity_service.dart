@@ -10,7 +10,7 @@ import 'package:quilmedic/data/config.dart';
 class ConnectivityService {
   /// Verifica si hay conexión a Internet intentando conectarse al servidor de la aplicación
   /// Realiza diferentes intentos de conexión dependiendo de la plataforma y maneja posibles errores
-  /// @return true si hay conexión a Internet, false en caso contrario
+  /// @return [bool] true si hay conexión a Internet, false en caso contrario
   static Future<bool> hayConexionInternet() async {
     try {
       if (kIsWeb) {

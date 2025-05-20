@@ -14,8 +14,8 @@ class DatalogicScannerListener extends StatefulWidget {
   final Function(String) onBarcodeScanned;
 
   /// Constructor del widget DatalogicScannerListener
-  /// @param child Widget hijo que será envuelto por el listener
-  /// @param onBarcodeScanned Función que se ejecuta cuando se detecta un código
+  /// @param [child] Widget hijo que será envuelto por el listener
+  /// @param [onBarcodeScanned] Función que se ejecuta cuando se detecta un código
   const DatalogicScannerListener({
     super.key,
     required this.child,

@@ -10,7 +10,7 @@ class ProductSerialDialog extends StatelessWidget {
   final List<String>? notFounds;
 
   /// Constructor del widget ProductSerialDialog
-  /// @param notFounds Lista de números de serie no encontrados
+  /// @param [notFounds] Lista de números de serie no encontrados
   const ProductSerialDialog({super.key, required this.notFounds});
 
   /// Construye la interfaz del diálogo de números de serie no encontrados

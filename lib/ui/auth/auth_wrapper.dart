@@ -11,15 +11,15 @@ class AuthWrapper extends StatelessWidget {
   /// Widget hijo que se mostrará cuando el usuario esté autenticado
   final Widget child;
 
-  /// Constructor del AuthWrapper
-  /// @param key Clave del widget
-  /// @param child Widget hijo que se mostrará cuando el usuario esté autenticado
+  /// Constructor del [AuthWrapper]
+  /// @param [key] Clave del widget
+  /// @param [child] Widget hijo que se mostrará cuando el usuario esté autenticado
   const AuthWrapper({super.key, required this.child});
 
-  /// Construye el widget AuthWrapper
-  /// Utiliza BlocListener para escuchar cambios en el estado de autenticación
-  /// @param context Contexto de construcción
-  /// @return Widget con el BlocListener configurado
+  /// Construye el widget [AuthWrapper]
+  /// Utiliza [BlocListener] para escuchar cambios en el estado de autenticación
+  /// @param [context] Contexto de construcción
+  /// @return [Widget] con el [BlocListener] configurado
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(

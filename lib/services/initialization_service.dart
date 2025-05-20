@@ -25,7 +25,7 @@ class InitializationService {
 
   /// Determina si se debe realizar una actualización al iniciar la aplicación
   /// basado en el tiempo transcurrido desde el último inicio
-  /// @return true si han pasado más de _minHoursBetweenUpdates horas desde el último inicio
+  /// @return [bool] true si han pasado más de _minHoursBetweenUpdates horas desde el último inicio
   static Future<bool> _shouldUpdateOnAppStart() async {
     final prefs = await SharedPreferences.getInstance();
     final lastStart = prefs.getInt(_lastAppStartKey);

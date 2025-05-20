@@ -7,7 +7,7 @@ sealed class ListaProductosEvent {}
 
 /// Evento para cargar productos en la lista
 class CargarProductosEvent extends ListaProductosEvent {
-  /// Lista de productos a cargar
+  /// [List] Lista de productos a cargar
   final List<Producto> productos;
 
   /// Constructor que recibe opcionalmente una lista de productos
@@ -17,7 +17,7 @@ class CargarProductosEvent extends ListaProductosEvent {
 
 /// Evento para mostrar productos en la interfaz de usuario
 class MostrarProductosEvent extends ListaProductosEvent {
-  /// Lista de productos a mostrar
+  /// [List] Lista de productos a mostrar
   final List<Producto> productos;
 
   /// Constructor que recibe la lista de productos a mostrar
@@ -29,13 +29,13 @@ class CargarHospitalesEvent extends ListaProductosEvent {}
 
 /// Evento para enviar una solicitud de traslado de productos entre hospitales
 class EnviarSolicitudTrasladoEvent extends ListaProductosEvent {
-  /// Lista de productos a trasladar
+  /// [List] Lista de productos a trasladar
   final List<Producto> productos;
-  /// ID del hospital de destino
+  /// [int] ID del hospital de destino
   final int hospitalDestinoId;
-  /// Nombre del hospital de destino (para mostrar en mensajes)
+  /// [String] Nombre del hospital de destino (para mostrar en mensajes)
   final String hospitalDestinoNombre;
-  /// Correo electrónico para notificaciones sobre el traslado
+  /// [String] Correo electrónico para notificaciones sobre el traslado
   final String email;
 
   /// Constructor que recibe todos los datos necesarios para el traslado

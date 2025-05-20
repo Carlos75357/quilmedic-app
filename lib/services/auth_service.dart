@@ -30,7 +30,7 @@ class AuthService {
   Stream<bool> get onAuthExpired => _authExpirationController.stream;
 
   /// Obtiene el ID único del dispositivo
-  /// @return ID del dispositivo o 'unknown_device' si ocurre un error
+  /// @return [String] ID del dispositivo o 'unknown_device' si ocurre un error
   Future<String> getDeviceId() async {
     try {
       return await _deviceIdService.getUniqueDeviceId();
@@ -40,9 +40,9 @@ class AuthService {
   }
 
   /// Inicia sesión con las credenciales proporcionadas
-  /// @param username Nombre de usuario
-  /// @param password Contraseña del usuario
-  /// @return Usuario autenticado o null si falla la autenticación
+  /// @param [username] Nombre de usuario
+  /// @param [password] Contraseña del usuario
+  /// @return [User] Usuario autenticado o null si falla la autenticación
   Future<User?> login(String username, String password) async {
     try {
       final deviceId = await getDeviceId();
@@ -85,7 +85,7 @@ class AuthService {
     
   /// Verifica si el usuario está autenticado actualmente
   /// Valida el token almacenado contra el servidor
-  /// @return true si el usuario está autenticado, false en caso contrario
+  /// @return [bool] true si el usuario está autenticado, false en caso contrario
   Future<bool> isAuthenticated() async {
     try {
       final token = await _secureStorage.read(key: _tokenKey);
@@ -118,7 +118,7 @@ class AuthService {
   }
 
   /// Obtiene los datos del usuario actualmente autenticado
-  /// @return Usuario actual o null si no hay usuario autenticado
+  /// @return [User] Usuario actual o null si no hay usuario autenticado
   Future<User?> getCurrentUser() async {
     try {
       final userData = await _secureStorage.read(key: _userKey);
@@ -132,7 +132,7 @@ class AuthService {
   }
 
   /// Obtiene el token de autenticación almacenado
-  /// @return Token de autenticación o null si no existe
+  /// @return [String] Token de autenticación o null si no existe
   Future<String?> getToken() async {
     try {
       return await _secureStorage.read(key: _tokenKey);
@@ -156,7 +156,7 @@ class AuthService {
   
   /// Verifica si el token actual es válido
   /// Realiza una petición al servidor para validar el token
-  /// @return true si el token es válido, false en caso contrario
+  /// @return [bool] true si el token es válido, false en caso contrario
   Future<bool> isTokenValid() async {
     try {
       await _apiClient.getAll('/validate-token', {});

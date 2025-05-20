@@ -59,7 +59,7 @@ class AlarmUtils {
   }
 
   /// Determina si la caché de alarmas debe actualizarse
-  /// @return true si la caché ha expirado o no existe, false en caso contrario
+  /// @return [bool] true si la caché ha expirado o no existe, false en caso contrario
   Future<bool> _shouldRefreshCache() async {
     final prefs = await SharedPreferences.getInstance();
     final lastUpdate = prefs.getInt(_lastUpdateKey);
@@ -99,7 +99,7 @@ class AlarmUtils {
   }
 
   /// Obtiene las alarmas generales relacionadas con fechas de caducidad
-  /// @return Lista de alarmas de tipo 'date'
+  /// @return [List] Lista de alarmas de tipo 'date'
   Future<List<Alarm>> getGeneralExpirationDateAlarms() async {
     try {
       final response = await alarmRepository.getGeneralAlarms();
@@ -115,7 +115,7 @@ class AlarmUtils {
   }
 
   /// Obtiene las alarmas generales relacionadas con niveles de stock
-  /// @return Lista de alarmas de tipo 'stock'
+  /// @return [List] Lista de alarmas de tipo 'stock'
   Future<List<Alarm>> getGeneralStockAlarms() async {
     try {
       final response = await alarmRepository.getGeneralAlarms();
@@ -132,7 +132,7 @@ class AlarmUtils {
 
   /// Obtiene todas las alarmas generales (caducidad y stock)
   /// Primero intenta usar la caché, luego la caché local, y finalmente el servidor
-  /// @return Lista combinada de todas las alarmas generales
+  /// @return [List] Lista combinada de todas las alarmas generales
   Future<List<Alarm>> getGeneralAlarms() async {
     if (_generalAlarmCache.isNotEmpty) {
       return List.from(_generalAlarmCache);
@@ -182,7 +182,7 @@ class AlarmUtils {
 
   /// Obtiene las alarmas específicas para un producto
   /// @param productId ID del producto
-  /// @return Lista de alarmas específicas para el producto
+  /// @return [List] Lista de alarmas específicas para el producto
   Future<List<Alarm>> getSpecificAlarmsForProduct(int? productId) async {
     if (productId == null) return [];
 
@@ -213,7 +213,7 @@ class AlarmUtils {
 
   /// Carga las alarmas para una lista de productos
   /// Actualiza las cachés de colores para stock y caducidad
-  /// @param productos Lista de productos para los que cargar alarmas
+  /// @param [productos] Lista de productos para los que cargar alarmas
   Future<void> loadAlarmsForProducts(List<Producto> productos) async {
     Map<int, AlarmInfo> stockColorsMap = {};
     Map<int, AlarmInfo> expiryColorsMap = {};
@@ -265,38 +265,32 @@ class AlarmUtils {
 
   /// Obtiene el color para el nivel de stock de un producto
   /// Primero busca alarmas específicas, luego usa el valor por defecto
-  /// @param stock Nivel de stock actual
-  /// @param productId ID del producto
-  /// @param locationId ID de la ubicación
-  /// @return Color correspondiente al nivel de stock
+  /// @param [stock] Nivel de stock actual
+  /// @param [productId] ID del producto
+  /// @param [locationId] ID de la ubicación
+  /// @return [Color] correspondiente al nivel de stock
   Color getColorForStockFromCache(int stock, int? productId, int locationId) {
     if (productId != null) {
-      // Verificamos que el producto tenga una alarma y que la ubicación coincida exactamente
       if (_stockColorCache.containsKey(productId)) {
         final alarmInfo = _stockColorCache[productId]!;
         
-        // Solo aplicamos la alarma si la ubicación coincide exactamente con la configurada
-        // o si la alarma no tiene ubicación especificada (alarma global)
         if (alarmInfo.locationId != null && alarmInfo.locationId == locationId) {
-          // La ubicación coincide exactamente, evaluamos la alarma
           if (_evaluateAlarm(alarmInfo.condition!, stock)) {
-            return Color.fromARGB(255, 233, 236, 11).withValues(alpha: 0.3); // Amarillo para advertencia
+            return Color.fromARGB(255, 233, 236, 11).withValues(alpha: 0.3); 
           }
-          return const Color.fromARGB(255, 37, 238, 44).withValues(alpha: 0.3); // Verde para normal
+          return const Color.fromARGB(255, 37, 238, 44).withValues(alpha: 0.3); 
         }
       }
-      // Si no hay alarma para este producto o la ubicación no coincide, usamos gris
-      return const Color.fromARGB(255, 82, 83, 82).withValues(alpha: 0.3); // Gris para sin alarma
+      return const Color.fromARGB(255, 82, 83, 82).withValues(alpha: 0.3); 
     }
-    // Si no hay ID de producto, usamos verde por defecto
     return Colors.green.withValues(alpha: 0.3);
   }
 
   /// Obtiene el color para la fecha de caducidad de un producto
   /// Primero busca alarmas específicas, luego usa las alarmas generales
-  /// @param productId ID del producto
-  /// @param expiryDate Fecha de caducidad
-  /// @return Color correspondiente a la fecha de caducidad
+  /// @param [productId] ID del producto
+  /// @param [expiryDate] Fecha de caducidad
+  /// @return [Color] correspondiente a la fecha de caducidad
   Color getColorForExpiryFromCache(int? productId, [DateTime? expiryDate]) {
     if (productId != null && _expiryColorCache.containsKey(productId)) {
       if (_evaluateAlarm(
@@ -321,9 +315,9 @@ class AlarmUtils {
   }
 
   /// Evalúa una condición de alarma contra un valor
-  /// @param condition Condición en formato operador+valor (ej: '<30', '>=10')
-  /// @param days Valor a comparar (días o cantidad)
-  /// @return true si la condición se cumple, false en caso contrario
+  /// @param [condition] Condición en formato operador+valor (ej: '<30', '>=10')
+  /// @param [days] Valor a comparar (días o cantidad)
+  /// @return [bool] true si la condición se cumple, false en caso contrario
   static bool _evaluateAlarm(String condition, int days) {
     final value = _getValue(condition);
 
@@ -344,8 +338,8 @@ class AlarmUtils {
   }
 
   /// Extrae el valor numérico de una condición
-  /// @param condition Condición en formato operador+valor (ej: '<30', '>=10')
-  /// @return Valor numérico extraído de la condición
+  /// @param [condition] Condición en formato operador+valor (ej: '<30', '>=10')
+  /// @return [int] Valor numérico extraído de la condición
   static int _getValue(String condition) {
     final RegExp regExp = RegExp(r'(\D*)(\d+)');
     final Match? match = regExp.firstMatch(condition);
@@ -358,8 +352,8 @@ class AlarmUtils {
   }
 
   /// Extrae el operador de una condición
-  /// @param condition Condición en formato operador+valor (ej: '<30', '>=10')
-  /// @return Operador extraído de la condición (<, <=, >, >=, =)
+  /// @param [condition] Condición en formato operador+valor (ej: '<30', '>=10')
+  /// @return [String] Operador extraído de la condición (<, <=, >, >=, =)
   static String _getOperator(String? condition) {
     final RegExp regExp = RegExp(r'(\D*)(\d+)');
     final Match? match = regExp.firstMatch(condition!);
@@ -372,8 +366,8 @@ class AlarmUtils {
   }
 
   /// Convierte una cadena de color en un objeto Color
-  /// @param color Cadena con formato 'alpha,red,green,blue'
-  /// @return Objeto Color correspondiente o color morado por defecto
+  /// @param [color] Cadena con formato 'alpha,red,green,blue'
+  /// @return [Color] Objeto Color correspondiente o color morado por defecto
   static Color? _parseColor(String? color) {
     if (color == null) {
       return const Color.fromARGB(255, 189, 47, 214).withValues(alpha: 0.3);

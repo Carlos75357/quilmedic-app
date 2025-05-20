@@ -5,8 +5,8 @@ class TokenExpiredException implements Exception {
   /// Mensaje descriptivo de la excepción
   final String message;
   
-  /// Constructor de la excepción TokenExpiredException
-  /// @param message Mensaje descriptivo del error
+  /// Constructor de la excepción [TokenExpiredException]
+  /// @param [message] Mensaje descriptivo del error
   TokenExpiredException(this.message);
   @override
   /// Retorna el mensaje descriptivo de la excepción como cadena de texto
@@ -20,8 +20,8 @@ class AuthenticationException implements Exception {
   /// Mensaje descriptivo de la excepción
   final String message;
   
-  /// Constructor de la excepción AuthenticationException
-  /// @param message Mensaje descriptivo del error
+  /// Constructor de la excepción [AuthenticationException]
+  /// @param [message] Mensaje descriptivo del error
   AuthenticationException(this.message);
   @override
   /// Retorna el mensaje descriptivo de la excepción como cadena de texto

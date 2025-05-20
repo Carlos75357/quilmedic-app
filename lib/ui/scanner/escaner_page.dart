@@ -25,7 +25,7 @@ class EscanerPage extends StatefulWidget {
 }
 
 /// Estado mutable para la pantalla del escáner
-/// Implementa WidgetsBindingObserver para detectar cambios en el ciclo de vida de la aplicación
+/// Implementa [WidgetsBindingObserver] para detectar cambios en el ciclo de vida de la aplicación
 class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
   /// Controlador para el campo de texto de hospitales
   final TextEditingController _hospitalesController = TextEditingController();
@@ -176,8 +176,8 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
 
   /// Procesa un código ingresado manualmente
   /// Envía el código al bloc y muestra una advertencia si no hay hospital seleccionado
-  /// @param code Código ingresado por el usuario
-  /// @param context Contexto de construcción
+  /// @param [code] Código ingresado por el usuario
+  /// @param [context] Contexto de construcción
   void _onManualCodeSubmitted(String code, BuildContext context) {
     BlocProvider.of<EscanerBloc>(context).add(SubmitCodeEvent(code));
 
@@ -204,8 +204,8 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
   }
 
   /// Construye la interfaz de usuario de la pantalla del escáner
-  /// @param context Contexto de construcción
-  /// @return Widget con la estructura completa de la pantalla
+  /// @param [context] Contexto de construcción
+  /// @return [Widget] con la estructura completa de la pantalla
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -253,8 +253,6 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
                     selectedLocation = null;
                     locations = state.locations;
 
-                    // Retrasar la ejecución de _putPendingLocation para asegurar que las ubicaciones
-                    // se hayan cargado completamente en la interfaz de usuario
                     Future.delayed(const Duration(milliseconds: 500), () {
                       if (mounted && locations.isNotEmpty) {
                         _putPendingLocation();
@@ -289,7 +287,6 @@ class _EscanerPageState extends State<EscanerPage> with WidgetsBindingObserver {
                         setState(() {
                           selectedLocation = location;
                         });
-                        print(selectedLocation?.toJson());
                         ScannerHandler.seleccionarUbicacion(context, location);
                       },
                       onToggleManualInput: _toggleManualInput,

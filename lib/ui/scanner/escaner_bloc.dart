@@ -47,7 +47,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   /// Utilidad para gestionar alarmas de productos
   late AlarmUtils alarmUtils = AlarmUtils();
 
-  /// Constructor del EscanerBloc
+  /// Constructor del [EscanerBloc]
   /// Registra los manejadores de eventos y carga los productos pendientes
   EscanerBloc() : super(EscanerInitial()) {
     on<LoadHospitales>(cargarHospitales);
@@ -57,7 +57,6 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
     on<ChooseLocationEvent>(chooseLocation);
     on<GuardarProductosEvent>(guardarProductos);
     on<EliminarProductoEvent>(_eliminarProducto);
-    // on<SincronizarProductosPendientesEvent>(_sincronizarProductosPendientes);
     on<CargarProductosPendientesEvent>(_cargarProductosPendientes);
     on<ResetSelectionsEvent>(resetSelections);
 
@@ -65,8 +64,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Carga la lista de hospitales desde el servidor
-  /// @param event Evento para cargar hospitales
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento para cargar hospitales
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> cargarHospitales(
     LoadHospitales event,
     Emitter<EscanerState> emit,
@@ -91,7 +90,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
   /// Guarda los productos escaneados en caché local en caso de error
   /// Se utiliza cuando hay problemas de conexión o errores del servidor
-  /// @param emitter Emisor opcional para cambiar el estado
+  /// @param [emitter] Emisor opcional para cambiar el estado
   Future<void> _guardarProductosEnCacheEnCasoDeError([
     Emitter<EscanerState>? emitter,
   ]) async {
@@ -123,8 +122,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Carga las ubicaciones disponibles para el hospital seleccionado
-  /// @param event Evento para cargar ubicaciones
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento para cargar ubicaciones
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> loadLocationsForAStore(
     LoadLocations event,
     Emitter<EscanerState> emit,
@@ -155,9 +154,9 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Procesa un código de barras escaneado o ingresado manualmente
-  /// Crea un objeto ProductoEscaneado y lo agrega a la lista
-  /// @param event Evento con el código escaneado
-  /// @param emit Emisor para cambiar el estado
+  /// Crea un objeto [ProductoEscaneado] y lo agrega a la lista
+  /// @param [event] Evento con el código escaneado
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _procesarCodigoDeBarras(
     SubmitCodeEvent event,
     Emitter<EscanerState> emit,
@@ -205,8 +204,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Maneja la selección de un hospital
-  /// @param event Evento con el hospital seleccionado
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento con el hospital seleccionado
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> elegirHospitales(
     ChooseStoreEvent event,
     Emitter<EscanerState> emit,
@@ -227,8 +226,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Maneja la selección de una ubicación dentro del hospital
-  /// @param event Evento con la ubicación seleccionada
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento con la ubicación seleccionada
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> chooseLocation(
     ChooseLocationEvent event,
     Emitter<EscanerState> emit,
@@ -253,8 +252,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
 
   /// Guarda los productos escaneados en el servidor o localmente
   /// Verifica la conexión y el estado de selección de hospital/ubicación
-  /// @param event Evento para guardar productos
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento para guardar productos
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> guardarProductos(
     GuardarProductosEvent event,
     Emitter<EscanerState> emit,
@@ -291,8 +290,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Elimina un producto de la lista de productos escaneados
-  /// @param event Evento con el producto a eliminar
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento con el producto a eliminar
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _eliminarProducto(
     EliminarProductoEvent event,
     Emitter<EscanerState> emit,
@@ -313,8 +312,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Carga los productos pendientes de sincronización almacenados localmente
-  /// @param event Evento para cargar productos pendientes
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento para cargar productos pendientes
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _cargarProductosPendientes(
     CargarProductosPendientesEvent event,
     Emitter<EscanerState> emit,
@@ -387,8 +386,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Valida si hay un hospital seleccionado
-  /// @param emit Emisor para cambiar el estado en caso de error
-  /// @return true si hay un hospital seleccionado, false en caso contrario
+  /// @param [emit] Emisor para cambiar el estado en caso de error
+  /// @return [bool] true si hay un hospital seleccionado, false en caso contrario
   Future<bool> _validarHospitalSeleccionado(Emitter<EscanerState> emit) async {
     if (hospitalSeleccionado == null) {
       emit(EscanerError("Debe seleccionar un hospital primero"));
@@ -398,8 +397,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Valida si hay productos escaneados para guardar
-  /// @param emit Emisor para cambiar el estado en caso de error
-  /// @return true si hay productos escaneados, false en caso contrario
+  /// @param [emit] Emisor para cambiar el estado en caso de error
+  /// @return [bool] true si hay productos escaneados, false en caso contrario
   Future<bool> _validarProductosEscaneados(Emitter<EscanerState> emit) async {
     if (productosEscaneados.isEmpty) {
       emit(EscanerError("No hay productos escaneados para guardar"));
@@ -409,7 +408,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Verifica si hay conexión a Internet
-  /// @return true si hay conexión, false en caso contrario
+  /// @return [bool] true si hay conexión, false en caso contrario
   Future<bool> _verificarConexion() async {
     try {
       return await ConnectivityService.hayConexionInternet();
@@ -419,7 +418,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Guarda los productos escaneados localmente cuando no hay conexión
-  /// @param emit Emisor para cambiar el estado
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _guardarProductosLocal(Emitter<EscanerState> emit) async {
     try {
       if (hospitalSeleccionado == null) {
@@ -450,7 +449,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Comprueba si hay productos pendientes de sincronización
-  /// @param emit Emisor para cambiar el estado
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _comprobarProductosPendientes(Emitter<EscanerState> emit) async {
     try {
       final productosPendientes =
@@ -486,7 +485,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Envía los productos escaneados al servidor
-  /// @param emit Emisor para cambiar el estado
+  /// @param [emit] Emisor para cambiar el estado
   Future<void> _guardarProductosEnServidor(Emitter<EscanerState> emit) async {
     try {
       List<ProductoEscaneado> productosCopia = List.from(productosEscaneados);
@@ -553,7 +552,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Elimina un producto por su número de serie
-  /// @param serialnumber Número de serie del producto a eliminar
+  /// @param [serialnumber] Número de serie del producto a eliminar
   Future<void> _eliminarProductoPorserialnumber(String serialnumber) async {
     try {
       final response = await apiClient.getAll('/productos', null);
@@ -578,7 +577,7 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Guarda los IDs de los productos escaneados en el almacenamiento local
-  /// @param productos Lista de productos a guardar
+  /// @param [productos] Lista de productos a guardar
   Future<void> _guardarProductosEscaneadosLocalmente(
     List<Producto> productos,
   ) async {
@@ -597,8 +596,8 @@ class EscanerBloc extends Bloc<EscanerEvent, EscanerState> {
   }
 
   /// Reinicia las selecciones de hospital y ubicación
-  /// @param event Evento para reiniciar selecciones
-  /// @param emit Emisor para cambiar el estado
+  /// @param [event] Evento para reiniciar selecciones
+  /// @param [emit] Emisor para cambiar el estado
   void resetSelections(ResetSelectionsEvent event, Emitter<EscanerState> emit) {
     hospitalSeleccionado = null;
     locationSeleccionada = null;

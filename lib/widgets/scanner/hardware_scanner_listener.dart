@@ -22,10 +22,10 @@ class HardwareScannerListener extends StatefulWidget {
   final int scanTimeout;
 
   /// Constructor del widget HardwareScannerListener
-  /// @param child Widget hijo que será envuelto por el listener
-  /// @param onBarcodeScanned Función que se ejecuta cuando se detecta un código
-  /// @param scannerEndChar Caracter que indica el final de un escaneo
-  /// @param scanTimeout Tiempo máximo entre pulsaciones de tecla
+  /// @param [child] Widget hijo que será envuelto por el listener
+  /// @param [onBarcodeScanned] Función que se ejecuta cuando se detecta un código
+  /// @param [scannerEndChar] Caracter que indica el final de un escaneo
+  /// @param [scanTimeout] Tiempo máximo entre pulsaciones de tecla
   const HardwareScannerListener({
     super.key,
     required this.child,
@@ -75,7 +75,7 @@ class _HardwareScannerListenerState extends State<HardwareScannerListener> {
 
   /// Procesa un evento de teclado para detectar códigos de barras
   /// Acumula caracteres y detecta cuando se ha completado un escaneo
-  /// @param event Evento de teclado a procesar
+  /// @param [event] Evento de teclado a procesar
   void _processKeyEvent(KeyEvent event) {
     if (event is! KeyDownEvent) {
       return;

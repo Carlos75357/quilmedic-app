@@ -8,7 +8,7 @@ abstract class AuthState extends Equatable {
   const AuthState();
   
   /// Sobrescribe el método props de Equatable
-  /// @return Lista vacía por defecto, las subclases pueden sobrescribirlo
+  /// @return [List] Lista vacía por defecto, las subclases pueden sobrescribirlo
   @override
   List<Object?> get props => [];
 }
@@ -28,11 +28,11 @@ class Authenticated extends AuthState {
   final User user;
   
   /// Constructor del estado Authenticated
-  /// @param user Usuario autenticado
+  /// @param [user] Usuario autenticado
   const Authenticated(this.user);
   
   /// Sobrescribe el método props para incluir el usuario
-  /// @return Lista con el usuario para comparación de estados
+  /// @return [List] Lista con el usuario para comparación de estados
   @override
   List<Object?> get props => [user];
 }
@@ -48,11 +48,11 @@ class AuthError extends AuthState {
   final String message;
   
   /// Constructor del estado AuthError
-  /// @param message Mensaje de error
+  /// @param [message] Mensaje de error
   const AuthError(this.message);
   
   /// Sobrescribe el método props para incluir el mensaje de error
-  /// @return Lista con el mensaje para comparación de estados
+  /// @return [List] Lista con el mensaje para comparación de estados
   @override
   List<Object?> get props => [message];
 }

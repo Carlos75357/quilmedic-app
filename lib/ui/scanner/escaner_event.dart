@@ -1,7 +1,7 @@
 part of 'escaner_bloc.dart';
 
 /// Clase base abstracta para todos los eventos del escáner
-/// Todos los eventos que puede manejar el EscanerBloc deben extender esta clase
+/// Todos los eventos que puede manejar el [EscanerBloc] deben extender esta clase
 @immutable
 sealed class EscanerEvent {}
 

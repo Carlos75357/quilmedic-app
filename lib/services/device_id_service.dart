@@ -11,7 +11,7 @@ class DeviceIdService {
   
   /// Obtiene el identificador único del dispositivo
   /// Si no existe, genera uno nuevo utilizando UUID v4 y lo almacena
-  /// @return ID único del dispositivo o un ID temporal en caso de error
+  /// @return [String] ID único del dispositivo o un ID temporal en caso de error
   Future<String> getUniqueDeviceId() async {
     try {
       String? storedId = await _secureStorage.read(key: _deviceIdKey);
