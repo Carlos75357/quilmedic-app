@@ -14,10 +14,10 @@ class AlarmInfo {
   int? locationId;
 
   /// Constructor de la clase AlarmInfo
-  /// @param productId ID del producto asociado a la alarma
-  /// @param condition Condición de la alarma
-  /// @param color Color de la alarma como objeto Color
-  /// @param locationId ID de la ubicación asociada (opcional)
+  /// @param [productId] ID del producto asociado a la alarma
+  /// @param [condition] Condición de la alarma
+  /// @param [color] Color de la alarma como objeto Color
+  /// @param [locationId] ID de la ubicación asociada (opcional)
   AlarmInfo({
     this.productId,
     this.condition,

@@ -15,10 +15,10 @@ class ProductoRepository {
 
   /// Envía una lista de productos escaneados al servidor para su procesamiento
   /// Identifica qué productos fueron encontrados en la base de datos y cuáles no
-  /// @param hospitalId ID del hospital donde se escanearon los productos
-  /// @param locationId ID de la ubicación dentro del hospital
-  /// @param productos Lista de productos escaneados a enviar
-  /// @return RepositoryResponse con los resultados de la operación, incluyendo productos encontrados y no encontrados
+  /// @param [hospitalId] ID del hospital donde se escanearon los productos
+  /// @param [locationId] ID de la ubicación dentro del hospital
+  /// @param [productos] Lista de productos escaneados a enviar
+  /// @return [RepositoryResponse] con los resultados de la operación, incluyendo productos encontrados y no encontrados
   Future<RepositoryResponse> enviarProductosEscaneados(int hospitalId, int locationId, List<ProductoEscaneado> productos) async {
     final List<dynamic> resultados = [];
     final List<String> noEncontrados = [];

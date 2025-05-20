@@ -11,9 +11,9 @@ import 'json_rpc.dart';
 class JsonClient {
   /// Realiza una llamada HTTP al endpoint especificado con los datos de la petición JSON-RPC.
   /// Selecciona automáticamente el método HTTP adecuado según el tipo de operación.
-  /// @param endpoint Ruta del endpoint de la API
-  /// @param jsonRequest Objeto con los datos de la petición JSON-RPC
-  /// @return Respuesta procesada de la API
+  /// @param [endpoint] Ruta del endpoint de la API
+  /// @param [jsonRequest] Objeto con los datos de la petición JSON-RPC
+  /// @return [dynamic] Respuesta procesada de la API
   Future<dynamic> call(String endpoint, JsonRequest jsonRequest) async {
     try {
       final headers = await _getHeaders();
@@ -85,7 +85,7 @@ class JsonClient {
   }
 
   /// Obtiene los encabezados HTTP necesarios para la petición, incluyendo el token de autenticación.
-  /// @return Mapa con los encabezados HTTP
+  /// @return [Map] Mapa con los encabezados HTTP
   Future<Map<String, String>> _getHeaders() async {
     final token = await ApiConfig.getToken();
     return {
@@ -98,10 +98,10 @@ class JsonClient {
   /// Procesa la respuesta HTTP y maneja los posibles errores.
   /// Si la respuesta es exitosa, decodifica el cuerpo de la respuesta.
   /// Si hay un error de autenticación (401), limpia el token y redirige al login.
-  /// @param response Respuesta HTTP recibida
-  /// @param endpoint Endpoint utilizado en la petición
-  /// @param jsonRequest Petición original enviada
-  /// @return Datos decodificados de la respuesta
+  /// @param [response] Respuesta HTTP recibida
+  /// @param [endpoint] Endpoint utilizado en la petición
+  /// @param [jsonRequest] Petición original enviada
+  /// @return [dynamic] Datos decodificados de la respuesta
   Future<dynamic> _handleResponse(http.Response response, String endpoint, JsonRequest jsonRequest) async {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final String decodedBody = utf8.decode(response.bodyBytes);

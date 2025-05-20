@@ -10,12 +10,12 @@ class TransferRepository {
   final ApiClient apiClient;
 
   /// Constructor que recibe una instancia de ApiClient
-  /// @param apiClient Cliente de API para realizar las peticiones
+  /// @param [apiClient] Cliente de API para realizar las peticiones
   TransferRepository({required this.apiClient});
 
   /// Envía una solicitud de traslado de productos entre hospitales
-  /// @param request Objeto que contiene los datos de la solicitud de traslado
-  /// @return RepositoryResponse con el resultado de la operación
+  /// @param [request] Objeto que contiene los datos de la solicitud de traslado
+  /// @return [RepositoryResponse] con el resultado de la operación
   Future<RepositoryResponse> transferProducts(TransferRequest request) async {
     try {
       final response = await apiClient.post(

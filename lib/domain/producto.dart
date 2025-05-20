@@ -22,15 +22,15 @@ class Producto {
   int? minStock;
 
   /// Constructor de la clase Producto
-  /// @param id Identificador único del producto
-  /// @param productcode Código del producto
-  /// @param description Descripción o nombre del producto
-  /// @param numerolote Número de lote
-  /// @param locationid ID de la ubicación donde se encuentra
-  /// @param serialnumber Número de serie único
-  /// @param expirationdate Fecha de caducidad
-  /// @param stock Cantidad disponible
-  /// @param minStock Stock mínimo esperado (opcional)
+  /// @param [id] Identificador único del producto
+  /// @param [productcode] Código del producto
+  /// @param [description] Descripción o nombre del producto
+  /// @param [numerolote] Número de lote
+  /// @param [locationid] ID de la ubicación donde se encuentra
+  /// @param [serialnumber] Número de serie único
+  /// @param [expirationdate] Fecha de caducidad
+  /// @param [stock] Cantidad disponible
+  /// @param [minStock] Stock mínimo esperado (opcional)
   Producto(
     this.id,
     this.productcode,
@@ -44,7 +44,7 @@ class Producto {
   });
 
   /// Convierte la instancia actual a un mapa para almacenamiento local
-  /// @return Mapa con los datos del producto
+  /// @return [Map] Mapa con los datos del producto
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -61,8 +61,8 @@ class Producto {
 
   /// Constructor factory para crear una instancia de Producto desde un mapa
   /// almacenado localmente
-  /// @param map Mapa con los datos del producto
-  /// @return Nueva instancia de Producto
+  /// @param [map] Mapa con los datos del producto
+  /// @return Nueva instancia de [Producto]
   factory Producto.fromMap(Map<String, dynamic> map) {
     return Producto(
       map['id'] ?? 0,
@@ -79,8 +79,8 @@ class Producto {
 
   /// Constructor factory para crear una instancia de Producto desde un mapa JSON
   /// proveniente de la API, con manejo de errores
-  /// @param map Mapa con los datos en formato JSON de la API
-  /// @return Nueva instancia de Producto
+  /// @param [map] Mapa con los datos en formato JSON de la API
+  /// @return Nueva instancia de [Producto]
   factory Producto.fromApiMap(Map<String, dynamic> map) {
     try {
       return Producto(

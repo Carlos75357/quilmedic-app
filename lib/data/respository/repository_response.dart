@@ -12,10 +12,10 @@ class RepositoryResponse<T> {
   final Exception? error;
 
   /// Constructor principal
-  /// @param success Indica si la operación fue exitosa
-  /// @param message Mensaje opcional descriptivo
-  /// @param data Datos opcionales devueltos por la operación
-  /// @param error Excepción opcional si hubo error
+  /// @param [success] Indica si la operación fue exitosa
+  /// @param [message] Mensaje opcional descriptivo
+  /// @param [data] Datos opcionales devueltos por la operación
+  /// @param [error] Excepción opcional si hubo error
   RepositoryResponse({
     required this.success,
     this.message,
@@ -24,9 +24,9 @@ class RepositoryResponse<T> {
   });
 
   /// Constructor factory para crear una respuesta exitosa
-  /// @param data Datos devueltos por la operación
-  /// @param message Mensaje opcional de éxito
-  /// @return Nueva instancia de RepositoryResponse con success=true
+  /// @param [data] Datos devueltos por la operación
+  /// @param [message] Mensaje opcional de éxito
+  /// @return Nueva instancia de [RepositoryResponse] con success=true
   factory RepositoryResponse.success(T data, {String? message}) {
     return RepositoryResponse(
       success: true,
@@ -36,10 +36,10 @@ class RepositoryResponse<T> {
   }
 
   /// Constructor factory para crear una respuesta de error
-  /// @param message Mensaje de error
-  /// @param error Excepción opcional que causó el error
-  /// @param data Datos opcionales que podrían haberse obtenido parcialmente
-  /// @return Nueva instancia de RepositoryResponse con success=false
+  /// @param [message] Mensaje de error
+  /// @param [error] Excepción opcional que causó el error
+  /// @param [data] Datos opcionales que podrían haberse obtenido parcialmente
+  /// @return Nueva instancia de [RepositoryResponse] con success=false
   factory RepositoryResponse.error(String message, {Exception? error, T? data}) {
     return RepositoryResponse(
       success: false,

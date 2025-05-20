@@ -16,7 +16,7 @@ class ApiConfig {
   // static const String baseUrl = 'http://localhost:8000/api';
 
   /// Obtiene el token de autenticación almacenado o el token maestro si no hay ninguno guardado
-  /// @return Token de autenticación o null si no existe
+  /// @return [String] Token de autenticación o null si no existe
   static Future<String?> getToken() async {
     final savedToken = await _storage.read(key: _tokenKey);
 
@@ -50,7 +50,7 @@ class ApiConfig {
   static const int receiveTimeout = 30000;
 
   /// Encabezados HTTP estándar para las peticiones a la API
-  /// @return Mapa con los encabezados HTTP incluyendo el token maestro
+  /// @return [Map] Mapa con los encabezados HTTP incluyendo el token maestro
   static Map<String, String> get headers {
     return {
       'Content-Type': 'application/json',

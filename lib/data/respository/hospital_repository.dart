@@ -10,11 +10,11 @@ class HospitalRepository {
   final ApiClient apiClient;
 
   /// Constructor que recibe una instancia de ApiClient
-  /// @param apiClient Cliente de API para realizar las peticiones
+  /// @param [apiClient] Cliente de API para realizar las peticiones
   HospitalRepository({required this.apiClient});
 
   /// Obtiene todos los hospitales desde la API
-  /// @return RepositoryResponse con la lista de hospitales o un mensaje de error
+  /// @return [RepositoryResponse] con la lista de hospitales o un mensaje de error
   Future<RepositoryResponse> getAllHospitals() async {
     try {
       final response = await apiClient.getAll(

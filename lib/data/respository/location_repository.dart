@@ -10,12 +10,12 @@ class LocationRepository {
   final ApiClient apiClient;
 
   /// Constructor que recibe una instancia de ApiClient
-  /// @param apiClient Cliente de API para realizar las peticiones
+  /// @param [apiClient] Cliente de API para realizar las peticiones
   LocationRepository({required this.apiClient});
 
   /// Obtiene todas las ubicaciones disponibles para un hospital específico
-  /// @param id ID del hospital del que se quieren obtener las ubicaciones
-  /// @return RepositoryResponse con la lista de ubicaciones o un mensaje de error
+  /// @param [id] ID del hospital del que se quieren obtener las ubicaciones
+  /// @return [RepositoryResponse] con la lista de ubicaciones o un mensaje de error
   Future<RepositoryResponse> getLocationsForAStore(int id) async {
     try {
       final response = await apiClient.getAll(

@@ -11,11 +11,11 @@ class AlarmRepository {
   final ApiClient apiClient;
 
   /// Constructor que recibe una instancia de ApiClient
-  /// @param apiClient Cliente de API para realizar las peticiones
+  /// @param [apiClient] Cliente de API para realizar las peticiones
   AlarmRepository({required this.apiClient});
 
   /// Obtiene todas las alarmas generales desde la API
-  /// @return RepositoryResponse con la lista de alarmas generales o un mensaje de error
+  /// @return [RepositoryResponse] con la lista de alarmas generales o un mensaje de error
   Future<RepositoryResponse> getGeneralAlarms() async {
     try {
       final response = await apiClient.getAll(
@@ -37,13 +37,13 @@ class AlarmRepository {
 
       return RepositoryResponse.error('Error al obtener alarmas generales');
     } catch (e) {
-      throw Exception('Error al obtener alarmas generales: ${e.toString()}');
+      throw Exception('Error al obtener alarmas generales');
     }
   }
 
   /// Obtiene las alarmas específicas para una lista de productos identificados por sus IDs en formato String
-  /// @param productIds Lista de IDs de productos en formato String
-  /// @return RepositoryResponse con la lista de alarmas específicas o un mensaje de error
+  /// @param [productIds] Lista de IDs de productos en formato String
+  /// @return [RepositoryResponse] con la lista de alarmas específicas o un mensaje de error
   Future<RepositoryResponse> getAlarmsByProduct(List<String> productIds) async {
     try {
       final response = await apiClient.getAll(
@@ -67,8 +67,8 @@ class AlarmRepository {
 
   /// Obtiene las alarmas específicas para una lista de productos identificados por sus IDs en formato entero
   /// Utiliza el método POST para enviar la lista de IDs
-  /// @param productIds Lista de IDs de productos en formato entero
-  /// @return RepositoryResponse con la lista de alarmas específicas o un mensaje de error
+  /// @param [productIds] Lista de IDs de productos en formato entero
+  /// @return [RepositoryResponse] con la lista de alarmas específicas o un mensaje de error
   Future<RepositoryResponse> getAlarmsByProducts(List<int> productIds) async {
     try {
       final response = await apiClient.post(
@@ -91,7 +91,7 @@ class AlarmRepository {
 
       return RepositoryResponse.error('Error al obtener alarmas para los productos');
     } catch (e) {
-      return RepositoryResponse.error('Error al obtener alarmas: ${e.toString()}');
+      return RepositoryResponse.error('Error al obtener alarmas');
     }
   }
 }

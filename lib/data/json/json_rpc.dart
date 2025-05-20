@@ -10,7 +10,7 @@ class JsonRequest {
   var params = {};
 
   /// Constructor que inicializa una petición JSON-RPC a partir de un mapa
-  /// @param map Mapa con los datos de la petición (jsonrpc, method, params)
+  /// @param [map] Mapa con los datos de la petición (jsonrpc, method, params)
   JsonRequest(Map map) {
     jsonrpc = map['jsonrpc'];
     method = map['method'];
@@ -18,14 +18,14 @@ class JsonRequest {
   }
 
   /// Constructor factory para crear una instancia desde un mapa JSON
-  /// @param json Mapa con los datos en formato JSON
-  /// @return Nueva instancia de JsonRequest
+  /// @param [json] Mapa con los datos en formato JSON
+  /// @return [JsonRequest] Nueva instancia de JsonRequest
   factory JsonRequest.fromJson(Map<String, dynamic> json) {
     return JsonRequest(json);
   }
 
   /// Convierte la instancia actual a un mapa JSON
-  /// @return Mapa con los datos de la petición en formato JSON
+  /// @return [Map] Mapa con los datos de la petición en formato JSON
   Map<String, dynamic> toJson() {
     return {
       'jsonrpc': jsonrpc,

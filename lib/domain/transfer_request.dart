@@ -14,11 +14,11 @@ class TransferRequest {
   final List<String> products;
 
   /// Constructor de la clase TransferRequest
-  /// @param email Correo electrónico del solicitante
-  /// @param fromStoreId ID del hospital de origen
-  /// @param toStoreId ID del hospital de destino
-  /// @param userId ID del usuario que realiza la solicitud
-  /// @param products Lista de números de serie de los productos
+  /// @param [email] Correo electrónico del solicitante
+  /// @param [fromStoreId] ID del hospital de origen
+  /// @param [toStoreId] ID del hospital de destino
+  /// @param [userId] ID del usuario que realiza la solicitud
+  /// @param [products] Lista de números de serie de los productos
   TransferRequest({
     required this.email,
     required this.fromStoreId,
@@ -28,7 +28,7 @@ class TransferRequest {
   });
 
   /// Convierte la instancia actual a un mapa JSON para enviar a la API
-  /// @return Mapa con los datos de la solicitud de traslado en formato JSON
+  /// @return [Map] Mapa con los datos de la solicitud de traslado en formato JSON
   Map<String, dynamic> toJson() {
     return {
       'email': email,

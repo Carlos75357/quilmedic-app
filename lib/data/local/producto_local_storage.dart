@@ -22,8 +22,8 @@ class ProductoLocalStorage {
   static const String _alarmasKeyEspecificas = 'alarmas_especificas';
   
   /// Guarda la lista de IDs de productos escaneados en el almacenamiento local
-  /// @param productosIds Lista de IDs de productos a guardar
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [productosIds] Lista de IDs de productos a guardar
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> guardarProductosEscaneados(List<String> productosIds) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -35,7 +35,7 @@ class ProductoLocalStorage {
   }
   
   /// Obtiene la lista de IDs de productos escaneados del almacenamiento local
-  /// @return Lista de IDs de productos escaneados, o lista vacía si no hay datos o ocurre un error
+  /// @return [List] Lista de IDs de productos escaneados, o lista vacía si no hay datos o ocurre un error
   static Future<List<String>> obtenerProductosEscaneados() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -53,8 +53,8 @@ class ProductoLocalStorage {
   }
   
   /// Agrega un ID de producto a la lista de productos escaneados si no existe ya
-  /// @param productoId ID del producto a agregar
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [productoId] ID del producto a agregar
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> agregarProductoEscaneado(String productoId) async {
     try {
       final productosIds = await obtenerProductosEscaneados();
@@ -71,8 +71,8 @@ class ProductoLocalStorage {
   }
   
   /// Elimina un ID de producto de la lista de productos escaneados
-  /// @param productoId ID del producto a eliminar
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [productoId] ID del producto a eliminar
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> eliminarProductoEscaneado(String productoId) async {
     try {
       final productosIds = await obtenerProductosEscaneados();
@@ -89,10 +89,10 @@ class ProductoLocalStorage {
   }
   
   /// Guarda una lista de productos pendientes de sincronización junto con el hospital y ubicación
-  /// @param productos Lista de productos escaneados pendientes
-  /// @param hospitalId ID del hospital donde se escanearon los productos
-  /// @param locationId ID opcional de la ubicación específica dentro del hospital
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [productos] Lista de productos escaneados pendientes
+  /// @param [hospitalId] ID del hospital donde se escanearon los productos
+  /// @param [locationId] ID opcional de la ubicación específica dentro del hospital
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> guardarProductosPendientes(List<ProductoEscaneado> productos, int hospitalId, int? locationId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -102,8 +102,13 @@ class ProductoLocalStorage {
       
       final String jsonString = jsonEncode(productosMap);
       
-      await prefs.setInt(_hospitalPendienteKey, hospitalId);
-      await prefs.setInt(_locationPendienteKey, locationId ?? 0);
+      if (hospitalId > 0) {
+        await prefs.setInt(_hospitalPendienteKey, hospitalId);
+      }
+      
+      if (locationId != null && locationId > 0) {
+        await prefs.setInt(_locationPendienteKey, locationId);
+      }
       
       return await prefs.setString(_productosPendientesKey, jsonString);
     } catch (e) {
@@ -112,7 +117,7 @@ class ProductoLocalStorage {
   }
   
   /// Obtiene la lista de productos pendientes de sincronización
-  /// @return Lista de productos pendientes, o lista vacía si no hay datos o ocurre un error
+  /// @return [List] Lista de productos pendientes, o lista vacía si no hay datos o ocurre un error
   static Future<List<ProductoEscaneado>> obtenerProductosPendientes() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -132,7 +137,7 @@ class ProductoLocalStorage {
   }
   
   /// Obtiene el ID del hospital asociado a los productos pendientes
-  /// @return ID del hospital o null si no existe o ocurre un error
+  /// @return [int] ID del hospital o null si no existe o ocurre un error
   static Future<int?> obtenerHospitalPendiente() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -143,7 +148,7 @@ class ProductoLocalStorage {
   }
   
   /// Obtiene el ID de la ubicación asociada a los productos pendientes
-  /// @return ID de la ubicación o null si no existe o ocurre un error
+  /// @return [int] ID de la ubicación o null si no existe o ocurre un error
   static Future<int?> obtenerLocationPendiente() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -154,7 +159,7 @@ class ProductoLocalStorage {
   }
   
   /// Elimina todos los datos relacionados con productos pendientes (productos, hospital y ubicación)
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> limpiarProductosPendientes() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -167,7 +172,7 @@ class ProductoLocalStorage {
   }
   
   /// Verifica si hay productos pendientes de sincronización
-  /// @return true si existen productos pendientes, false en caso contrario
+  /// @return [bool] true si existen productos pendientes, false en caso contrario
   static Future<bool> hayProductosPendientes() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? jsonString = prefs.getString(_productosPendientesKey);
@@ -176,8 +181,8 @@ class ProductoLocalStorage {
   
   /// Elimina un producto específico de la lista de productos pendientes por su número de serie
   /// Si la lista queda vacía, limpia todos los datos de productos pendientes
-  /// @param serialnumber Número de serie del producto a eliminar
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [serialnumber] Número de serie del producto a eliminar
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> eliminarProductoPendiente(String serialnumber) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -212,8 +217,8 @@ class ProductoLocalStorage {
 
   /// Agrega una alarma a la lista de alarmas generales
   /// Si no existen alarmas previas, crea una nueva lista
-  /// @param alarm Alarma a agregar
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [alarm] Alarma a agregar
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> agregarAlarma(Alarm alarm) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -235,8 +240,8 @@ class ProductoLocalStorage {
   }
 
   /// Reemplaza todas las alarmas generales con una nueva lista
-  /// @param alarms Lista de alarmas a guardar
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [alarms] Lista de alarmas a guardar
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> agregarAlarmas(List<Alarm> alarms) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -247,8 +252,8 @@ class ProductoLocalStorage {
   }
 
   /// Reemplaza todas las alarmas específicas por producto con una nueva lista
-  /// @param alarms Lista de alarmas específicas a guardar
-  /// @return true si la operación fue exitosa, false en caso contrario
+  /// @param [alarms] Lista de alarmas específicas a guardar
+  /// @return [bool] true si la operación fue exitosa, false en caso contrario
   static Future<bool> agregarAlarmasEspecificas(List<Alarm> alarms) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -259,7 +264,7 @@ class ProductoLocalStorage {
   }
 
   /// Obtiene la lista de alarmas específicas por producto
-  /// @return Lista de alarmas específicas, o lista vacía si no hay datos o ocurre un error
+  /// @return [List] Lista de alarmas específicas, o lista vacía si no hay datos o ocurre un error
   static Future<List<Alarm>> obtenerAlarmasEspecificas() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -277,7 +282,7 @@ class ProductoLocalStorage {
   }
 
   /// Obtiene la lista de alarmas generales
-  /// @return Lista de alarmas generales, o lista vacía si no hay datos o ocurre un error
+  /// @return [List] Lista de alarmas generales, o lista vacía si no hay datos o ocurre un error
   static Future<List<Alarm>> obtenerAlarmas() async {
     try {
       final prefs = await SharedPreferences.getInstance();
