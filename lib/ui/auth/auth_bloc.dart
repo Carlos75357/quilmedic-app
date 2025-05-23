@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:quilmedic/services/auth_service.dart';
+import 'package:quilmedic/services/app_version_service.dart';
 import 'package:quilmedic/ui/auth/auth_event.dart';
 import 'package:quilmedic/ui/auth/auth_state.dart';
 
@@ -10,6 +11,8 @@ import 'package:quilmedic/ui/auth/auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// Servicio de autenticación utilizado para realizar operaciones de login/logout
   final AuthService _authService;
+  /// Servicio para verificar actualizaciones de la aplicación
+  final AppVersionService _appVersionService = AppVersionService();
   /// Suscripción al stream de eventos de expiración de autenticación
   StreamSubscription? _authExpirationSubscription;
   /// Temporizador para verificar periódicamente la validez del token
@@ -57,7 +60,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       
       if (user != null) {
-        emit(Authenticated(user));
+        // Verificar si hay una nueva versión disponible después de autenticar
+        final updateInfo = await _appVersionService.checkForUpdates();
+        
+        if (updateInfo != null) {
+          // Si hay una actualización disponible, emitir estado con información de la actualización
+          emit(AuthenticatedWithUpdate(user, 
+            currentVersion: updateInfo['currentVersion'],
+            latestVersion: updateInfo['latestVersion'],
+            filePath: updateInfo['filePath'],
+            releaseNotes: updateInfo['releaseNotes'],
+            forceUpdate: updateInfo['forceUpdate'],
+          ));
+        } else {
+          // Si no hay actualización, emitir estado normal de autenticado
+          emit(Authenticated(user));
+        }
       } else {
         emit(const AuthError('Error al iniciar sesión'));
       }
@@ -93,7 +111,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (isAuthenticated) {
         final user = await _authService.getCurrentUser();
         if (user != null && await _authService.isTokenValid()) {
-          emit(Authenticated(user));
+          // Verificar si hay una nueva versión disponible después de validar el token
+          final updateInfo = await _appVersionService.checkForUpdates();
+          
+          if (updateInfo != null) {
+            // Si hay una actualización disponible, emitir estado con información de la actualización
+            emit(AuthenticatedWithUpdate(user, 
+              currentVersion: updateInfo['currentVersion'],
+              latestVersion: updateInfo['latestVersion'],
+              filePath: updateInfo['filePath'],
+              releaseNotes: updateInfo['releaseNotes'],
+              forceUpdate: updateInfo['forceUpdate'],
+            ));
+          } else {
+            // Si no hay actualización, emitir estado normal de autenticado
+            emit(Authenticated(user));
+          }
           return;
         }
       }

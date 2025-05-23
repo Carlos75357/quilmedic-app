@@ -12,6 +12,7 @@ import 'package:quilmedic/ui/list/lista_productos_bloc.dart';
 import 'package:quilmedic/ui/scanner/escaner_page.dart';
 import 'package:quilmedic/ui/scanner/escaner_bloc.dart';
 import 'package:quilmedic/ui/product/producto_detalle_bloc.dart';
+import 'package:quilmedic/ui/update/update_dialog.dart';
 import 'package:quilmedic/utils/theme.dart';
 
 /// Punto de entrada principal de la aplicación.
@@ -59,7 +60,26 @@ class MainApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         // Configura la pantalla inicial con el wrapper de autenticación
         home: AuthWrapper(
-          child: BlocBuilder<AuthBloc, AuthState>(
+          child: BlocConsumer<AuthBloc, AuthState>(
+            listener: (context, state) {
+              // Mostrar diálogo de actualización si hay una nueva versión disponible
+              if (state is AuthenticatedWithUpdate) {
+                // Usar Future.microtask para mostrar el diálogo después de que se complete la construcción
+                Future.microtask(() {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: !state.forceUpdate,
+                    builder: (context) => UpdateDialog(
+                      currentVersion: state.currentVersion,
+                      latestVersion: state.latestVersion,
+                      filePath: state.filePath,
+                      releaseNotes: state.releaseNotes,
+                      forceUpdate: state.forceUpdate,
+                    ),
+                  );
+                });
+              }
+            },
             builder: (context, state) {
               // Muestra la página de escaneo si el usuario está autenticado
               if (state is Authenticated) {
