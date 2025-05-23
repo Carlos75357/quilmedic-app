@@ -11,10 +11,8 @@ import 'package:quilmedic/data/config.dart';
 /// Proporciona métodos para verificar si hay nuevas versiones disponibles y descargar
 /// la última versión de la APK.
 class AppVersionService {
-  /// Endpoint para verificar la versión de la aplicación
   static const String _versionEndpoint = '/app-version';
 
-  /// Nombre del archivo APK para guardar
   static const String _apkFileName = 'quilmedic_installer.apk';
 
   /// Verifica si hay una nueva versión de la aplicación disponible y la descarga si existe
@@ -60,7 +58,7 @@ class AppVersionService {
           if (filePath != null) {
             return {
               'currentVersion': currentVersion,
-              'latestVersion': 'Nueva versión', // No tenemos el número exacto
+              'latestVersion': 'Nueva versión',
               'filePath': filePath,
               'releaseNotes': 'Nueva actualización disponible',
               'forceUpdate': false,
@@ -98,13 +96,11 @@ class AppVersionService {
             filePath = '/storage/emulated/0/Download/$_apkFileName';
           }
         } else {
-          // Para Android 9 y anteriores, solicitar permiso de almacenamiento normal
           final status = await Permission.storage.request();
           if (!status.isGranted) return null;
           filePath = '/storage/emulated/0/Download/$_apkFileName';
         }
       } else {
-        // En iOS u otras plataformas, usar el directorio de documentos
         final directory = await getApplicationDocumentsDirectory();
         filePath = '${directory.path}/$_apkFileName';
       }
@@ -114,7 +110,6 @@ class AppVersionService {
       await file.writeAsBytes(bytes);
       return filePath;
     } catch (e) {
-      print('Error al guardar el APK: $e');
       return null;
     }
   }
@@ -135,39 +130,28 @@ class AppVersionService {
   Future<bool> installApk(String filePath) async {
     try {
       if (Platform.isAndroid) {
-        print('Intentando instalar APK desde: $filePath');
-        
-        // Verificar y solicitar permiso para instalar paquetes
         final status = await Permission.requestInstallPackages.status;
         if (!status.isGranted) {
-          print('Solicitando permiso para instalar paquetes');
           final result = await Permission.requestInstallPackages.request();
           if (!result.isGranted) {
-            print('Permiso para instalar paquetes denegado');
             return false;
           }
         }
         
-        // Verificar si el archivo existe
         final file = File(filePath);
         if (!await file.exists()) {
-          print('El archivo APK no existe en la ruta especificada');
           return false;
         }
 
-        // Usar OpenFile para abrir el APK con el instalador nativo
-        print('Abriendo APK con OpenFile: $filePath');
         final result = await OpenFile.open(
           filePath,
           type: 'application/vnd.android.package-archive',
         );
         
-        print('Resultado de OpenFile: ${result.message}, ${result.type}');
         return result.type == ResultType.done;
       }
       return false;
     } catch (e) {
-      print('Error al instalar APK: $e');
       return false;
     }
   }

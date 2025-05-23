@@ -74,7 +74,6 @@ class _UpdateDialogState extends State<UpdateDialog> {
         ),
       ),
       actions: [
-        if (!widget.forceUpdate)
         ElevatedButton(
           onPressed: _isInstalling ? null : _installUpdate,
           child: const Text('Instalar'),

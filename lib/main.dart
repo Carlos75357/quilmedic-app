@@ -68,7 +68,7 @@ class MainApp extends StatelessWidget {
                 Future.microtask(() {
                   showDialog(
                     context: context,
-                    barrierDismissible: !state.forceUpdate,
+                    barrierDismissible: false,
                     builder: (context) => UpdateDialog(
                       currentVersion: state.currentVersion,
                       latestVersion: state.latestVersion,
